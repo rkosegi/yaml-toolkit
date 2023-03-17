@@ -76,16 +76,8 @@ func appendChild(current *map[string]interface{}, parent ContainerBuilder, path 
 		case reflect.Map:
 			ref := v.(map[string]interface{})
 			appendChild(&ref, parent.AddContainer(k), path+"/"+k)
-			break
-		case reflect.Int:
+		case reflect.Int, reflect.Float64, reflect.String:
 			parent.AddValue(k, LeafNode(v))
-			break
-		case reflect.Float64:
-			parent.AddValue(k, LeafNode(v))
-			break
-		case reflect.String:
-			parent.AddValue(k, LeafNode(v))
-			break
 		}
 	}
 }
