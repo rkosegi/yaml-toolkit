@@ -17,14 +17,75 @@ limitations under the License.
 package k8s
 
 import (
+	"bytes"
 	"github.com/stretchr/testify/assert"
+	"io"
+	"os"
+	"strings"
 	"testing"
 )
 
+func getTestFileAsReader(file string) (io.Reader, error) {
+	if data, err := os.ReadFile(file); err != nil {
+		return nil, err
+	} else {
+		return strings.NewReader(string(data)), nil
+	}
+}
+
 func TestCRUD(t *testing.T) {
-	h, err := NewHelper("../testdata/secret1.yaml")
+	m, err := ManifestFromFile("../testdata/secret1.yaml")
 	assert.Nil(t, err)
-	assert.NotNil(t, h.List()["application.yaml"])
-	h.Update("key1", "123")
-	assert.Equal(t, "123", h.List()["key1"])
+	assert.NotNil(t, m)
+	assert.NotNil(t, m.StringData().Get("application.yaml"))
+	assert.Equal(t, 1, len(m.BinaryData().List()))
+	var buff bytes.Buffer
+	_, err = m.WriteTo(&buff)
+	assert.Nil(t, err)
+	m.BinaryData().Update("key2", []byte("abcd"))
+	m.BinaryData().Remove("key1")
+	assert.Equal(t, 1, len(m.BinaryData().List()))
+	buff.Reset()
+	_, err = m.WriteTo(&buff)
+	assert.Nil(t, err)
+}
+
+func TestCRUD2(t *testing.T) {
+	r, err := getTestFileAsReader("../testdata/cm1.yaml")
+	assert.Nil(t, err)
+	m, err := ManifestFromReader(r)
+	assert.Nil(t, err)
+	assert.NotNil(t, m)
+	assert.NotNil(t, m.StringData().Get("application.yaml"))
+	assert.Equal(t, 1, len(m.StringData().List()))
+	m.StringData().Update("application.yaml", "")
+	assert.Equal(t, "", *m.StringData().Get("application.yaml"))
+	m.StringData().Remove("application.yaml")
+	assert.Nil(t, m.StringData().Get("application.yaml"))
+	assert.NotNil(t, m.BinaryData().Get("file.bin"))
+	m.BinaryData().Remove("file.bin")
+	assert.Nil(t, m.BinaryData().Get("file.bin"))
+	var buff bytes.Buffer
+	_, err = m.WriteTo(&buff)
+	assert.Nil(t, err)
+}
+
+func TestInvalidDoc(t *testing.T) {
+	_, err := ManifestFromFile("../testdata/invalid.yaml")
+	assert.Error(t, err)
+}
+
+func TestUnsupportedKind(t *testing.T) {
+	_, err := ManifestFromFile("../testdata/unknown_kind.yaml")
+	assert.Error(t, err)
+}
+
+func TestNoKind(t *testing.T) {
+	_, err := ManifestFromFile("../testdata/no_kind.yaml")
+	assert.Error(t, err)
+}
+
+func TestInvalidBase64(t *testing.T) {
+	_, err := ManifestFromFile("../testdata/invalid_base64.yaml")
+	assert.Error(t, err)
 }

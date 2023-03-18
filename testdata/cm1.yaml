@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
-kind: Secret
+kind: ConfigMap
 metadata:
-  name: secret1
+  name: cm1
   namespace: default
 apiVersion: v1
-stringData:
+data:
   application.yaml: |
     abc:
       def:
         leaf1: 123
         leaf2: Hello
-data:
-  key1: aGVsbG8gd29ybGQK
+binaryData:
+  file.bin: aGVsbG8gd29ybGQK

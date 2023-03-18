@@ -12,16 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
-kind: Secret
-metadata:
-  name: secret1
-  namespace: default
-apiVersion: v1
-stringData:
-  application.yaml: |
-    abc:
-      def:
-        leaf1: 123
-        leaf2: Hello
-data:
-  key1: aGVsbG8gd29ybGQK
+leaf1: abc
