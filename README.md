@@ -8,3 +8,48 @@
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=rkosegi_yaml-toolkit&metric=coverage)](https://sonarcloud.io/summary/new_code?id=rkosegi_yaml-toolkit)
 
 Go library to deal with YAML documents embedded within k8s manifests (like Spring boot's application.yaml).
+
+
+## Usage
+
+### Opening embedded YAML
+
+`example.yaml`
+```yaml
+---
+kind: ConfigMap
+metadata:
+  name: cm1
+  namespace: default
+apiVersion: v1
+data:
+  application.yaml: |
+    xyz: 456
+    abc:
+      def:
+        leaf1: 123
+        leaf2: Hello
+```
+
+code
+```go
+package main
+
+import (
+    ydom "github.com/rkosegi/yaml-toolkit/dom"
+    yk8s "github.com/rkosegi/yaml-toolkit/k8s"
+)
+
+func main() {
+	d, err := yk8s.YamlDoc("example.yaml", "application.yaml")
+	if err != nil {
+		panic(err)
+    }
+	print (d.Document().Child("xyz").(ydom.Leaf).Value()) // 456
+	d.Document().AddValue("another-key", ydom.LeafNode("789")) // add new child node
+	err = d.Save()
+	if err != nil {
+		panic(err)
+	}
+}
+```

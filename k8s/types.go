@@ -16,9 +16,12 @@ limitations under the License.
 
 package k8s
 
-import "io"
+import (
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"io"
+)
 
-// StringData allows to manipulate content of string data items
+// StringData allows to manipulate content of string data items in k8s manifest
 type StringData interface {
 	// Get gets data item
 	Get(key string) *string
@@ -30,7 +33,7 @@ type StringData interface {
 	Update(key, value string)
 }
 
-// BinaryData allows to manipulate content of binary data items
+// BinaryData allows to manipulate content of binary data items in k8s manifest
 type BinaryData interface {
 	// Get gets binary data item by its name
 	Get(key string) []byte
@@ -50,4 +53,12 @@ type Manifest interface {
 	StringData() StringData
 	// BinaryData obtains interface to manipulate content of binary data items
 	BinaryData() BinaryData
+}
+
+// Document interface allows interaction with document embedded inside k8s manifest
+type Document interface {
+	// Document gets handle to embedded document root ContainerBuilder
+	Document() dom.ContainerBuilder
+	// Save persists any changes made to embedded document
+	Save() error
 }
