@@ -165,12 +165,12 @@ level1:
 	err = cright.Serialize(&buf, dom.DefaultNodeMappingFn, dom.DefaultYamlEncoder)
 	assert.Nil(t, err)
 	assert.Equal(t, `another:
-    container:
-        leaf13: Hi
+  container:
+    leaf13: Hi
 leaf0: 123
 level1:
-    level2:
-        leaf12: abcd
+  level2:
+    leaf12: abcd
 `, buf.String())
 }
 
@@ -200,9 +200,9 @@ level1:
 	assert.Nil(t, err)
 	assert.Equal(t, `leaf0: 1234
 level1:
-    level2: 123
-    level22:
-        leaf22: abc
+  level2: 123
+  level22:
+    leaf22: abc
 `, buf.String())
 }
 
@@ -227,6 +227,6 @@ level1:
 	assert.Nil(t, err)
 	assert.Equal(t, `leaf0: 1234
 level1:
-    level2: 123
+  level2: 123
 `, buf.String())
 }

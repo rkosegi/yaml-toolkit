@@ -62,7 +62,18 @@ func TestBuildAndSerialize(t *testing.T) {
 	var buf bytes.Buffer
 	err := builder.Serialize(&buf, DefaultNodeMappingFn, DefaultJsonEncoder)
 	assert.Nil(t, err)
-	assert.Equal(t, "{\"root\":{\"level1\":{\"level2\":{\"level3\":{\"leaf1\":\"Hello\"}}}}}\n", buf.String())
+	assert.Equal(t, `{
+  "root": {
+    "level1": {
+      "level2": {
+        "level3": {
+          "leaf1": "Hello"
+        }
+      }
+    }
+  }
+}
+`, buf.String())
 }
 
 func TestRemove(t *testing.T) {

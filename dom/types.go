@@ -40,11 +40,15 @@ func DefaultJsonDecoder(r io.Reader, v interface{}) error {
 }
 
 func DefaultYamlEncoder(w io.Writer, v interface{}) error {
-	return yaml.NewEncoder(w).Encode(v)
+	e := yaml.NewEncoder(w)
+	e.SetIndent(2)
+	return e.Encode(v)
 }
 
 func DefaultJsonEncoder(w io.Writer, v interface{}) error {
-	return json.NewEncoder(w).Encode(v)
+	e := json.NewEncoder(w)
+	e.SetIndent("", "  ")
+	return e.Encode(v)
 }
 
 func DefaultNodeMappingFn(n Container) interface{} {
