@@ -78,23 +78,7 @@ func (m *overlayDocument) Lookup(overlay, path string) Node {
 	if !slices.Contains(m.names, overlay) {
 		return nil
 	}
-	current := m.overlays[overlay]
-	components := m.pathComponents(path)
-	if len(components) == 0 || len(path) == 0 {
-		return current
-	}
-	for _, comp := range components[:len(components)-1] {
-		if n := current.Child(comp); n == nil {
-			return nil
-		} else {
-			if n, ok := n.(ContainerBuilder); !ok {
-				return nil
-			} else {
-				current = n
-			}
-		}
-	}
-	return current.Child(components[len(components)-1])
+	return m.overlays[overlay].Lookup(path)
 }
 
 func (m *overlayDocument) LookupAny(path string) Node {

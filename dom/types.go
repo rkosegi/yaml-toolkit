@@ -79,6 +79,8 @@ type Container interface {
 	Children() map[string]Node
 	// Child returns single child Node by its name
 	Child(name string) Node
+	// Lookup attempts to find child Node at given path
+	Lookup(path string) Node
 }
 
 type ContainerBuilder interface {

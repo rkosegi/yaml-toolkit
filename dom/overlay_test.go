@@ -29,7 +29,7 @@ func TestPutAndLookup(t *testing.T) {
 	d := NewOverlayDocument()
 	assert.Nil(t, d.Lookup("main", "abc"))
 	d.Put("main", "abc", LeafNode("123"))
-	assert.NotNil(t, d.Lookup("main", ""))
+	assert.Nil(t, d.Lookup("main", ""))
 	assert.Equal(t, "123", d.Lookup("main", "abc").(Leaf).Value())
 	d.Put("main", "xyz.efg", LeafNode(42))
 	assert.Equal(t, 42, d.Lookup("main", "xyz.efg").(Leaf).Value())

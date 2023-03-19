@@ -19,6 +19,7 @@ package dom
 import (
 	"io"
 	"reflect"
+	"strings"
 )
 
 type containerImpl struct {
@@ -43,6 +44,25 @@ func (c *containerImpl) IsContainer() bool {
 func (c *containerImpl) Children() map[string]Node {
 	c.ensureChildren()
 	return c.children
+}
+
+func (c *containerImpl) Lookup(path string) Node {
+	if path == "" {
+		return nil
+	}
+	c.ensureChildren()
+	pc := strings.Split(path, ".")
+	var current Container
+	current = c
+	for _, p := range pc[0 : len(pc)-1] {
+		x := current.Child(p)
+		if x == nil || !x.IsContainer() {
+			return nil
+		} else {
+			current = x.(Container)
+		}
+	}
+	return current.Child(pc[len(pc)-1])
 }
 
 type containerBuilderImpl struct {

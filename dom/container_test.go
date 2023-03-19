@@ -39,6 +39,12 @@ def: xyz
 	assert.Equal(t, 123, doc.Children()["abc"].(Leaf).Value())
 }
 
+func TestBuilderFromInvalidYamlString(t *testing.T) {
+	doc, err := b.FromReader(strings.NewReader(`This is not a yaml`), DefaultYamlDecoder)
+	assert.NotNil(t, err)
+	assert.Nil(t, doc)
+}
+
 func TestBuilderFromJsonString(t *testing.T) {
 	doc, err := b.FromReader(strings.NewReader(`
 {
@@ -96,4 +102,17 @@ func TestBuilderFromFile(t *testing.T) {
 	assert.True(t, doc.IsContainer())
 	assert.Equal(t, "leaf1", doc.Child("level1").(Container).Child("level2a").(Container).Child("level3a").(Leaf).Value())
 	assert.Equal(t, 3, doc.Child("level1").(Container).Child("level2b").(Leaf).Value())
+}
+
+func TestLookup(t *testing.T) {
+	data, err := os.ReadFile("../testdata/doc1.yaml")
+	assert.Nil(t, err)
+	doc, err := b.FromReader(bytes.NewReader(data), DefaultYamlDecoder)
+	assert.Nil(t, err)
+
+	assert.NotNil(t, doc.Lookup("level1"))
+	assert.Nil(t, doc.Lookup("level1a"))
+	assert.Nil(t, doc.Lookup(""))
+	assert.Nil(t, doc.Lookup("level1.level2b.level3"))
+	assert.Equal(t, "leaf1", doc.Lookup("level1.level2a.level3a").(Leaf).Value())
 }
