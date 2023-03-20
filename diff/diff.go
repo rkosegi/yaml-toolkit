@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/dom"
-	"strings"
 )
 
 type ModificationType string
@@ -53,18 +52,18 @@ func toPath(path, key string) string {
 }
 
 // flatten converts dom.Container into series of ModAdd modifications, recursively
-func flatten(node dom.Container, path string, result *[]Modification) {
-	for k, n := range node.(dom.Container).Children() {
-		subpath := toPath(path, k)
-		if n.IsContainer() {
-			flatten(n.(dom.Container), subpath, result)
-		} else {
-			*result = append(*result, Modification{
-				Type:  ModAdd,
-				Path:  subpath,
-				Value: n.(dom.Leaf),
-			})
+func flatten(node dom.Node, path string, res *[]Modification) {
+	if node.IsContainer() {
+		for k, n := range node.(dom.Container).Children() {
+			subpath := toPath(path, k)
+			if n.IsContainer() {
+				flatten(n.(dom.Container), subpath, res)
+			} else {
+				appendMod(ModAdd, subpath, n.(dom.Leaf), res)
+			}
 		}
+	} else {
+		appendMod(ModAdd, path, node.(dom.Leaf), res)
 	}
 }
 
@@ -74,35 +73,20 @@ func handleExisting(left, right dom.Node, path string, res *[]Modification) {
 	} else if !left.IsContainer() && !right.IsContainer() {
 		if !cmp.Equal(left.(dom.Leaf).Value(), right.(dom.Leaf).Value()) {
 			// update
-			*res = append(*res, Modification{
-				Type:  ModChange,
-				Path:  path,
-				Value: right.(dom.Leaf),
-			})
+			appendMod(ModChange, path, right.(dom.Leaf), res)
 		}
 	} else {
 		// replace (del+add)
-		*res = append(*res, Modification{
-			Type: ModDelete,
-			Path: path,
-		})
-		if right.IsContainer() {
-			flatten(right.(dom.Container), path, res)
-		} else {
-			*res = append(*res, Modification{
-				Type:  ModAdd,
-				Path:  path,
-				Value: right.(dom.Leaf),
-			})
-		}
+		appendMod(ModDelete, path, nil, res)
+		flatten(right, path, res)
 	}
 }
 
-func handleExtra(key, path string, res *[]Modification) {
+func appendMod(t ModificationType, path string, val dom.Leaf, res *[]Modification) {
 	*res = append(*res, Modification{
-		Type:  ModDelete,
-		Path:  toPath(path, key),
-		Value: nil,
+		Type:  t,
+		Path:  path,
+		Value: val,
 	})
 }
 
@@ -112,14 +96,18 @@ func diff(left, right dom.Container, path string, res *[]Modification) {
 			// already exists in right
 			handleExisting(n, n2, toPath(path, k), res)
 		} else {
-			// not found in right Container,so flatten out Node into series of Modifications
-			flatten(n.(dom.Container), toPath(path, k), res)
+			// not found in right Container,so flatten out Node into 1 or more ModAdds Modifications
+			if n.IsContainer() {
+				flatten(n.(dom.Container), toPath(path, k), res)
+			} else {
+				appendMod(ModAdd, toPath(path, k), n.(dom.Leaf), res)
+			}
 		}
 	}
 	for k := range right.Children() {
 		if n2 := left.Child(k); n2 == nil {
 			// k is present in right, but missing in left
-			handleExtra(k, path, res)
+			appendMod(ModDelete, toPath(path, k), nil, res)
 		}
 	}
 }

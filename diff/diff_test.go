@@ -91,15 +91,21 @@ leaf0: 123
 level1:
   level2:
     leaf12: abcd
+leaf2: Hi
 `, `
 leaf0: 1234
 level1:
   level2: 123
 `)
-	assert.Equal(t, 3, len(*res))
+	assert.Equal(t, 4, len(*res))
 	assertHasChange(t, Modification{
 		Type: ModDelete,
 		Path: "level1.level2",
+	}, res)
+	assertHasChange(t, Modification{
+		Type:  ModAdd,
+		Path:  "leaf2",
+		Value: dom.LeafNode("Hi"),
 	}, res)
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
