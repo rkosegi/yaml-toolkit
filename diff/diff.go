@@ -131,38 +131,3 @@ func Diff(left, right dom.Container) *[]Modification {
 	diff(left, right, path, &mods)
 	return &mods
 }
-
-func applySingle(node dom.ContainerBuilder, mod Modification) {
-	pc := strings.Split(mod.Path, ".")
-	current := node
-	switch mod.Type {
-	case ModAdd, ModChange:
-
-		for _, c := range pc[0 : len(pc)-1] {
-			x := current.Child(c)
-			if x == nil || !x.IsContainer() {
-				current = current.AddContainer(c)
-			} else {
-				current = x.(dom.ContainerBuilder)
-			}
-		}
-		current.AddValue(pc[len(pc)-1], mod.Value)
-
-	case ModDelete:
-		for _, c := range pc[0 : len(pc)-1] {
-			x := current.Child(c)
-			if x == nil || !x.IsContainer() {
-				return
-			} else {
-				current = x.(dom.ContainerBuilder)
-			}
-		}
-		current.Remove(pc[len(pc)-1])
-	}
-}
-
-func Apply(node dom.ContainerBuilder, mods []Modification) {
-	for _, mod := range mods {
-		applySingle(node, mod)
-	}
-}
