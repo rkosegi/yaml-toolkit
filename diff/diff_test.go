@@ -18,22 +18,33 @@ package diff
 
 import (
 	"bytes"
+	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 )
 
+func leavesEqual(l1, l2 dom.Leaf) bool {
+	if l1 == nil && l2 == nil {
+		return true
+	}
+	if l1 != nil && l2 != nil {
+		return cmp.Equal(l1.Value(), l2.Value())
+	}
+	return false
+}
+
 func assertHasChange(t *testing.T, mod Modification, mods *[]Modification) {
 	for _, m := range *mods {
-		if m.Path == mod.Path && m.Type == mod.Type &&
-			((m.Value != nil && mod.Value != nil && m.Value.Value() == mod.Value.Value()) ||
-				(m.Value == nil && mod.Value == nil)) {
-			// t.Logf("Found: %s", mod)
+		if cmp.Equal(m, mod, cmp.Comparer(func(m1, m2 Modification) bool {
+			return cmp.Equal(m.Type, mod.Type) && cmp.Equal(m.Path, mod.Path) &&
+				leavesEqual(m.Value, mod.Value) && leavesEqual(m.OldValue, mod.OldValue)
+		})) {
 			return
 		}
 	}
-	t.Fatalf("expected change not present %s", mod.String())
+	t.Fatalf("expected change not present %s, all changes: %v", mod.String(), mods)
 }
 
 func diffStrDocs(t *testing.T, doc1, doc2 string) *[]Modification {
@@ -56,9 +67,10 @@ func TestDiffSimple1(t *testing.T) {
 	res := Diff(c1, c2)
 	assert.Equal(t, 1, len(*res))
 	assertHasChange(t, Modification{
-		Type:  ModChange,
-		Path:  "leaf1",
-		Value: dom.LeafNode(456),
+		Type:     ModChange,
+		Path:     "leaf1",
+		Value:    dom.LeafNode(456),
+		OldValue: dom.LeafNode("abc"),
 	}, res)
 }
 
@@ -74,14 +86,16 @@ level1:
     leaf12: 456`)
 	assert.Equal(t, 2, len(*res))
 	assertHasChange(t, Modification{
-		Type:  ModChange,
-		Path:  "leaf0",
-		Value: dom.LeafNode(1234),
+		Type:     ModChange,
+		Path:     "leaf0",
+		Value:    dom.LeafNode(1234),
+		OldValue: dom.LeafNode(123),
 	}, res)
 	assertHasChange(t, Modification{
-		Type:  ModChange,
-		Path:  "level1.level2.leaf12",
-		Value: dom.LeafNode(456),
+		Type:     ModChange,
+		Path:     "level1.level2.leaf12",
+		Value:    dom.LeafNode(456),
+		OldValue: dom.LeafNode("abcd"),
 	}, res)
 }
 
@@ -113,9 +127,10 @@ level1:
 		Value: dom.LeafNode(123),
 	}, res)
 	assertHasChange(t, Modification{
-		Type:  ModChange,
-		Path:  "leaf0",
-		Value: dom.LeafNode(1234),
+		Type:     ModChange,
+		Path:     "leaf0",
+		Value:    dom.LeafNode(1234),
+		OldValue: dom.LeafNode(123),
 	}, res)
 }
 
@@ -144,9 +159,10 @@ level1:
 	assert.Equal(t, 5, len(*res))
 
 	assertHasChange(t, Modification{
-		Type:  ModChange,
-		Path:  "leaf0",
-		Value: dom.LeafNode(123),
+		Type:     ModChange,
+		Path:     "leaf0",
+		Value:    dom.LeafNode(123),
+		OldValue: dom.LeafNode(1234),
 	}, res)
 	assertHasChange(t, Modification{
 		Type: ModDelete,

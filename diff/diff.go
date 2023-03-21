@@ -35,9 +35,10 @@ const (
 )
 
 type Modification struct {
-	Type  ModificationType
-	Path  string
-	Value dom.Leaf
+	Type     ModificationType
+	Path     string
+	Value    dom.Leaf
+	OldValue dom.Leaf
 }
 
 func (m *Modification) String() string {
@@ -60,11 +61,11 @@ func flatten(node dom.Node, path string, res *[]Modification) {
 			if n.IsContainer() {
 				flatten(n.(dom.Container), subpath, res)
 			} else {
-				appendMod(ModAdd, subpath, n.(dom.Leaf), res)
+				appendMod(ModAdd, subpath, n.(dom.Leaf), nil, res)
 			}
 		}
 	} else {
-		appendMod(ModAdd, path, node.(dom.Leaf), res)
+		appendMod(ModAdd, path, node.(dom.Leaf), nil, res)
 	}
 }
 
@@ -74,20 +75,21 @@ func handleExisting(left, right dom.Node, path string, res *[]Modification) {
 	} else if !left.IsContainer() && !right.IsContainer() {
 		if !cmp.Equal(left.(dom.Leaf).Value(), right.(dom.Leaf).Value()) {
 			// update
-			appendMod(ModChange, path, right.(dom.Leaf), res)
+			appendMod(ModChange, path, right.(dom.Leaf), left.(dom.Leaf), res)
 		}
 	} else {
 		// replace (del+add)
-		appendMod(ModDelete, path, nil, res)
+		appendMod(ModDelete, path, nil, nil, res)
 		flatten(right, path, res)
 	}
 }
 
-func appendMod(t ModificationType, path string, val dom.Leaf, res *[]Modification) {
+func appendMod(t ModificationType, path string, val dom.Leaf, oldVal dom.Leaf, res *[]Modification) {
 	*res = append(*res, Modification{
-		Type:  t,
-		Path:  path,
-		Value: val,
+		Type:     t,
+		Path:     path,
+		Value:    val,
+		OldValue: oldVal,
 	})
 }
 
@@ -101,14 +103,14 @@ func diff(left, right dom.Container, path string, res *[]Modification) {
 			if n.IsContainer() {
 				flatten(n.(dom.Container), toPath(path, k), res)
 			} else {
-				appendMod(ModAdd, toPath(path, k), n.(dom.Leaf), res)
+				appendMod(ModAdd, toPath(path, k), n.(dom.Leaf), nil, res)
 			}
 		}
 	}
 	for k := range right.Children() {
 		if n2 := left.Child(k); n2 == nil {
 			// k is present in right, but missing in left
-			appendMod(ModDelete, toPath(path, k), nil, res)
+			appendMod(ModDelete, toPath(path, k), nil, nil, res)
 		}
 	}
 }
