@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"sort"
 )
 
 type ModificationType string
@@ -112,10 +113,18 @@ func diff(left, right dom.Container, path string, res *[]Modification) {
 	}
 }
 
+func sortMods(mods []Modification) {
+	sort.SliceStable(mods, func(i, j int) bool {
+		return mods[i].Path < mods[j].Path
+	})
+}
+
 // Diff computes semantic difference between 2 Containers
 func Diff(left, right dom.Container) *[]Modification {
 	var mods []Modification
 	path := ""
 	diff(left, right, path, &mods)
+	// make order of modifications deterministic
+	sortMods(mods)
 	return &mods
 }
