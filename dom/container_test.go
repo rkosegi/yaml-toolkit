@@ -135,6 +135,18 @@ func TestFromMap(t *testing.T) {
 	assert.Equal(t, "abc", c.Lookup("test1.test2").(Leaf).Value())
 }
 
+func TestRemoveAt(t *testing.T) {
+	c := b.FromMap(map[string]interface{}{
+		"test1.test2":       "abc",
+		"test1.test22":      123,
+		"testA.testB.testC": "Hi",
+	})
+	c.RemoveAt("testA.non-existing.another")
+	assert.NotNil(t, c.Lookup("test1.test22"))
+	c.RemoveAt("test1.test22")
+	assert.Nil(t, c.Lookup("test1.test22"))
+}
+
 func TestAddValueAt(t *testing.T) {
 	c := b.Container()
 	c.AddValueAt("test1.test2.test31", LeafNode("abc"))

@@ -78,7 +78,7 @@ func (m *overlayDocument) Populate(overlay, path string, data *map[string]interf
 			current = child.(ContainerBuilder)
 		}
 	}
-	appendChild(data, current, path)
+	appendChild(data, current)
 }
 
 func (m *overlayDocument) Lookup(overlay, path string) Node {

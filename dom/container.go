@@ -109,22 +109,37 @@ func (c *containerBuilderImpl) AddValue(name string, value Leaf) {
 	c.children[name] = value
 }
 
-func (c *containerBuilderImpl) AddValueAt(path string, value Leaf) {
+func (c *containerBuilderImpl) ancestorOf(path string, create bool) (ContainerBuilder, string) {
 	var node ContainerBuilder
 	node = c
 	cp := strings.Split(path, ".")
 	for _, p := range cp[0 : len(cp)-1] {
 		x := node.Child(p)
 		if x == nil || !x.IsContainer() {
-			node = node.AddContainer(p)
+			if create {
+				node = node.AddContainer(p)
+			} else {
+				return nil, ""
+			}
 		} else {
 			node = x.(ContainerBuilder)
 		}
 	}
-	node.AddValue(cp[len(cp)-1], value)
+	return node, cp[len(cp)-1]
 }
 
-func appendChild(current *map[string]interface{}, parent ContainerBuilder, path string) {
+func (c *containerBuilderImpl) AddValueAt(path string, value Leaf) {
+	node, p := c.ancestorOf(path, true)
+	node.AddValue(p, value)
+}
+
+func (c *containerBuilderImpl) RemoveAt(path string) {
+	if node, p := c.ancestorOf(path, false); node != nil {
+		node.Remove(p)
+	}
+}
+
+func appendChild(current *map[string]interface{}, parent ContainerBuilder) {
 	for k, v := range *current {
 		if v == nil {
 			parent.AddValue(k, LeafNode(v))
@@ -133,7 +148,7 @@ func appendChild(current *map[string]interface{}, parent ContainerBuilder, path 
 			switch t.Kind() {
 			case reflect.Map:
 				ref := v.(map[string]interface{})
-				appendChild(&ref, parent.AddContainer(k), path+"/"+k)
+				appendChild(&ref, parent.AddContainer(k))
 			case reflect.Int, reflect.Float64, reflect.String, reflect.Bool:
 				parent.AddValue(k, LeafNode(v))
 			}
@@ -162,7 +177,7 @@ func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBui
 		return nil, err
 	} else {
 		doc := containerBuilderImpl{}
-		appendChild(&root, &doc, "")
+		appendChild(&root, &doc)
 		return &doc, err
 	}
 }

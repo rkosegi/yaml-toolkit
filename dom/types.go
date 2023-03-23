@@ -85,6 +85,7 @@ type Container interface {
 	Flatten() map[string]Leaf
 }
 
+// ContainerBuilder is mutable extension of Container
 type ContainerBuilder interface {
 	Container
 	Serializable
@@ -95,8 +96,10 @@ type ContainerBuilder interface {
 	AddValueAt(path string, value Leaf)
 	// AddContainer adds child Container into this Container
 	AddContainer(name string) ContainerBuilder
-	// Remove child
+	// Remove removes direct child Node.
 	Remove(name string)
+	// RemoveAt removes child Node at given path.
+	RemoveAt(path string)
 }
 
 type ContainerFactory interface {
