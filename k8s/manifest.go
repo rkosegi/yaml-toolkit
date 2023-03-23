@@ -173,10 +173,13 @@ func (k *manifest) BinaryData() BinaryData {
 // WriteTo writes contents of this manifest into io.Writer
 func (k *manifest) WriteTo(w io.Writer) (read int64, err error) {
 	k.h.beforeSave(k)
-	if data, err := yaml.Marshal(k.doc); err != nil {
+	var buff bytes.Buffer
+	enc := yaml.NewEncoder(&buff)
+	enc.SetIndent(2)
+	if err = enc.Encode(k.doc); err != nil {
 		return 0, err
 	} else {
-		n, err := w.Write(data)
+		n, err := w.Write(buff.Bytes())
 		return int64(n), err
 	}
 }
