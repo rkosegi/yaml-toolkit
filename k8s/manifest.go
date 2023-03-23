@@ -56,7 +56,7 @@ func afterLoadBinary(k *manifest, srcKey string) error {
 func afterLoadString(k *manifest, srcKey string) {
 	if data, ok := k.doc[srcKey].(map[string]interface{}); ok {
 		for dk, dv := range data {
-			k.strData[dk] = dv.(string)
+			k.strData[dk] = fmt.Sprintf("%v", dv)
 		}
 	}
 }

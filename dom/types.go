@@ -90,6 +90,9 @@ type ContainerBuilder interface {
 	Serializable
 	// AddValue adds Leaf value into this Container
 	AddValue(name string, value Leaf)
+	// AddValueAt adds Leaf value into this Container at given path.
+	// Child nodes are creates as needed.
+	AddValueAt(path string, value Leaf)
 	// AddContainer adds child Container into this Container
 	AddContainer(name string) ContainerBuilder
 	// Remove child
@@ -101,6 +104,8 @@ type ContainerFactory interface {
 	Container() ContainerBuilder
 	// FromReader creates ContainerBuilder pre-populated with data from provided io.Reader and DecoderFunc
 	FromReader(r io.Reader, fn DecoderFunc) (ContainerBuilder, error)
+	// FromMap creates ContainerBuilder pre-populated with data from provided map
+	FromMap(in map[string]interface{}) ContainerBuilder
 }
 
 // OverlayDocument represents multiple documents layered over each other.

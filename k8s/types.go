@@ -62,3 +62,9 @@ type Document interface {
 	// Save persists any changes made to embedded document
 	Save() error
 }
+
+// EncodeInternalFn is responsible for taking ContainerBuilder and encode it into provided Manifest
+type EncodeInternalFn func(m Manifest, node dom.ContainerBuilder) error
+
+// DecodeInternalFn is responsible for taking Manifest and producing ContainerBuilder
+type DecodeInternalFn func(m Manifest) (dom.ContainerBuilder, error)

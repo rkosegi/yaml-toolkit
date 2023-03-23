@@ -109,6 +109,21 @@ func (c *containerBuilderImpl) AddValue(name string, value Leaf) {
 	c.children[name] = value
 }
 
+func (c *containerBuilderImpl) AddValueAt(path string, value Leaf) {
+	var node ContainerBuilder
+	node = c
+	cp := strings.Split(path, ".")
+	for _, p := range cp[0 : len(cp)-1] {
+		x := node.Child(p)
+		if x == nil || !x.IsContainer() {
+			node = node.AddContainer(p)
+		} else {
+			node = x.(ContainerBuilder)
+		}
+	}
+	node.AddValue(cp[len(cp)-1], value)
+}
+
 func appendChild(current *map[string]interface{}, parent ContainerBuilder, path string) {
 	for k, v := range *current {
 		t := reflect.ValueOf(v)
@@ -123,6 +138,14 @@ func appendChild(current *map[string]interface{}, parent ContainerBuilder, path 
 }
 
 type containerFactory struct {
+}
+
+func (f *containerFactory) FromMap(in map[string]interface{}) ContainerBuilder {
+	b := f.Container()
+	for k, v := range in {
+		b.AddValueAt(k, LeafNode(v))
+	}
+	return b
 }
 
 func (f *containerFactory) Container() ContainerBuilder {

@@ -16,7 +16,9 @@ limitations under the License.
 
 package utils
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // ToPath creates path from path and key name
 func ToPath(path, key string) string {

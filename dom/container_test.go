@@ -126,3 +126,18 @@ func TestFlatten(t *testing.T) {
 	assert.Equal(t, 3, len(fm))
 	assert.NotNil(t, fm["level1.level2b"])
 }
+
+func TestFromMap(t *testing.T) {
+	c := b.FromMap(map[string]interface{}{
+		"test1.test2":  "abc",
+		"test1.test22": 123,
+	})
+	assert.Equal(t, "abc", c.Lookup("test1.test2").(Leaf).Value())
+}
+
+func TestAddValueAt(t *testing.T) {
+	c := b.Container()
+	c.AddValueAt("test1.test2.test31", LeafNode("abc"))
+	c.AddValueAt("test1.test2.test32", LeafNode(123))
+	assert.Equal(t, "abc", c.Lookup("test1.test2.test31").(Leaf).Value())
+}

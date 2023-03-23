@@ -92,3 +92,37 @@ data:
 	assert.Error(t, err)
 	assert.Nil(t, d)
 }
+
+func TestBuildInvalid(t *testing.T) {
+	d, err := NewBuilder().Open()
+	assert.Error(t, err)
+	assert.Nil(t, d)
+	d, err = NewBuilder().Decoder(DecodeEmbeddedProps()).Open()
+	assert.Error(t, err)
+	assert.Nil(t, d)
+}
+
+func TestLoadEmbeddedProps(t *testing.T) {
+	d, err := Properties("../testdata/secret3.yaml")
+	assert.Nil(t, err)
+	assert.NotNil(t, d)
+	assert.Equal(t, "123", d.Document().Lookup("prop2.level2.level3").(dom.Leaf).Value())
+
+	f, err := os.CreateTemp("", "yt.*.yaml")
+	defer func() {
+		_ = os.Remove(f.Name())
+	}()
+	assert.Nil(t, err)
+	_, err = f.Write([]byte(`
+kind: ConfigMap
+data: {}
+`))
+	assert.Nil(t, err)
+	assert.Nil(t, f.Close())
+	d, err = Properties(f.Name())
+	assert.Nil(t, err)
+	assert.NotNil(t, d)
+	d.Document().AddContainer("abc").AddValue("def", dom.LeafNode("123"))
+	assert.Nil(t, d.Save())
+
+}
