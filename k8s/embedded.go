@@ -27,7 +27,6 @@ import (
 
 type doc struct {
 	file string
-	item string
 	cb   dom.ContainerBuilder
 	m    Manifest
 	enc  EncodeInternalFn
