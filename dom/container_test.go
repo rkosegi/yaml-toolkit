@@ -139,5 +139,20 @@ func TestAddValueAt(t *testing.T) {
 	c := b.Container()
 	c.AddValueAt("test1.test2.test31", LeafNode("abc"))
 	c.AddValueAt("test1.test2.test32", LeafNode(123))
+	c.AddValueAt("test1.test2.test33", LeafNode(nil))
 	assert.Equal(t, "abc", c.Lookup("test1.test2.test31").(Leaf).Value())
+	var buff bytes.Buffer
+	err := c.Serialize(&buff, DefaultNodeMappingFn, DefaultYamlEncoder)
+	assert.Nil(t, err)
+}
+
+func TestFromReaderNullLeaf(t *testing.T) {
+	c, err := Builder().FromReader(strings.NewReader(`
+leaf0: null
+level1: 123
+`), DefaultYamlDecoder)
+	assert.NotNil(t, c)
+	assert.Nil(t, err)
+	assert.NotNil(t, c.Child("leaf0"))
+	assert.Nil(t, c.Child("leaf0").(Leaf).Value())
 }

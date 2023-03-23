@@ -27,6 +27,7 @@ import (
 func TestApply(t *testing.T) {
 	doc, err := dom.Builder().FromReader(strings.NewReader(`
 leaf0: 1234
+leafX: null
 level1:
   level2: 123
 `), dom.DefaultYamlDecoder)
@@ -44,6 +45,7 @@ level1:
 	err = doc.Serialize(&buf, dom.DefaultNodeMappingFn, dom.DefaultYamlEncoder)
 	assert.Nil(t, err)
 	assert.Equal(t, `leaf0: 1234
+leafX: null
 level1:
   level2: 123
   level22:

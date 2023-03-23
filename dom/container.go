@@ -126,13 +126,17 @@ func (c *containerBuilderImpl) AddValueAt(path string, value Leaf) {
 
 func appendChild(current *map[string]interface{}, parent ContainerBuilder, path string) {
 	for k, v := range *current {
-		t := reflect.ValueOf(v)
-		switch t.Kind() {
-		case reflect.Map:
-			ref := v.(map[string]interface{})
-			appendChild(&ref, parent.AddContainer(k), path+"/"+k)
-		case reflect.Int, reflect.Float64, reflect.String:
+		if v == nil {
 			parent.AddValue(k, LeafNode(v))
+		} else {
+			t := reflect.ValueOf(v)
+			switch t.Kind() {
+			case reflect.Map:
+				ref := v.(map[string]interface{})
+				appendChild(&ref, parent.AddContainer(k), path+"/"+k)
+			case reflect.Int, reflect.Float64, reflect.String, reflect.Bool:
+				parent.AddValue(k, LeafNode(v))
+			}
 		}
 	}
 }
