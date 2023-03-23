@@ -44,6 +44,10 @@ func TestSerialize(t *testing.T) {
 	d.Put("layer-2", "key1.key2.key3", LeafNode("hello"))
 	d.Put("layer-2", "key1.key11", LeafNode("ola!"))
 	d.Put("layer-3", "key1.key2.key4", LeafNode(7))
+	c := Builder().Container()
+	c.AddContainer("test1").AddValue("test2", LeafNode("Hi"))
+	c.AddValue("test3", LeafNode("no"))
+	d.Put("", "key2", c)
 	var buf bytes.Buffer
 	assert.Nil(t, d.Serialize(&buf, DefaultNodeMappingFn, DefaultYamlEncoder))
 	assert.True(t, buf.Len() > 0)

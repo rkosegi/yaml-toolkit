@@ -81,6 +81,8 @@ type Container interface {
 	Child(name string) Node
 	// Lookup attempts to find child Node at given path
 	Lookup(path string) Node
+	// Flatten flattens this Container into list of leaves
+	Flatten() map[string]Leaf
 }
 
 type ContainerBuilder interface {
@@ -113,8 +115,8 @@ type OverlayDocument interface {
 	LookupAny(path string) Node
 	// Populate puts dictionary into overlay at given path
 	Populate(overlay, path string, data *map[string]interface{})
-	// Put puts scalar value into overlay at given path
-	Put(overlay, path string, value Leaf)
+	// Put puts Node value into overlay at given path
+	Put(overlay, path string, value Node)
 	// Merged returns read-only, merged view of all overlays
 	Merged() Container
 }

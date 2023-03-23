@@ -116,3 +116,13 @@ func TestLookup(t *testing.T) {
 	assert.Nil(t, doc.Lookup("level1.level2b.level3"))
 	assert.Equal(t, "leaf1", doc.Lookup("level1.level2a.level3a").(Leaf).Value())
 }
+
+func TestFlatten(t *testing.T) {
+	data, err := os.ReadFile("../testdata/doc1.yaml")
+	assert.Nil(t, err)
+	doc, err := b.FromReader(bytes.NewReader(data), DefaultYamlDecoder)
+	assert.Nil(t, err)
+	fm := doc.Flatten()
+	assert.Equal(t, 3, len(fm))
+	assert.NotNil(t, fm["level1.level2b"])
+}

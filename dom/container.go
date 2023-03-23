@@ -17,6 +17,7 @@ limitations under the License.
 package dom
 
 import (
+	"github.com/rkosegi/yaml-toolkit/utils"
 	"io"
 	"reflect"
 	"strings"
@@ -24,6 +25,25 @@ import (
 
 type containerImpl struct {
 	children map[string]Node
+}
+
+func flattenInto(node Container, path string, ret *map[string]Leaf) {
+	for k, n := range node.Children() {
+		p := utils.ToPath(path, k)
+		if !n.IsContainer() {
+			m := *ret
+			m[p] = n.(Leaf)
+		} else {
+			flattenInto(n.(Container), p, ret)
+		}
+	}
+}
+
+func (c *containerImpl) Flatten() map[string]Leaf {
+	ret := make(map[string]Leaf, 0)
+	path := ""
+	flattenInto(c, path, &ret)
+	return ret
 }
 
 func (c *containerImpl) ensureChildren() {

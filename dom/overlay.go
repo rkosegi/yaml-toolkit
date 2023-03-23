@@ -17,6 +17,7 @@ limitations under the License.
 package dom
 
 import (
+	"github.com/rkosegi/yaml-toolkit/utils"
 	"golang.org/x/exp/slices"
 	"io"
 	"strings"
@@ -27,17 +28,23 @@ type overlayDocument struct {
 	overlays map[string]ContainerBuilder
 }
 
-func (m *overlayDocument) Put(overlay, path string, value Leaf) {
-	current := m.ensureOverlay(overlay)
-	components := m.pathComponents(path)
-	for _, component := range components[:len(components)-1] {
-		if n := current.Child(component); n == nil {
-			current = current.AddContainer(component)
-		} else {
-			current = n.(ContainerBuilder)
+func (m *overlayDocument) Put(overlay, path string, value Node) {
+	if value.IsContainer() {
+		for k, v := range value.(Container).Flatten() {
+			m.Put(overlay, utils.ToPath(path, k), v)
 		}
+	} else {
+		current := m.ensureOverlay(overlay)
+		components := m.pathComponents(path)
+		for _, component := range components[:len(components)-1] {
+			if n := current.Child(component); n == nil {
+				current = current.AddContainer(component)
+			} else {
+				current = n.(ContainerBuilder)
+			}
+		}
+		current.AddValue(components[len(components)-1], value.(Leaf))
 	}
-	current.AddValue(components[len(components)-1], value)
 }
 
 func (m *overlayDocument) Merged() Container {
