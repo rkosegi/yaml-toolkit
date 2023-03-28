@@ -36,15 +36,20 @@ func (m *overlayDocument) Put(overlay, path string, value Node) {
 	} else {
 		current := m.ensureOverlay(overlay)
 		components := m.pathComponents(path)
-		for _, component := range components[:len(components)-1] {
-			if n := current.Child(component); n == nil {
-				current = current.AddContainer(component)
-			} else {
-				current = n.(ContainerBuilder)
-			}
-		}
+		current = ensurePath(current, components[:len(components)-1])
 		current.AddValue(components[len(components)-1], value.(Leaf))
 	}
+}
+
+func ensurePath(node ContainerBuilder, pc []string) ContainerBuilder {
+	for _, component := range pc {
+		if n := node.Child(component); n == nil {
+			node = node.AddContainer(component)
+		} else {
+			node = n.(ContainerBuilder)
+		}
+	}
+	return node
 }
 
 func (m *overlayDocument) Merged() Container {
@@ -70,13 +75,8 @@ func (m *overlayDocument) pathComponents(path string) []string {
 
 func (m *overlayDocument) Populate(overlay, path string, data *map[string]interface{}) {
 	current := m.ensureOverlay(overlay)
-	for _, comp := range m.pathComponents(path) {
-		child := current.Child(comp)
-		if child == nil {
-			current = current.AddContainer(comp)
-		} else {
-			current = child.(ContainerBuilder)
-		}
+	if path != "" {
+		current = ensurePath(current, m.pathComponents(path))
 	}
 	appendChild(data, current)
 }
