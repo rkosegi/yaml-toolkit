@@ -45,7 +45,7 @@ func main() {
 	d, err := yk8s.YamlDoc("example.yaml", "application.yaml")
 	if err != nil {
 		panic(err)
-    }
+	}
 	print (d.Document().Child("xyz").(ydom.Leaf).Value()) // 456
 	d.Document().AddValue("another-key", ydom.LeafNode("789")) // add new child node
 	err = d.Save()

@@ -63,6 +63,7 @@ type Serializable interface {
 
 // Node is elemental unit of document. At runtime, it could be either Leaf or Container.
 type Node interface {
+	// IsContainer returns true if this node is Container
 	IsContainer() bool
 }
 
