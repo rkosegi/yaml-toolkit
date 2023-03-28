@@ -90,10 +90,10 @@ func (p *propImpl) findEndIndex(buf string, startIndex int) int {
 	}
 	return notFound
 }
-func (p *propImpl) resolve(value string, lookupFn LookupFn, seen []string) string {
+func (p *propImpl) resolve(value string, lookupFn LookupFn, seen []string) *string {
 	si := strings.Index(value, p.b.prefix)
 	if si == notFound {
-		return value
+		return &value
 	}
 	result := strings.Clone(value)
 	for si != notFound {
@@ -105,23 +105,23 @@ func (p *propImpl) resolve(value string, lookupFn LookupFn, seen []string) strin
 				panic("Circular placeholder reference '" + orig + "' in property definitions")
 			}
 			seen = append(seen, orig)
-			ph = p.resolve(ph, lookupFn, seen)
+			ph = *p.resolve(ph, lookupFn, seen)
 			pv := lookupFn(ph)
-			if len(pv) == 0 {
+			if pv == nil {
 				sep := strings.Index(ph, p.b.vs)
 				if sep != notFound {
 					actualPlaceholder := ph[0:sep]
 					def := ph[sep+p.vsl:]
 					pv = lookupFn(actualPlaceholder)
-					if len(pv) == 0 {
-						pv = def
+					if pv == nil {
+						pv = &def
 					}
 				}
 			}
-			if len(pv) > 0 {
-				pv = p.resolve(pv, lookupFn, seen)
-				result = replaceAt(result, si, ei+p.sl, pv)
-				si = indexAfter(result, p.b.prefix, si+len(pv))
+			if pv != nil {
+				pv = p.resolve(*pv, lookupFn, seen)
+				result = replaceAt(result, si, ei+p.sl, *pv)
+				si = indexAfter(result, p.b.prefix, si+len(*pv))
 			} else {
 				si = indexAfter(result, p.b.prefix, ei+p.sl)
 			}
@@ -130,11 +130,11 @@ func (p *propImpl) resolve(value string, lookupFn LookupFn, seen []string) strin
 			si = notFound
 		}
 	}
-	return result
+	return &result
 }
 
 func (p *propImpl) Resolve(placeholder string) string {
-	return p.resolve(placeholder, p.b.lookupFunc, []string{})
+	return *p.resolve(placeholder, p.b.lookupFunc, []string{})
 }
 
 type builder struct {
@@ -187,8 +187,10 @@ func Builder() ResolverBuilder {
 
 // MapLookup returns simple LookupFn that looks into providd map
 func MapLookup(data map[string]string) LookupFn {
-	return func(key string) string {
-		r, _ := data[key]
-		return r
+	return func(key string) *string {
+		if r, ok := data[key]; ok {
+			return &r
+		}
+		return nil
 	}
 }

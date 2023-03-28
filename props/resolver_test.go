@@ -60,6 +60,7 @@ func TestResolve(t *testing.T) {
 		r.Resolve("${circ1}")
 	})
 	assert.Equal(t, "${propX} 123", r.Resolve("${prop4}"))
+	assert.Equal(t, "${propY}", r.Resolve("${propY}"))
 	assert.Equal(t, "${prop", r.Resolve("${prop"))
 	assert.Equal(t, "username=\"user1\" password=\"pwd1\";",
 		r.Resolve("${jaas-config:username=\"${username}\" password=\"${password}\";}"))

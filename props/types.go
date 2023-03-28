@@ -17,7 +17,7 @@ limitations under the License.
 package props
 
 // LookupFn looks up value corresponding to given key.
-type LookupFn func(key string) string
+type LookupFn func(key string) *string
 
 // Resolver allows to resolve placeholder in property values. Nested placeholders are supported.
 type Resolver interface {
