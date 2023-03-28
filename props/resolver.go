@@ -90,34 +90,24 @@ func (p *propImpl) findEndIndex(buf string, startIndex int) int {
 	}
 	return notFound
 }
+
 func (p *propImpl) resolve(value string, lookupFn LookupFn, seen []string) *string {
 	si := strings.Index(value, p.b.prefix)
 	if si == notFound {
 		return &value
 	}
-	result := strings.Clone(value)
+	result := value
 	for si != notFound {
 		ei := p.findEndIndex(result, si)
 		if ei != notFound {
 			ph := result[si+p.pl : ei]
-			orig := strings.Clone(ph)
+			orig := ph
 			if slices.Contains(seen, orig) {
 				panic("Circular placeholder reference '" + orig + "' in property definitions")
 			}
 			seen = append(seen, orig)
 			ph = *p.resolve(ph, lookupFn, seen)
-			pv := lookupFn(ph)
-			if pv == nil {
-				sep := strings.Index(ph, p.b.vs)
-				if sep != notFound {
-					actualPlaceholder := ph[0:sep]
-					def := ph[sep+p.vsl:]
-					pv = lookupFn(actualPlaceholder)
-					if pv == nil {
-						pv = &def
-					}
-				}
-			}
+			pv := p.resolvePlaceholder(lookupFn, ph)
 			if pv != nil {
 				pv = p.resolve(*pv, lookupFn, seen)
 				result = replaceAt(result, si, ei+p.sl, *pv)
@@ -131,6 +121,22 @@ func (p *propImpl) resolve(value string, lookupFn LookupFn, seen []string) *stri
 		}
 	}
 	return &result
+}
+
+func (p *propImpl) resolvePlaceholder(lookupFn LookupFn, ph string) *string {
+	pv := lookupFn(ph)
+	if pv == nil {
+		sep := strings.Index(ph, p.b.vs)
+		if sep != notFound {
+			actualPlaceholder := ph[0:sep]
+			def := ph[sep+p.vsl:]
+			pv = lookupFn(actualPlaceholder)
+			if pv == nil {
+				pv = &def
+			}
+		}
+	}
+	return pv
 }
 
 func (p *propImpl) Resolve(placeholder string) string {
