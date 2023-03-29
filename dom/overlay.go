@@ -23,9 +23,43 @@ import (
 	"strings"
 )
 
+type coordinate struct {
+	path  string
+	layer string
+}
+
+func (c *coordinate) Layer() string {
+	return c.layer
+}
+
+func (c *coordinate) Path() string {
+	return c.path
+}
+
 type overlayDocument struct {
 	names    []string
 	overlays map[string]ContainerBuilder
+}
+
+func (m *overlayDocument) FindValue(val interface{}) []Coordinate {
+	var r []Coordinate
+	for _, l := range m.names {
+		if paths := m.overlays[l].FindValue(val); paths != nil {
+			for _, path := range paths {
+				r = append(r, &coordinate{
+					path:  path,
+					layer: l,
+				})
+			}
+		}
+	}
+	return r
+}
+
+func (m *overlayDocument) Layers() []string {
+	c := make([]string, len(m.names))
+	copy(c, m.names)
+	return c
 }
 
 func (m *overlayDocument) Put(overlay, path string, value Node) {

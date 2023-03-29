@@ -19,6 +19,7 @@ package dom
 import (
 	"bytes"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/exp/slices"
 	"os"
 	"strings"
 	"testing"
@@ -167,4 +168,18 @@ level1: 123
 	assert.Nil(t, err)
 	assert.NotNil(t, c.Child("leaf0"))
 	assert.Nil(t, c.Child("leaf0").(Leaf).Value())
+}
+
+func TestFindValue(t *testing.T) {
+	c, err := Builder().FromReader(strings.NewReader(`
+leaf0: null
+level1: 123
+path.to.element1: Hi
+path.to.element2: Hi
+`), DefaultYamlDecoder)
+	assert.NotNil(t, c)
+	assert.Nil(t, err)
+	assert.Nil(t, c.FindValue(456))
+	assert.Equal(t, []string{"level1"}, c.FindValue(123))
+	assert.True(t, slices.Equal([]string{"path.to.element1", "path.to.element2"}, c.FindValue("Hi")))
 }

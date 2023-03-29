@@ -84,6 +84,9 @@ type Container interface {
 	Lookup(path string) Node
 	// Flatten flattens this Container into list of leaves
 	Flatten() map[string]Leaf
+	// FindValue finds all paths where Node's value is equal to given value.
+	// If no match is found, nil is returned.
+	FindValue(val interface{}) []string
 }
 
 // ContainerBuilder is mutable extension of Container
@@ -112,6 +115,14 @@ type ContainerFactory interface {
 	FromMap(in map[string]interface{}) ContainerBuilder
 }
 
+// Coordinate is address of Node within OverlayDocument
+type Coordinate interface {
+	// Layer returns name of layer within OverlayDocument
+	Layer() string
+	// Path returns path to Node within layer
+	Path() string
+}
+
 // OverlayDocument represents multiple documents layered over each other.
 // It allows lookup across all layers while respecting precedence
 type OverlayDocument interface {
@@ -122,10 +133,14 @@ type OverlayDocument interface {
 	// LookupAny lookups data in given all overlays (in creation order) and path.
 	// if no node is present at any level, nil is returned
 	LookupAny(path string) Node
+	// FindValue find all occurrences of given value in all layers
+	FindValue(val interface{}) []Coordinate
 	// Populate puts dictionary into overlay at given path
 	Populate(overlay, path string, data *map[string]interface{})
 	// Put puts Node value into overlay at given path
 	Put(overlay, path string, value Node)
 	// Merged returns read-only, merged view of all overlays
 	Merged() Container
+	// Layers return copy of list with all layer names
+	Layers() []string
 }
