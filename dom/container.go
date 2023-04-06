@@ -17,7 +17,6 @@ limitations under the License.
 package dom
 
 import (
-	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"io"
 	"reflect"
@@ -58,14 +57,18 @@ func (c *containerImpl) Child(name string) Node {
 	return c.children[name]
 }
 
-func (c *containerImpl) FindValue(val interface{}) []string {
+func (c *containerImpl) Search(fn SearchValueFunc) []string {
 	var r []string
 	for k, v := range c.Flatten() {
-		if cmp.Equal(v.Value(), val) {
+		if fn(v.Value()) {
 			r = append(r, k)
 		}
 	}
 	return r
+}
+
+func (c *containerImpl) FindValue(val interface{}) []string {
+	return c.Search(SearchEqual(val))
 }
 
 func (c *containerImpl) IsContainer() bool {

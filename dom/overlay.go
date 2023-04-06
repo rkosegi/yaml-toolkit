@@ -41,10 +41,10 @@ type overlayDocument struct {
 	overlays map[string]ContainerBuilder
 }
 
-func (m *overlayDocument) FindValue(val interface{}) []Coordinate {
+func (m *overlayDocument) Search(fn SearchValueFunc) []Coordinate {
 	var r []Coordinate
 	for _, l := range m.names {
-		if paths := m.overlays[l].FindValue(val); paths != nil {
+		if paths := m.overlays[l].Search(fn); paths != nil {
 			for _, path := range paths {
 				r = append(r, &coordinate{
 					path:  path,
@@ -54,6 +54,10 @@ func (m *overlayDocument) FindValue(val interface{}) []Coordinate {
 		}
 	}
 	return r
+}
+
+func (m *overlayDocument) FindValue(val interface{}) []Coordinate {
+	return m.Search(SearchEqual(val))
 }
 
 func (m *overlayDocument) Layers() []string {

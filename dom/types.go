@@ -18,9 +18,20 @@ package dom
 
 import (
 	"encoding/json"
+	"github.com/google/go-cmp/cmp"
 	"gopkg.in/yaml.v3"
 	"io"
 )
+
+// SearchValueFunc is used to search for value within document
+type SearchValueFunc func(val interface{}) bool
+
+// SearchEqual is SearchValueFunc that search for equivalent value
+func SearchEqual(in interface{}) SearchValueFunc {
+	return func(val interface{}) bool {
+		return cmp.Equal(val, in)
+	}
+}
 
 // NodeMappingFunc maps internal Container value into external data representation
 type NodeMappingFunc func(Container) interface{}
@@ -86,7 +97,11 @@ type Container interface {
 	Flatten() map[string]Leaf
 	// FindValue finds all paths where Node's value is equal to given value.
 	// If no match is found, nil is returned.
+	// Deprecated: use Search(SearchEqual(x))
 	FindValue(val interface{}) []string
+	// Search finds all paths where Node's value is equal to given value according to provided SearchValueFunc.
+	// If no match is found, nil is returned.
+	Search(fn SearchValueFunc) []string
 }
 
 // ContainerBuilder is mutable extension of Container
@@ -134,7 +149,10 @@ type OverlayDocument interface {
 	// if no node is present at any level, nil is returned
 	LookupAny(path string) Node
 	// FindValue find all occurrences of given value in all layers
+	// Deprecated: use Search(SearchEqual(x))
 	FindValue(val interface{}) []Coordinate
+	// Search fina all occurrences of given value in all layers using custom SearchValueFunc
+	Search(fn SearchValueFunc) []Coordinate
 	// Populate puts dictionary into overlay at given path
 	Populate(overlay, path string, data *map[string]interface{})
 	// Put puts Node value into overlay at given path
