@@ -75,6 +75,10 @@ func (c *containerImpl) IsContainer() bool {
 	return true
 }
 
+func (c *containerImpl) IsList() bool {
+	return false
+}
+
 func (c *containerImpl) Children() map[string]Node {
 	c.ensureChildren()
 	return c.children
@@ -101,6 +105,13 @@ func (c *containerImpl) Lookup(path string) Node {
 
 type containerBuilderImpl struct {
 	containerImpl
+}
+
+func (c *containerBuilderImpl) AddList(name string) ListBuilder {
+	c.ensureChildren()
+	lb := &listBuilderImpl{}
+	c.children[name] = lb
+	return lb
 }
 
 func (c *containerBuilderImpl) Remove(name string) {
@@ -153,7 +164,7 @@ func (c *containerBuilderImpl) RemoveAt(path string) {
 	}
 }
 
-func appendChild(current *map[string]interface{}, parent ContainerBuilder) {
+func appendMap(current *map[string]interface{}, parent ContainerBuilder) {
 	for k, v := range *current {
 		if v == nil {
 			parent.AddValue(k, LeafNode(v))
@@ -162,10 +173,27 @@ func appendChild(current *map[string]interface{}, parent ContainerBuilder) {
 			switch t.Kind() {
 			case reflect.Map:
 				ref := v.(map[string]interface{})
-				appendChild(&ref, parent.AddContainer(k))
+				appendMap(&ref, parent.AddContainer(k))
+			case reflect.Slice, reflect.Array:
+				appendSlice(v.([]interface{}), parent.AddList(k))
 			case reflect.Int, reflect.Float64, reflect.String, reflect.Bool:
 				parent.AddValue(k, LeafNode(v))
 			}
+		}
+	}
+}
+
+func appendSlice(items []interface{}, l ListBuilder) {
+	for _, item := range items {
+		t := reflect.ValueOf(item)
+		switch t.Kind() {
+		case reflect.Map:
+			ref := item.(map[string]interface{})
+			c := &containerBuilderImpl{}
+			appendMap(&ref, c)
+			l.Append(c)
+		case reflect.Int, reflect.Float64, reflect.String, reflect.Bool:
+			l.Append(LeafNode(item))
 		}
 	}
 }
@@ -191,7 +219,7 @@ func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBui
 		return nil, err
 	} else {
 		doc := containerBuilderImpl{}
-		appendChild(&root, &doc)
+		appendMap(&root, &doc)
 		return &doc, err
 	}
 }

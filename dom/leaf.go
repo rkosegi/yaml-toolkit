@@ -24,6 +24,10 @@ func (b *leaf) IsContainer() bool {
 	return false
 }
 
+func (b *leaf) IsList() bool {
+	return false
+}
+
 func (b *leaf) Value() interface{} {
 	return b.value
 }

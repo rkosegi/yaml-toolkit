@@ -76,12 +76,21 @@ type Serializable interface {
 type Node interface {
 	// IsContainer returns true if this node is Container
 	IsContainer() bool
+	// IsList returns true if this node is List
+	IsList() bool
 }
 
 // Leaf represent Node of scalar value
 type Leaf interface {
 	Node
 	Value() interface{}
+}
+
+// List is collection of Nodes
+type List interface {
+	Node
+	// Items returns copy of slice of all nodes in this list
+	Items() []Node
 }
 
 // Container is element that has zero or more child Nodes
@@ -115,6 +124,8 @@ type ContainerBuilder interface {
 	AddValueAt(path string, value Leaf)
 	// AddContainer adds child Container into this Container
 	AddContainer(name string) ContainerBuilder
+	// AddList adds child List into this Container
+	AddList(name string) ListBuilder
 	// Remove removes direct child Node.
 	Remove(name string)
 	// RemoveAt removes child Node at given path.
@@ -136,6 +147,16 @@ type Coordinate interface {
 	Layer() string
 	// Path returns path to Node within layer
 	Path() string
+}
+
+type ListBuilder interface {
+	List
+	// Clear sets items to empty slice
+	Clear()
+	// Set sets item at given index. Panics if index is out of bounds.
+	Set(uint, Node)
+	// Append adds new item at the end of slice
+	Append(Node)
 }
 
 // OverlayDocument represents multiple documents layered over each other.

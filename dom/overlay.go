@@ -116,7 +116,7 @@ func (m *overlayDocument) Populate(overlay, path string, data *map[string]interf
 	if path != "" {
 		current = ensurePath(current, m.pathComponents(path))
 	}
-	appendChild(data, current)
+	appendMap(data, current)
 }
 
 func (m *overlayDocument) Lookup(overlay, path string) Node {
