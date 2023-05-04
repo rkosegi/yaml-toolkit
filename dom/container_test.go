@@ -181,5 +181,8 @@ path.to.element2: Hi
 	assert.Nil(t, err)
 	assert.Nil(t, c.FindValue(456))
 	assert.Equal(t, []string{"level1"}, c.FindValue(123))
-	assert.True(t, slices.Equal([]string{"path.to.element1", "path.to.element2"}, c.FindValue("Hi")))
+	x := c.FindValue("Hi")
+	assert.Equal(t, 2, len(x))
+	assert.True(t, slices.Contains(x, "path.to.element1"))
+	assert.True(t, slices.Contains(x, "path.to.element2"))
 }
