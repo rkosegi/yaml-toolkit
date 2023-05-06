@@ -117,11 +117,11 @@ type Container interface {
 type ContainerBuilder interface {
 	Container
 	Serializable
-	// AddValue adds Leaf value into this Container
-	AddValue(name string, value Leaf)
+	// AddValue adds Node value into this Container
+	AddValue(name string, value Node)
 	// AddValueAt adds Leaf value into this Container at given path.
 	// Child nodes are creates as needed.
-	AddValueAt(path string, value Leaf)
+	AddValueAt(path string, value Node)
 	// AddContainer adds child Container into this Container
 	AddContainer(name string) ContainerBuilder
 	// AddList adds child List into this Container

@@ -55,4 +55,12 @@ func (l *listBuilderImpl) Append(item Node) {
 	l.items = append(l.items, item)
 }
 
+func ListNode(items ...Node) List {
+	l := &listBuilderImpl{}
+	for _, item := range items {
+		l.Append(item)
+	}
+	return l
+}
+
 var _ Node = &listBuilderImpl{}

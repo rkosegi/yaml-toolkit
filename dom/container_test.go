@@ -124,8 +124,18 @@ func TestFlatten(t *testing.T) {
 	doc, err := b.FromReader(bytes.NewReader(data), DefaultYamlDecoder)
 	assert.Nil(t, err)
 	fm := doc.Flatten()
-	assert.Equal(t, 3, len(fm))
+	assert.Equal(t, 5, len(fm))
 	assert.NotNil(t, fm["level1.level2b"])
+}
+
+func TestFlatten2(t *testing.T) {
+	data, err := os.ReadFile("../testdata/doc2.yaml")
+	assert.Nil(t, err)
+	doc, err := b.FromReader(bytes.NewReader(data), DefaultYamlDecoder)
+	assert.Nil(t, err)
+	fm := doc.Flatten()
+	assert.Equal(t, 5, len(fm))
+	assert.Equal(t, LeafNode(1), fm["root[2][0]"])
 }
 
 func TestFromMap(t *testing.T) {
@@ -153,6 +163,11 @@ func TestAddValueAt(t *testing.T) {
 	c.AddValueAt("test1.test2.test31", LeafNode("abc"))
 	c.AddValueAt("test1.test2.test32", LeafNode(123))
 	c.AddValueAt("test1.test2.test33", LeafNode(nil))
+	c.AddValueAt("test1.test2.test34", ListNode(
+		LeafNode("Hello"),
+		b.Container(),
+		ListNode()),
+	)
 	assert.Equal(t, "abc", c.Lookup("test1.test2.test31").(Leaf).Value())
 	var buff bytes.Buffer
 	err := c.Serialize(&buff, DefaultNodeMappingFn, DefaultYamlEncoder)

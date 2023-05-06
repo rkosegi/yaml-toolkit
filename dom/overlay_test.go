@@ -72,7 +72,6 @@ func TestLoad(t *testing.T) {
 	n := d.LookupAny("key1")
 	assert.True(t, n.IsContainer())
 	c1 := n.(Container).Child("key12")
-	c1.IsContainer()
 	assert.True(t, c1.IsContainer())
 	assert.Equal(t, 1, len(d.Layers()))
 
@@ -88,11 +87,23 @@ func TestLoad(t *testing.T) {
 	nodes, err := p.Find(&node)
 	assert.Nil(t, err)
 	assert.NotNil(t, nodes)
-	assert.Equal(t, "3", nodes[0].Content[1].Content[3].Value)
+	assert.Equal(t, "level2b", nodes[0].Content[1].Content[4].Value)
 	c := d.FindValue("leaf1")
 	assert.NotNil(t, c)
 	assert.Nil(t, d.FindValue("non-existent"))
 	assert.Equal(t, 1, len(c))
 	assert.Equal(t, "key1.key12.level1.level2a.level3a", c[0].Path())
 	assert.Equal(t, "layer-1", c[0].Layer())
+}
+
+func TestLoad2(t *testing.T) {
+	d := NewOverlayDocument()
+	var doc map[string]interface{}
+	data, err := os.ReadFile("../testdata/doc2.yaml")
+	assert.Nil(t, err)
+	err = yaml.NewDecoder(bytes.NewReader(data)).Decode(&doc)
+	assert.Nil(t, err)
+	d.Populate("layer-1", "", &doc)
+	props := d.Merged().Flatten()
+	assert.Equal(t, 5, len(props))
 }

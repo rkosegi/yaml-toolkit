@@ -17,6 +17,7 @@ limitations under the License.
 package dom
 
 import (
+	"fmt"
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"io"
 	"reflect"
@@ -27,14 +28,33 @@ type containerImpl struct {
 	children map[string]Node
 }
 
+func flattenLeaf(node Leaf, path string, ret *map[string]Leaf) {
+	m := *ret
+	m[path] = node
+}
+
+func flattenList(node List, path string, ret *map[string]Leaf) {
+	for i, item := range node.Items() {
+		p := fmt.Sprintf("%s[%d]", path, i)
+		if item.IsContainer() {
+			flattenInto(item.(Container), p, ret)
+		} else if item.IsList() {
+			flattenList(item.(List), p, ret)
+		} else {
+			flattenLeaf(item.(Leaf), p, ret)
+		}
+	}
+}
+
 func flattenInto(node Container, path string, ret *map[string]Leaf) {
 	for k, n := range node.Children() {
 		p := utils.ToPath(path, k)
-		if !n.IsContainer() {
-			m := *ret
-			m[p] = n.(Leaf)
-		} else {
+		if n.IsContainer() {
 			flattenInto(n.(Container), p, ret)
+		} else if n.IsList() {
+			flattenList(n.(List), p, ret)
+		} else {
+			flattenLeaf(n.(Leaf), p, ret)
 		}
 	}
 }
@@ -129,7 +149,7 @@ func (c *containerBuilderImpl) AddContainer(name string) ContainerBuilder {
 	return cb
 }
 
-func (c *containerBuilderImpl) AddValue(name string, value Leaf) {
+func (c *containerBuilderImpl) AddValue(name string, value Node) {
 	c.ensureChildren()
 	c.children[name] = value
 }
@@ -153,7 +173,7 @@ func (c *containerBuilderImpl) ancestorOf(path string, create bool) (ContainerBu
 	return node, cp[len(cp)-1]
 }
 
-func (c *containerBuilderImpl) AddValueAt(path string, value Leaf) {
+func (c *containerBuilderImpl) AddValueAt(path string, value Node) {
 	node, p := c.ancestorOf(path, true)
 	node.AddValue(p, value)
 }
@@ -192,6 +212,10 @@ func appendSlice(items []interface{}, l ListBuilder) {
 			c := &containerBuilderImpl{}
 			appendMap(&ref, c)
 			l.Append(c)
+		case reflect.Slice, reflect.Array:
+			list := &listBuilderImpl{}
+			appendSlice(item.([]interface{}), list)
+			l.Append(list)
 		case reflect.Int, reflect.Float64, reflect.String, reflect.Bool:
 			l.Append(LeafNode(item))
 		}

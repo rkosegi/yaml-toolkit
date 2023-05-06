@@ -156,11 +156,27 @@ func leafMappingFn(n Leaf) interface{} {
 	return n.Value()
 }
 
+func listMappingFn(n List) []interface{} {
+	res := make([]interface{}, len(n.Items()))
+	for i, item := range n.Items() {
+		if item.IsContainer() {
+			res[i] = containerMappingFn(item.(Container))
+		} else if item.IsList() {
+			res[i] = listMappingFn(item.(List))
+		} else {
+			res[i] = leafMappingFn(item.(Leaf))
+		}
+	}
+	return res
+}
+
 func containerMappingFn(n Container) map[string]interface{} {
 	res := map[string]interface{}{}
 	for k, v := range n.(Container).Children() {
 		if v.IsContainer() {
 			res[k] = containerMappingFn(v.(Container))
+		} else if v.IsList() {
+			res[k] = listMappingFn(v.(List))
 		} else {
 			res[k] = leafMappingFn(v.(Leaf))
 		}
