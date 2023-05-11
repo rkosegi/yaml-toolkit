@@ -21,8 +21,12 @@ import (
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"io"
 	"reflect"
+	"regexp"
+	"strconv"
 	"strings"
 )
+
+var listPathRe = regexp.MustCompile("\\[\\d+]$")
 
 type containerImpl struct {
 	children map[string]Node
@@ -37,7 +41,7 @@ func flattenList(node List, path string, ret *map[string]Leaf) {
 	for i, item := range node.Items() {
 		p := fmt.Sprintf("%s[%d]", path, i)
 		if item.IsContainer() {
-			flattenInto(item.(Container), p, ret)
+			flattenContainer(item.(Container), p, ret)
 		} else if item.IsList() {
 			flattenList(item.(List), p, ret)
 		} else {
@@ -46,11 +50,11 @@ func flattenList(node List, path string, ret *map[string]Leaf) {
 	}
 }
 
-func flattenInto(node Container, path string, ret *map[string]Leaf) {
+func flattenContainer(node Container, path string, ret *map[string]Leaf) {
 	for k, n := range node.Children() {
 		p := utils.ToPath(path, k)
 		if n.IsContainer() {
-			flattenInto(n.(Container), p, ret)
+			flattenContainer(n.(Container), p, ret)
 		} else if n.IsList() {
 			flattenList(n.(List), p, ret)
 		} else {
@@ -62,7 +66,7 @@ func flattenInto(node Container, path string, ret *map[string]Leaf) {
 func (c *containerImpl) Flatten() map[string]Leaf {
 	ret := make(map[string]Leaf, 0)
 	path := ""
-	flattenInto(c, path, &ret)
+	flattenContainer(c, path, &ret)
 	return ret
 }
 
@@ -74,6 +78,26 @@ func (c *containerImpl) ensureChildren() {
 
 func (c *containerImpl) Child(name string) Node {
 	c.ensureChildren()
+	if listPathRe.MatchString(name) {
+		idx := listPathRe.FindStringIndex(name)
+		index, _ := strconv.Atoi(name[idx[0]+1 : idx[1]-1])
+		name2 := name[0:idx[0]]
+		if n, ok := c.children[name2]; ok {
+			if l, ok := n.(List); ok {
+				if index > len(l.Items())-1 {
+					// index out of bounds
+					return nil
+				}
+				return l.Items()[index]
+			} else {
+				// not a list
+				return nil
+			}
+		} else {
+			// child not exists
+			return nil
+		}
+	}
 	return c.children[name]
 }
 
@@ -128,9 +152,8 @@ type containerBuilderImpl struct {
 }
 
 func (c *containerBuilderImpl) AddList(name string) ListBuilder {
-	c.ensureChildren()
 	lb := &listBuilderImpl{}
-	c.children[name] = lb
+	c.add(name, lb)
 	return lb
 }
 
@@ -143,15 +166,18 @@ func (c *containerBuilderImpl) Serialize(writer io.Writer, mappingFunc NodeMappi
 }
 
 func (c *containerBuilderImpl) AddContainer(name string) ContainerBuilder {
-	c.ensureChildren()
 	cb := &containerBuilderImpl{}
-	c.children[name] = cb
+	c.add(name, cb)
 	return cb
 }
 
-func (c *containerBuilderImpl) AddValue(name string, value Node) {
+func (c *containerBuilderImpl) add(name string, child Node) {
 	c.ensureChildren()
-	c.children[name] = value
+	c.children[name] = child
+}
+
+func (c *containerBuilderImpl) AddValue(name string, value Node) {
+	c.add(name, value)
 }
 
 func (c *containerBuilderImpl) ancestorOf(path string, create bool) (ContainerBuilder, string) {

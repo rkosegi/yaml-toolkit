@@ -201,3 +201,21 @@ path.to.element2: Hi
 	assert.True(t, slices.Contains(x, "path.to.element1"))
 	assert.True(t, slices.Contains(x, "path.to.element2"))
 }
+
+func TestLookupList(t *testing.T) {
+	c, err := Builder().FromReader(strings.NewReader(`
+root:
+  list:
+    - item1: abc
+    - 123
+  not-a-list:
+    prop: 456
+`), DefaultYamlDecoder)
+	assert.NotNil(t, c)
+	assert.Nil(t, err)
+	assert.Equal(t, "abc", c.Lookup("root.list[0].item1").(Leaf).Value())
+	assert.Equal(t, 123, c.Lookup("root.list[1]").(Leaf).Value())
+	assert.Nil(t, c.Lookup("root.list[2]"))
+	assert.Nil(t, c.Lookup("root.not-a-list[0]"))
+	assert.Nil(t, c.Lookup("root.not-exists-at-all[0]"))
+}
