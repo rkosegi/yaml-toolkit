@@ -191,7 +191,7 @@ func Builder() ResolverBuilder {
 	}
 }
 
-// MapLookup returns simple LookupFn that looks into providd map
+// MapLookup returns simple LookupFn that looks into provided map
 func MapLookup(data map[string]string) LookupFn {
 	return func(key string) *string {
 		if r, ok := data[key]; ok {

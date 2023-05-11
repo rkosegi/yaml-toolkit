@@ -172,7 +172,7 @@ type OverlayDocument interface {
 	// FindValue find all occurrences of given value in all layers
 	// Deprecated: use Search(SearchEqual(x))
 	FindValue(val interface{}) []Coordinate
-	// Search fina all occurrences of given value in all layers using custom SearchValueFunc
+	// Search finds all occurrences of given value in all layers using custom SearchValueFunc
 	Search(fn SearchValueFunc) []Coordinate
 	// Populate puts dictionary into overlay at given path
 	Populate(overlay, path string, data *map[string]interface{})
