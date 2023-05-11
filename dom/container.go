@@ -171,13 +171,47 @@ func (c *containerBuilderImpl) AddContainer(name string) ContainerBuilder {
 	return cb
 }
 
+func (c *containerBuilderImpl) ensureList(name string, parent ContainerBuilder) (ListBuilder, uint, string) {
+	idx := listPathRe.FindStringIndex(name)
+	index, _ := strconv.Atoi(name[idx[0]+1 : idx[1]-1])
+	name2 := name[0:idx[0]]
+	var list ListBuilder
+	if l := parent.Child(name2); l == nil {
+		list = parent.AddList(name2)
+	} else {
+		list = l.(ListBuilder)
+	}
+	for i := 0; i <= index; i++ {
+		if len(list.Items()) <= i {
+			list.Append(LeafNode(nil))
+		}
+	}
+	return list, uint(index), name2
+}
+
 func (c *containerBuilderImpl) add(name string, child Node) {
 	c.ensureChildren()
-	c.children[name] = child
+	if listPathRe.MatchString(name) {
+		list, index, _ := c.ensureList(name, c)
+		list.Set(index, child)
+	} else {
+		c.children[name] = child
+	}
 }
 
 func (c *containerBuilderImpl) AddValue(name string, value Node) {
 	c.add(name, value)
+}
+
+func (c *containerBuilderImpl) addChild(parent ContainerBuilder, name string) ContainerBuilder {
+	if listPathRe.MatchString(name) {
+		list, index, _ := c.ensureList(name, parent)
+		c := &containerBuilderImpl{}
+		list.Set(index, c)
+		return c
+	} else {
+		return parent.AddContainer(name)
+	}
 }
 
 func (c *containerBuilderImpl) ancestorOf(path string, create bool) (ContainerBuilder, string) {
@@ -188,7 +222,7 @@ func (c *containerBuilderImpl) ancestorOf(path string, create bool) (ContainerBu
 		x := node.Child(p)
 		if x == nil || !x.IsContainer() {
 			if create {
-				node = node.AddContainer(p)
+				node = c.addChild(node, p)
 			} else {
 				return nil, ""
 			}

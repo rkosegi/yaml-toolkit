@@ -219,3 +219,14 @@ root:
 	assert.Nil(t, c.Lookup("root.not-a-list[0]"))
 	assert.Nil(t, c.Lookup("root.not-exists-at-all[0]"))
 }
+
+func TestAddListAt(t *testing.T) {
+	root := b.Container().AddContainer("root")
+	root.AddValueAt("root.list[0]", LeafNode(123))
+	root.AddValueAt("root.sub.sub2[5]", LeafNode("abc"))
+	root.AddValueAt("root.sub.sub2[4].sub3", LeafNode(456))
+
+	assert.Equal(t, 123, root.Lookup("root.list[0]").(Leaf).Value())
+	assert.Equal(t, "abc", root.Lookup("root.sub.sub2[5]").(Leaf).Value())
+
+}
