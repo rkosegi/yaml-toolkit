@@ -32,7 +32,7 @@ const (
 )
 
 var (
-	errKindMissing = fmt.Errorf("'kind' elelemt is not present in the root of document")
+	errKindMissing = fmt.Errorf("'kind' element is not present in the root of document")
 )
 
 type handler interface {
