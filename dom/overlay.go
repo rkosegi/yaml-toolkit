@@ -81,6 +81,15 @@ func (m *overlayDocument) Put(overlay, path string, value Node) {
 
 func ensurePath(node ContainerBuilder, pc []string) ContainerBuilder {
 	for _, component := range pc {
+		if listPathRe.MatchString(component) {
+			list, index, _ := ensureList(component, node)
+			if list.Items()[int(index)] == nilLeaf {
+				c := &containerBuilderImpl{}
+				list.Set(index, c)
+				node = c
+				continue
+			}
+		}
 		if n := node.Child(component); n == nil {
 			node = node.AddContainer(component)
 		} else {

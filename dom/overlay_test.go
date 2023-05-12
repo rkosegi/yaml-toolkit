@@ -107,3 +107,10 @@ func TestLoad2(t *testing.T) {
 	props := d.Merged().Flatten()
 	assert.Equal(t, 5, len(props))
 }
+
+func TestLoadLookupList(t *testing.T) {
+	d := NewOverlayDocument()
+	d.Put("", "key1.key2[0].key3", LeafNode("hello"))
+	n := d.LookupAny("key1.key2[0].key3")
+	assert.Equal(t, "hello", n.(Leaf).Value())
+}

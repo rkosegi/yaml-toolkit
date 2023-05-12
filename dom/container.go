@@ -26,7 +26,10 @@ import (
 	"strings"
 )
 
-var listPathRe = regexp.MustCompile("\\[\\d+]$")
+var (
+	listPathRe = regexp.MustCompile("\\[\\d+]$")
+	nilLeaf    = LeafNode(nil)
+)
 
 type containerImpl struct {
 	children map[string]Node
@@ -171,7 +174,7 @@ func (c *containerBuilderImpl) AddContainer(name string) ContainerBuilder {
 	return cb
 }
 
-func (c *containerBuilderImpl) ensureList(name string, parent ContainerBuilder) (ListBuilder, uint, string) {
+func ensureList(name string, parent ContainerBuilder) (ListBuilder, uint, string) {
 	idx := listPathRe.FindStringIndex(name)
 	index, _ := strconv.Atoi(name[idx[0]+1 : idx[1]-1])
 	name2 := name[0:idx[0]]
@@ -183,7 +186,7 @@ func (c *containerBuilderImpl) ensureList(name string, parent ContainerBuilder) 
 	}
 	for i := 0; i <= index; i++ {
 		if len(list.Items()) <= i {
-			list.Append(LeafNode(nil))
+			list.Append(nilLeaf)
 		}
 	}
 	return list, uint(index), name2
@@ -192,7 +195,7 @@ func (c *containerBuilderImpl) ensureList(name string, parent ContainerBuilder) 
 func (c *containerBuilderImpl) add(name string, child Node) {
 	c.ensureChildren()
 	if listPathRe.MatchString(name) {
-		list, index, _ := c.ensureList(name, c)
+		list, index, _ := ensureList(name, c)
 		list.Set(index, child)
 	} else {
 		c.children[name] = child
@@ -205,7 +208,7 @@ func (c *containerBuilderImpl) AddValue(name string, value Node) {
 
 func (c *containerBuilderImpl) addChild(parent ContainerBuilder, name string) ContainerBuilder {
 	if listPathRe.MatchString(name) {
-		list, index, _ := c.ensureList(name, parent)
+		list, index, _ := ensureList(name, parent)
 		c := &containerBuilderImpl{}
 		list.Set(index, c)
 		return c
