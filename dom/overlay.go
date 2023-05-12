@@ -103,7 +103,7 @@ func (m *overlayDocument) Merged() Container {
 	var merged Container
 	merged = &containerBuilderImpl{}
 	for _, name := range m.names {
-		merged = mergeContainers(merged.(ContainerBuilder), m.overlays[name].(ContainerBuilder))
+		merged = mergeContainers(merged.(ContainerBuilder), m.overlays[name])
 	}
 	return merged
 }
