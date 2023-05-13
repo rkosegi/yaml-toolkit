@@ -20,6 +20,7 @@ import (
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"golang.org/x/exp/slices"
 	"io"
+	"math"
 	"strings"
 )
 
@@ -144,14 +145,64 @@ func (m *overlayDocument) LookupAny(path string) Node {
 	return nil
 }
 
+func coalesce(nodes ...Node) Node {
+	for _, node := range nodes {
+		if node != nil && node != nilLeaf {
+			return node
+		}
+	}
+	return nilLeaf
+}
+
+func firstValidListItem(idx int, lists ...List) Node {
+	for _, list := range lists {
+		if len(list.Items()) > idx {
+			return list.Items()[idx]
+		}
+	}
+	return nilLeaf
+}
+
+func mergeLists(l1, l2 ListBuilder) List {
+	c1 := len(l1.Items())
+	c2 := len(l2.Items())
+	max := int(math.Max(float64(c1), float64(c2)))
+	min := int(math.Min(float64(c1), float64(c2)))
+	l := &listBuilderImpl{}
+	for i := 0; i < max; i++ {
+		l.Append(nilLeaf)
+	}
+	for i := 0; i < min; i++ {
+		n1 := l1.Items()[i]
+		n2 := l2.Items()[i]
+		if n1.IsContainer() && n2.IsContainer() {
+			l.Set(uint(i), mergeContainers(n1.(ContainerBuilder), n2.(ContainerBuilder)))
+		} else if n1.IsList() && n2.IsList() {
+			l.Set(uint(i), mergeLists(n1.(ListBuilder), n2.(ListBuilder)))
+		} else {
+			l.Set(uint(i), coalesce(n1, n2))
+		}
+	}
+	for i := min; i < max; i++ {
+		l.Set(uint(i), firstValidListItem(i, l1, l2))
+	}
+	return l
+}
+
 func mergeContainers(c1, c2 ContainerBuilder) Container {
 	merged := map[string]Node{}
 	for k, v := range c1.Children() {
 		merged[k] = v
 	}
 	for k, v := range c2.Children() {
-		if n, exists := merged[k]; exists && n.IsContainer() && v.IsContainer() {
-			merged[k] = mergeContainers(n.(ContainerBuilder), v.(ContainerBuilder))
+		if n, exists := merged[k]; exists {
+			if n.IsContainer() && v.IsContainer() {
+				merged[k] = mergeContainers(n.(ContainerBuilder), v.(ContainerBuilder))
+			} else if n.IsList() && v.IsList() {
+				merged[k] = mergeLists(n.(ListBuilder), v.(ListBuilder))
+			} else {
+				merged[k] = coalesce(n, v)
+			}
 		} else {
 			merged[k] = v
 		}

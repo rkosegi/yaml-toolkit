@@ -49,9 +49,10 @@ stringData:
 
 	od := dom.NewOverlayDocument()
 	od.Put("main", "", doc.Document())
+	od.Put("other", "root.sub.list[0].prop2", dom.LeafNode("000"))
 
 	assert.Equal(t, "abc", od.LookupAny("root.sub.list[1].list2[2]").(dom.Leaf).Value())
 
 	m := od.Merged().Flatten()
-	assert.Equal(t, 6, len(m))
+	assert.Equal(t, 7, len(m))
 }

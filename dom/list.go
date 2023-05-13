@@ -55,7 +55,7 @@ func (l *listBuilderImpl) Append(item Node) {
 	l.items = append(l.items, item)
 }
 
-func ListNode(items ...Node) List {
+func ListNode(items ...Node) ListBuilder {
 	l := &listBuilderImpl{}
 	for _, item := range items {
 		l.Append(item)
