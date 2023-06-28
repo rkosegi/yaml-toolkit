@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/utils"
 	"os"
 	"strings"
 )
@@ -121,11 +122,20 @@ func EncodeEmbeddedProps() EncodeInternalFn {
 	}
 }
 
+type CreateOption func(*builderImpl)
+
+func WithNamespace(ns string) CreateOption {
+	return func(b *builderImpl) {
+		b.namespace = ns
+	}
+}
+
 type Builder interface {
 	Manifest(file string) Builder
 	Decoder(fn DecodeInternalFn) Builder
 	Encoder(fn EncodeInternalFn) Builder
 	Open() (Document, error)
+	Create(kind string, name string, opts ...CreateOption) (Document, error)
 }
 
 func NewBuilder() Builder {
@@ -133,9 +143,46 @@ func NewBuilder() Builder {
 }
 
 type builderImpl struct {
-	file string
-	idec DecodeInternalFn
-	ienc EncodeInternalFn
+	apiVersion  string
+	namespace   string
+	createFlags int
+	fileMode    os.FileMode
+	file        string
+	idec        DecodeInternalFn
+	ienc        EncodeInternalFn
+}
+
+func (b *builderImpl) Create(kind string, name string, opts ...CreateOption) (Document, error) {
+	b.createFlags = os.O_CREATE | os.O_RDWR
+	b.namespace = "default"
+	b.apiVersion = "v1"
+	b.fileMode = 0o660
+	for _, opt := range opts {
+		opt(b)
+	}
+	f, err := os.OpenFile(b.file, b.createFlags, b.fileMode)
+	if err != nil {
+		return nil, err
+	}
+	init := map[string]interface{}{
+		"kind":       kind,
+		"apiVersion": b.apiVersion,
+		"metadata": map[string]string{
+			"name":      name,
+			"namespace": b.namespace,
+		},
+		keyData: map[string]string{},
+	}
+	if kind == "Secret" {
+		init["type"] = "Opaque"
+	}
+	if err = utils.NewYamlEncoder(f).Encode(init); err != nil {
+		return nil, err
+	}
+	if err = f.Close(); err != nil {
+		return nil, err
+	}
+	return b.Open()
 }
 
 func (b *builderImpl) Manifest(file string) Builder {

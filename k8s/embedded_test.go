@@ -126,3 +126,20 @@ data: {}
 	assert.Nil(t, d.Save())
 
 }
+
+func TestBuildCreate(t *testing.T) {
+	f, err := os.CreateTemp("", "yt.*.yaml")
+	defer func() {
+		_ = os.Remove(f.Name())
+	}()
+	assert.Nil(t, err)
+	doc, err := NewBuilder().Manifest(f.Name()).
+		Encoder(EncodeEmbeddedProps()).
+		Decoder(DecodeEmbeddedProps()).
+		Create("Secret", "secret1", WithNamespace("something"))
+	assert.NoError(t, err)
+	doc.Document().AddValue("prop1", dom.LeafNode(123))
+	err = doc.Save()
+	assert.NoError(t, err)
+	assert.NotNil(t, doc)
+}
