@@ -18,6 +18,8 @@ package utils
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v3"
+	"io"
 )
 
 // ToPath creates path from path and key name
@@ -27,4 +29,11 @@ func ToPath(path, key string) string {
 	} else {
 		return fmt.Sprintf("%s.%s", path, key)
 	}
+}
+
+// NewYamlEncoder creates and uniformly configures yaml.Encoder across project
+func NewYamlEncoder(w io.Writer) *yaml.Encoder {
+	enc := yaml.NewEncoder(w)
+	enc.SetIndent(2)
+	return enc
 }

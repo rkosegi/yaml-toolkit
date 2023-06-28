@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"github.com/rkosegi/yaml-toolkit/utils"
 	"gopkg.in/yaml.v3"
 	"io"
 	"os"
@@ -174,9 +175,7 @@ func (k *manifest) BinaryData() BinaryData {
 func (k *manifest) WriteTo(w io.Writer) (read int64, err error) {
 	k.h.beforeSave(k)
 	var buff bytes.Buffer
-	enc := yaml.NewEncoder(&buff)
-	enc.SetIndent(2)
-	if err = enc.Encode(k.doc); err != nil {
+	if err = utils.NewYamlEncoder(&buff).Encode(k.doc); err != nil {
 		return 0, err
 	} else {
 		n, err := w.Write(buff.Bytes())

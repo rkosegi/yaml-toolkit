@@ -17,6 +17,7 @@ limitations under the License.
 package utils
 
 import (
+	"bytes"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -24,4 +25,8 @@ import (
 func TestToPath(t *testing.T) {
 	assert.Equal(t, "abc", ToPath("", "abc"))
 	assert.Equal(t, "abc.def", ToPath("abc", "def"))
+}
+
+func TestNewYamlEncoder(t *testing.T) {
+	assert.NotNil(t, NewYamlEncoder(bytes.NewBuffer(make([]byte, 0))))
 }

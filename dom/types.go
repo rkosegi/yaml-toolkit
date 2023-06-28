@@ -19,6 +19,7 @@ package dom
 import (
 	"encoding/json"
 	"github.com/google/go-cmp/cmp"
+	"github.com/rkosegi/yaml-toolkit/utils"
 	"gopkg.in/yaml.v3"
 	"io"
 )
@@ -51,9 +52,7 @@ func DefaultJsonDecoder(r io.Reader, v interface{}) error {
 }
 
 func DefaultYamlEncoder(w io.Writer, v interface{}) error {
-	e := yaml.NewEncoder(w)
-	e.SetIndent(2)
-	return e.Encode(v)
+	return utils.NewYamlEncoder(w).Encode(v)
 }
 
 func DefaultJsonEncoder(w io.Writer, v interface{}) error {
