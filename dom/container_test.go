@@ -228,5 +228,13 @@ func TestAddListAt(t *testing.T) {
 
 	assert.Equal(t, 123, root.Lookup("root.list[0]").(Leaf).Value())
 	assert.Equal(t, "abc", root.Lookup("root.sub.sub2[5]").(Leaf).Value())
+}
 
+func TestFromAny(t *testing.T) {
+	type x struct {
+		A string
+		B int
+	}
+	r := b.FromAny(&x{A: "abc", B: 456}).Flatten()
+	assert.Equal(t, 2, len(r))
 }
