@@ -155,6 +155,18 @@ type containerBuilderImpl struct {
 	containerImpl
 }
 
+func (c *containerBuilderImpl) Walk(fn WalkFn) {
+	c.ensureChildren()
+	for k, v := range c.children {
+		if v.IsContainer() {
+			v.(ContainerBuilder).Walk(fn)
+		}
+		if !fn(k, c, v) {
+			return
+		}
+	}
+}
+
 func (c *containerBuilderImpl) AddList(name string) ListBuilder {
 	lb := &listBuilderImpl{}
 	c.add(name, lb)
@@ -327,3 +339,5 @@ func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBui
 func Builder() ContainerFactory {
 	return &containerFactory{}
 }
+
+var _ ContainerBuilder = &containerBuilderImpl{}

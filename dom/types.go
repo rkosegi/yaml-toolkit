@@ -129,7 +129,22 @@ type ContainerBuilder interface {
 	Remove(name string)
 	// RemoveAt removes child Node at given path.
 	RemoveAt(path string)
+	// Walk walks whole document tree, visiting every node
+	Walk(fn WalkFn)
 }
+
+type WalkFn func(path string, parent ContainerBuilder, node Node) bool
+
+var (
+	CompactFn = func(path string, parent ContainerBuilder, node Node) bool {
+		if node.IsContainer() {
+			if len(node.(ContainerBuilder).Children()) == 0 {
+				parent.Remove(path)
+			}
+		}
+		return true
+	}
+)
 
 type ContainerFactory interface {
 	// Container creates empty ContainerBuilder

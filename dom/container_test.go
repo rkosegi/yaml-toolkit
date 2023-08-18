@@ -238,3 +238,28 @@ func TestFromAny(t *testing.T) {
 	r := b.FromAny(&x{A: "abc", B: 456}).Flatten()
 	assert.Equal(t, 2, len(r))
 }
+
+func TestCompact(t *testing.T) {
+	c, err := Builder().FromReader(strings.NewReader(`
+root:
+  level2:
+    leaf1: 123
+    orphan: {}
+`), DefaultYamlDecoder)
+	assert.NotNil(t, c)
+	assert.NoError(t, err)
+	assert.NotNil(t, c.Children()["root"].(ContainerBuilder).Children()["level2"].(ContainerBuilder).Children()["orphan"])
+	c.Walk(CompactFn)
+	assert.Nil(t, c.Children()["root"].(ContainerBuilder).Children()["level2"].(ContainerBuilder).Children()["orphan"])
+
+	c, err = Builder().FromReader(strings.NewReader(`
+root:
+  level2:
+    orphan: {}
+`), DefaultYamlDecoder)
+	assert.NotNil(t, c)
+	assert.NoError(t, err)
+	assert.NotNil(t, c.Children()["root"].(ContainerBuilder).Children()["level2"].(ContainerBuilder).Children()["orphan"])
+	c.Walk(CompactFn)
+	assert.Nil(t, c.Children()["root"])
+}
