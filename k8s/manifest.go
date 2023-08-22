@@ -239,3 +239,8 @@ func ManifestFromBytes(data []byte) (Manifest, error) {
 		return m, nil
 	}
 }
+
+var (
+	_ BinaryData = &binaryDataFacade{}
+	_ StringData = &stringDataFacade{}
+)

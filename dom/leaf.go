@@ -35,3 +35,5 @@ func (b *leaf) Value() interface{} {
 func LeafNode(val interface{}) Leaf {
 	return &leaf{value: val}
 }
+
+var _ Leaf = &leaf{}

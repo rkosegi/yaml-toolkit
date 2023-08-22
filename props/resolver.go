@@ -200,3 +200,8 @@ func MapLookup(data map[string]string) LookupFn {
 		return nil
 	}
 }
+
+var (
+	_ ResolverBuilder = &builder{}
+	_ Resolver        = &propImpl{}
+)

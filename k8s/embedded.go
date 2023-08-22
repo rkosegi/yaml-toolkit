@@ -223,3 +223,5 @@ func (b *builderImpl) Open() (Document, error) {
 		enc:  b.ienc,
 	}, nil
 }
+
+var _ Builder = &builderImpl{}

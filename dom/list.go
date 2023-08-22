@@ -63,4 +63,4 @@ func ListNode(items ...Node) ListBuilder {
 	return l
 }
 
-var _ Node = &listBuilderImpl{}
+var _ ListBuilder = &listBuilderImpl{}

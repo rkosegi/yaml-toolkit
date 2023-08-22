@@ -254,3 +254,5 @@ func NewOverlayDocument() OverlayDocument {
 		overlays: map[string]ContainerBuilder{},
 	}
 }
+
+var _ OverlayDocument = &overlayDocument{}
