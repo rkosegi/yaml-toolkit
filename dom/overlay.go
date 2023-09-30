@@ -145,9 +145,19 @@ func (m *overlayDocument) LookupAny(path string) Node {
 	return nil
 }
 
+func hasValue(n Node) bool {
+	if n == nil || n == nilLeaf {
+		return false
+	}
+	if !n.IsList() && !n.IsContainer() && n.(Leaf).Value() == nil {
+		return false
+	}
+	return true
+}
+
 func coalesce(nodes ...Node) Node {
 	for _, node := range nodes {
-		if node != nil && node != nilLeaf {
+		if hasValue(node) {
 			return node
 		}
 	}

@@ -155,3 +155,12 @@ func TestFirstValidListItem(t *testing.T) {
 		ListNode(LeafNode(123), LeafNode(456))).(Leaf).Value())
 	assert.Equal(t, nilLeaf, firstValidListItem(2, ListNode()))
 }
+
+func TestHasValue(t *testing.T) {
+	assert.True(t, hasValue(LeafNode(1)))
+	assert.True(t, hasValue(Builder().Container()))
+	assert.True(t, hasValue(ListNode()))
+	assert.False(t, hasValue(nil))
+	assert.False(t, hasValue(nilLeaf))
+	assert.False(t, hasValue(LeafNode(nil)))
+}
