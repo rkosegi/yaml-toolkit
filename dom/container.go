@@ -127,6 +127,14 @@ func (c *containerImpl) IsList() bool {
 	return false
 }
 
+func (c *containerImpl) IsLeaf() bool {
+	return false
+}
+
+func (c *containerImpl) SameAs(node Node) bool {
+	return node != nil && node.IsContainer()
+}
+
 func (c *containerImpl) Children() map[string]Node {
 	c.ensureChildren()
 	return c.children

@@ -36,6 +36,8 @@ def: xyz
 `), DefaultYamlDecoder)
 	assert.Nil(t, err)
 	assert.True(t, doc.IsContainer())
+	assert.False(t, doc.IsLeaf())
+	assert.False(t, doc.SameAs(nilLeaf))
 	assert.Equal(t, "xyz", doc.Children()["def"].(Leaf).Value())
 	assert.Equal(t, 123, doc.Children()["abc"].(Leaf).Value())
 }

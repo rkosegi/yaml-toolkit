@@ -20,8 +20,16 @@ type leaf struct {
 	value interface{}
 }
 
+func (b *leaf) SameAs(node Node) bool {
+	return node != nil && node.IsLeaf()
+}
+
 func (b *leaf) IsContainer() bool {
 	return false
+}
+
+func (b *leaf) IsLeaf() bool {
+	return true
 }
 
 func (b *leaf) IsList() bool {

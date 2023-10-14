@@ -40,6 +40,14 @@ type listBuilderImpl struct {
 	listImpl
 }
 
+func (l *listBuilderImpl) IsLeaf() bool {
+	return false
+}
+
+func (l *listBuilderImpl) SameAs(node Node) bool {
+	return node != nil && node.IsList()
+}
+
 func (l *listBuilderImpl) Clear() {
 	l.items = []Node{}
 }

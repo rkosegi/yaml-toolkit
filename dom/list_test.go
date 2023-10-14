@@ -39,11 +39,13 @@ func TestList(t *testing.T) {
 	assert.False(t, doc.IsList())
 	l := doc.Child("root").(Container).Child("list").(List)
 	assert.False(t, l.IsContainer())
+	assert.False(t, l.IsLeaf())
 	assert.True(t, l.IsList())
 	assert.Equal(t, 3, len(l.Items()))
 	assert.Equal(t, 123, l.Items()[2].(Container).
 		Child("item3").(List).Items()[0].(Container).
 		Child("sub").(Leaf).Value())
+	assert.False(t, l.SameAs(nilLeaf))
 }
 
 func TestMutateList(t *testing.T) {

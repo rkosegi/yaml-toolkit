@@ -25,9 +25,12 @@ func TestLeafValue(t *testing.T) {
 	l := LeafNode(10)
 	assert.False(t, l.IsContainer())
 	assert.False(t, l.IsList())
+	assert.True(t, l.IsLeaf())
 	assert.Equal(t, 10, l.Value())
 
 	l = LeafNode("abc")
 	assert.False(t, l.IsContainer())
+	assert.False(t, l.SameAs(nil))
+	assert.True(t, l.SameAs(nilLeaf))
 	assert.Equal(t, "abc", l.Value())
 }
