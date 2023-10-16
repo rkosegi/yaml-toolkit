@@ -175,8 +175,10 @@ type ListBuilder interface {
 	List
 	// Clear sets items to empty slice
 	Clear()
-	// Set sets item at given index. Panics if index is out of bounds.
+	// Set sets item at given index. Items are allocated and set to nil Leaf as necessary.
 	Set(uint, Node)
+	// MustSet sets item at given index. Panics if index is out of bounds.
+	MustSet(uint, Node)
 	// Append adds new item at the end of slice
 	Append(Node)
 }

@@ -53,6 +53,17 @@ func (l *listBuilderImpl) Clear() {
 }
 
 func (l *listBuilderImpl) Set(index uint, item Node) {
+	var i int
+	for i <= int(index) {
+		if i > len(l.items)-1 {
+			l.Append(nilLeaf)
+		}
+		i++
+	}
+	l.items[index] = item
+}
+
+func (l *listBuilderImpl) MustSet(index uint, item Node) {
 	if int(index) > len(l.items)-1 {
 		panic(fmt.Sprintf("index out of bounds: %d", index))
 	}

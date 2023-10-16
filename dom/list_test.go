@@ -55,20 +55,23 @@ func TestMutateList(t *testing.T) {
 	l := doc.Child("root").(Container).Child("list").(ListBuilder)
 	assert.Equal(t, 3, len(l.Items()))
 
-	l.Set(0, LeafNode(123))
-	l.Set(1, LeafNode("abc"))
+	l.MustSet(0, LeafNode(123))
+	l.MustSet(1, LeafNode("abc"))
 
 	assert.Equal(t, "abc", l.Items()[1].(Leaf).Value())
 	assert.Equal(t, 123, l.Items()[0].(Leaf).Value())
 	l.Clear()
 	assert.Equal(t, 0, len(l.Items()))
+	l.Set(0, LeafNode(123))
+	l.Set(1, LeafNode("abc"))
+	assert.Equal(t, 2, len(l.Items()))
 }
 
-func TestSetOutOfBounds(t *testing.T) {
+func TestMustSetOutOfBounds(t *testing.T) {
 	defer func() {
 		recover()
 	}()
 	l := &listBuilderImpl{}
-	l.Set(0, LeafNode(123))
+	l.MustSet(0, LeafNode(123))
 	assert.Fail(t, "should not be here")
 }
