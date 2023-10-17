@@ -265,3 +265,24 @@ root:
 	c.Walk(CompactFn)
 	assert.Nil(t, c.Children()["root"])
 }
+
+func TestWalk(t *testing.T) {
+	c, err := Builder().FromReader(strings.NewReader(`
+root:
+  level1:
+    level2a:
+      leaf1: 123
+    level2b:
+      leaf1: 123
+      leaf2: 123
+      leaf3: 123
+`), DefaultYamlDecoder)
+	assert.NotNil(t, c)
+	assert.NoError(t, err)
+	c.Walk(func(path string, parent ContainerBuilder, node Node) bool {
+		if node.IsLeaf() && node.(Leaf).Value() == 123 {
+			return false
+		}
+		return true
+	})
+}
