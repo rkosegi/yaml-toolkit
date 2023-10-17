@@ -21,16 +21,17 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 	"strings"
 	"testing"
 )
 
-func leavesEqual(l1, l2 dom.Leaf) bool {
+func leavesEqual(l1, l2 interface{}) bool {
 	if l1 == nil && l2 == nil {
 		return true
 	}
 	if l1 != nil && l2 != nil {
-		return cmp.Equal(l1.Value(), l2.Value())
+		return cmp.Equal(l1, l2)
 	}
 	return false
 }
@@ -44,7 +45,8 @@ func assertHasChange(t *testing.T, mod Modification, mods *[]Modification) {
 			return
 		}
 	}
-	t.Fatalf("expected change not present %s, all changes: %v", mod.String(), mods)
+	data, _ := yaml.Marshal(mods)
+	t.Fatalf("expected change not present %s, all changes:\n%v", mod.String(), string(data))
 }
 
 func diffStrDocs(t *testing.T, doc1, doc2 string) *[]Modification {
@@ -69,8 +71,8 @@ func TestDiffSimple1(t *testing.T) {
 	assertHasChange(t, Modification{
 		Type:     ModChange,
 		Path:     "leaf1",
-		Value:    dom.LeafNode(456),
-		OldValue: dom.LeafNode("abc"),
+		Value:    456,
+		OldValue: "abc",
 	}, res)
 }
 
@@ -88,14 +90,14 @@ level1:
 	assertHasChange(t, Modification{
 		Type:     ModChange,
 		Path:     "leaf0",
-		Value:    dom.LeafNode(1234),
-		OldValue: dom.LeafNode(123),
+		Value:    1234,
+		OldValue: 123,
 	}, res)
 	assertHasChange(t, Modification{
 		Type:     ModChange,
 		Path:     "level1.level2.leaf12",
-		Value:    dom.LeafNode(456),
-		OldValue: dom.LeafNode("abcd"),
+		Value:    456,
+		OldValue: "abcd",
 	}, res)
 }
 
@@ -119,18 +121,18 @@ level1:
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
 		Path:  "leaf2",
-		Value: dom.LeafNode("Hi"),
+		Value: "Hi",
 	}, res)
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
 		Path:  "level1.level2",
-		Value: dom.LeafNode(123),
+		Value: 123,
 	}, res)
 	assertHasChange(t, Modification{
 		Type:     ModChange,
 		Path:     "leaf0",
-		Value:    dom.LeafNode(1234),
-		OldValue: dom.LeafNode(123),
+		Value:    1234,
+		OldValue: 123,
 	}, res)
 }
 
@@ -161,8 +163,8 @@ level1:
 	assertHasChange(t, Modification{
 		Type:     ModChange,
 		Path:     "leaf0",
-		Value:    dom.LeafNode(123),
-		OldValue: dom.LeafNode(1234),
+		Value:    123,
+		OldValue: 1234,
 	}, res)
 	assertHasChange(t, Modification{
 		Type: ModDelete,
@@ -171,12 +173,12 @@ level1:
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
 		Path:  "level1.level2.leaf12",
-		Value: dom.LeafNode("abcd"),
+		Value: "abcd",
 	}, res)
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
 		Path:  "another.container.leaf13",
-		Value: dom.LeafNode("Hi"),
+		Value: "Hi",
 	}, res)
 	assertHasChange(t, Modification{
 		Type: ModDelete,
@@ -199,4 +201,68 @@ level1:
 func TestModString(t *testing.T) {
 	mod := Modification{}
 	assert.True(t, len(mod.String()) > 0)
+}
+
+func TestDiffNotSimilar(t *testing.T) {
+	res := diffStrDocs(t, `
+list1:
+  - item1
+  - item2`, `
+leaf0: 1234
+level1:
+  level2:
+    leaf12: 456`)
+	assert.Equal(t, 4, len(*res))
+	assertHasChange(t, Modification{
+		Type:  ModAdd,
+		Path:  "list1[0]",
+		Value: "item1",
+	}, res)
+	assertHasChange(t, Modification{
+		Type:  ModAdd,
+		Path:  "list1[1]",
+		Value: "item2",
+	}, res)
+}
+
+func TestDiffList(t *testing.T) {
+	res := diffStrDocs(t, `
+root: 123
+list1:
+  - item1
+  - item_obj1:
+      sub:
+        leaf1: 789
+        sublist:
+          - abcd
+          - efgh:
+              - 123
+  - item2`, `
+root:
+  - [ 4 ]
+  - 2
+list1:
+  - 123
+  - 456`)
+	assert.Equal(t, 9, len(*res))
+	assertHasChange(t, Modification{
+		Type:  ModDelete,
+		Path:  "list1",
+		Value: nil,
+	}, res)
+	assertHasChange(t, Modification{
+		Type:  ModAdd,
+		Path:  "list1[0]",
+		Value: "item1",
+	}, res)
+	assertHasChange(t, Modification{
+		Type:  ModAdd,
+		Path:  "list1[1].item_obj1.sub.leaf1",
+		Value: 789,
+	}, res)
+	assertHasChange(t, Modification{
+		Type:  ModAdd,
+		Path:  "list1[2]",
+		Value: "item2",
+	}, res)
 }

@@ -20,6 +20,9 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"io"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 // ToPath creates path from path and key name
@@ -28,6 +31,37 @@ func ToPath(path, key string) string {
 		return key
 	} else {
 		return fmt.Sprintf("%s.%s", path, key)
+	}
+}
+
+// ToListPath like ToPath, but for lists
+func ToListPath(path string, index int) string {
+	sub := fmt.Sprintf("[%d]", index)
+	if len(path) == 0 {
+		return sub
+	} else {
+		return path + sub
+	}
+}
+
+var listPropRe = regexp.MustCompile(".*(\\[\\d+])+")
+
+func ParseListPathComponent(path string) (string, []int, bool) {
+	if !listPropRe.MatchString(path) {
+		return "", nil, false
+	}
+	indexes := make([]int, 0)
+	first := strings.Index(path, "[")
+	cpath := path
+	for {
+		start := strings.Index(cpath, "[")
+		if start == -1 {
+			return path[0:first], indexes, true
+		}
+		end := strings.Index(cpath, "]")
+		index, _ := strconv.Atoi(cpath[start+1 : end])
+		indexes = append(indexes, index)
+		cpath = cpath[end+1:]
 	}
 }
 

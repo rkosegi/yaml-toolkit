@@ -18,8 +18,21 @@ package diff
 
 import (
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/utils"
 	"strings"
 )
+
+func applyList(l dom.ListBuilder, idxes []int) dom.ContainerBuilder {
+	if len(idxes) == 1 {
+		c := dom.Builder().Container()
+		l.Set(uint(idxes[0]), c)
+		return c
+	} else {
+		sub := dom.ListNode()
+		l.Set(uint(idxes[0]), sub)
+		return applyList(sub, idxes[1:])
+	}
+}
 
 func applySingle(node dom.ContainerBuilder, mod Modification) {
 	pc := strings.Split(mod.Path, ".")
@@ -27,14 +40,25 @@ func applySingle(node dom.ContainerBuilder, mod Modification) {
 	switch mod.Type {
 	case ModAdd, ModChange:
 		for _, c := range pc[0 : len(pc)-1] {
-			x := current.Child(c)
-			if x == nil || !x.IsContainer() {
-				current = current.AddContainer(c)
+			if n, idxes, ok := utils.ParseListPathComponent(c); ok {
+				var l dom.ListBuilder
+				x := current.Child(n)
+				if x == nil || !x.IsList() {
+					l = current.AddList(n)
+				} else {
+					l = x.(dom.ListBuilder)
+				}
+				current = applyList(l, idxes)
 			} else {
-				current = x.(dom.ContainerBuilder)
+				x := current.Child(c)
+				if x == nil || !x.IsContainer() {
+					current = current.AddContainer(c)
+				} else {
+					current = x.(dom.ContainerBuilder)
+				}
 			}
 		}
-		current.AddValue(pc[len(pc)-1], mod.Value)
+		current.AddValue(pc[len(pc)-1], dom.LeafNode(mod.Value))
 
 	case ModDelete:
 		for _, c := range pc[0 : len(pc)-1] {

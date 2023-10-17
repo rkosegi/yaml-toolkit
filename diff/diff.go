@@ -38,46 +38,74 @@ const (
 type Modification struct {
 	Type     ModificationType
 	Path     string
-	Value    dom.Leaf
-	OldValue dom.Leaf
+	Value    interface{}
+	OldValue interface{}
 }
 
 func (m *Modification) String() string {
 	return fmt.Sprintf("Mod[Type=%s,Path=%s,Value=%v]", m.Type, m.Path, m.Value)
 }
 
-// flatten converts dom.Container into series of ModAdd modifications, recursively
-func flatten(node dom.Node, path string, res *[]Modification) {
-	if node.IsContainer() {
-		for k, n := range node.(dom.Container).Children() {
-			subpath := utils.ToPath(path, k)
-			if n.IsContainer() {
-				flatten(n.(dom.Container), subpath, res)
-			} else {
-				appendMod(ModAdd, subpath, n.(dom.Leaf), nil, res)
-			}
+func flattenContainer(c dom.Container, path string, res *[]Modification) {
+	for k, n := range c.Children() {
+		sub := utils.ToPath(path, k)
+		if n.IsContainer() {
+			flattenContainer(n.(dom.Container), sub, res)
+		} else if n.IsList() {
+			flattenList(n.(dom.List), sub, res)
+		} else {
+			flattenLeaf(n.(dom.Leaf), sub, res)
 		}
+	}
+}
+
+func flattenList(l dom.List, path string, res *[]Modification) {
+	for i, n := range l.Items() {
+		sub := fmt.Sprintf("%s[%d]", path, i)
+		if n.IsContainer() {
+			flattenContainer(n.(dom.Container), sub, res)
+		} else if n.IsList() {
+			flattenList(n.(dom.List), utils.ToListPath(path, i), res)
+		} else {
+			flattenLeaf(n.(dom.Leaf), sub, res)
+		}
+	}
+}
+
+func flattenLeaf(l dom.Leaf, path string, res *[]Modification) {
+	appendMod(ModAdd, path, l.Value(), nil, res)
+}
+
+func flattenNode(node dom.Node, path string, res *[]Modification) {
+	if node.IsContainer() {
+		flattenContainer(node.(dom.Container), path, res)
+	} else if node.IsList() {
+		flattenList(node.(dom.List), path, res)
 	} else {
-		appendMod(ModAdd, path, node.(dom.Leaf), nil, res)
+		flattenLeaf(node.(dom.Leaf), path, res)
 	}
 }
 
 func handleExisting(left, right dom.Node, path string, res *[]Modification) {
 	if left.IsContainer() && right.IsContainer() {
 		diff(left.(dom.Container), right.(dom.Container), path, res)
-	} else if !left.IsContainer() && !right.IsContainer() {
+	} else if left.IsList() && right.IsList() {
+		// lists don't merge
+		appendMod(ModDelete, path, nil, nil, res)
+		flattenList(left.(dom.List), path, res)
+	} else if left.IsLeaf() && right.IsLeaf() {
 		if !cmp.Equal(left.(dom.Leaf).Value(), right.(dom.Leaf).Value()) {
 			// update
-			appendMod(ModChange, path, right.(dom.Leaf), left.(dom.Leaf), res)
+			appendMod(ModChange, path, right.(dom.Leaf).Value(), left.(dom.Leaf).Value(), res)
 		}
 	} else {
 		// replace (del+add)
 		appendMod(ModDelete, path, nil, nil, res)
-		flatten(right, path, res)
+		flattenNode(right, path, res)
 	}
 }
 
-func appendMod(t ModificationType, path string, val dom.Leaf, oldVal dom.Leaf, res *[]Modification) {
+func appendMod(t ModificationType, path string, val interface{}, oldVal interface{}, res *[]Modification) {
 	*res = append(*res, Modification{
 		Type:     t,
 		Path:     path,
@@ -93,11 +121,7 @@ func diff(left, right dom.Container, path string, res *[]Modification) {
 			handleExisting(n, n2, utils.ToPath(path, k), res)
 		} else {
 			// not found in right Container,so flatten out Node into 1 or more ModAdds Modifications
-			if n.IsContainer() {
-				flatten(n.(dom.Container), utils.ToPath(path, k), res)
-			} else {
-				appendMod(ModAdd, utils.ToPath(path, k), n.(dom.Leaf), nil, res)
-			}
+			flattenNode(n, utils.ToPath(path, k), res)
 		}
 	}
 	for k := range right.Children() {

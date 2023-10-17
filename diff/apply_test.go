@@ -38,7 +38,7 @@ level1:
 		{
 			Type:  ModAdd,
 			Path:  "level1.level22.leaf22",
-			Value: dom.LeafNode("abc"),
+			Value: "abc",
 		},
 	})
 	var buf bytes.Buffer
@@ -51,6 +51,25 @@ level1:
   level22:
     leaf22: abc
 `, buf.String())
+}
+
+func TestApplyListElements(t *testing.T) {
+	doc, err := dom.Builder().FromReader(strings.NewReader(`
+leafX: null
+list1:
+  - abc
+`), dom.DefaultYamlDecoder)
+	if err != nil {
+		t.Fatal(err)
+	}
+	Apply(doc, []Modification{
+		{
+			Type:  ModAdd,
+			Path:  "list1[1][2][3].item_obj1.sub.sublist[1].efgh[0]",
+			Value: "abc",
+		},
+	})
+	assert.True(t, doc.Child("list1").(dom.List).Items()[1].IsList())
 }
 
 func TestApplyNoop(t *testing.T) {
