@@ -42,3 +42,8 @@ func TestParseListPathComponent(t *testing.T) {
 	_, _, ok = ParseListPathComponent("not a list")
 	assert.False(t, ok)
 }
+
+func TestToListPath(t *testing.T) {
+	assert.Equal(t, "[2]", ToListPath("", 2))
+	assert.Equal(t, "item[3]", ToListPath("item", 3))
+}
