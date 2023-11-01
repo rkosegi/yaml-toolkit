@@ -190,7 +190,7 @@ type OverlayDocument interface {
 	// Lookup lookups data in given overlay and path
 	// if no node is present at any level, nil is returned
 	Lookup(overlay, path string) Node
-	// LookupAny lookups data in given all overlays (in creation order) and path.
+	// LookupAny lookups data in all overlays (in creation order) and path.
 	// if no node is present at any level, nil is returned
 	LookupAny(path string) Node
 	// FindValue find all occurrences of given value in all layers
