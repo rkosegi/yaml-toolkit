@@ -141,6 +141,7 @@ type ContainerBuilder interface {
 type WalkFn func(path string, parent ContainerBuilder, node Node) bool
 
 var (
+	// CompactFn is WalkFn that you can use to compact document tree by removing empty containers.
 	CompactFn = func(path string, parent ContainerBuilder, node Node) bool {
 		if node.IsContainer() {
 			if len(node.(ContainerBuilder).Children()) == 0 {

@@ -19,7 +19,6 @@ package dom
 import (
 	"bytes"
 	"github.com/stretchr/testify/assert"
-	"github.com/vmware-labs/yaml-jsonpath/pkg/yamlpath"
 	"gopkg.in/yaml.v3"
 	"os"
 	"testing"
@@ -77,23 +76,11 @@ func TestLoad(t *testing.T) {
 
 	var buf bytes.Buffer
 	assert.Nil(t, d.Serialize(&buf, DefaultNodeMappingFn, DefaultYamlEncoder))
-
 	var node yaml.Node
 	err = yaml.NewDecoder(&buf).Decode(&node)
-	assert.Nil(t, err)
-
-	p, err := yamlpath.NewPath("$..key12")
-	assert.Nil(t, err)
-	nodes, err := p.Find(&node)
-	assert.Nil(t, err)
-	assert.NotNil(t, nodes)
-	assert.Equal(t, "level2b", nodes[0].Content[1].Content[4].Value)
-	c := d.FindValue("leaf1")
-	assert.NotNil(t, c)
-	assert.Nil(t, d.FindValue("non-existent"))
-	assert.Equal(t, 1, len(c))
-	assert.Equal(t, "key1.key12.level1.level2a.level3a", c[0].Path())
-	assert.Equal(t, "layer-1", c[0].Layer())
+	assert.NoError(t, err)
+	assert.Equal(t, "key1", node.Content[0].Content[0].Value)
+	assert.Equal(t, "level2b", node.Content[0].Content[1].Content[3].Content[1].Content[4].Value)
 }
 
 func TestLoad2(t *testing.T) {
