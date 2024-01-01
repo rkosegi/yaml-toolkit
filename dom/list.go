@@ -53,12 +53,10 @@ func (l *listBuilderImpl) Clear() {
 }
 
 func (l *listBuilderImpl) Set(index uint, item Node) {
-	var i int
-	for i <= int(index) {
+	for i := 0; i <= int(index); i++ {
 		if i > len(l.items)-1 {
 			l.Append(nilLeaf)
 		}
-		i++
 	}
 	l.items[index] = item
 }
