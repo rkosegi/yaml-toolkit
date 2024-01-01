@@ -41,21 +41,9 @@ func applySingle(node dom.ContainerBuilder, mod Modification) {
 	case ModAdd, ModChange:
 		for _, c := range pc[0 : len(pc)-1] {
 			if n, idxes, ok := utils.ParseListPathComponent(c); ok {
-				var l dom.ListBuilder
-				x := current.Child(n)
-				if x == nil || !x.IsList() {
-					l = current.AddList(n)
-				} else {
-					l = x.(dom.ListBuilder)
-				}
-				current = applyList(l, idxes)
+				current = applyListItem(current, n, idxes)
 			} else {
-				x := current.Child(c)
-				if x == nil || !x.IsContainer() {
-					current = current.AddContainer(c)
-				} else {
-					current = x.(dom.ContainerBuilder)
-				}
+				current = applyNonListItem(current, c)
 			}
 		}
 		current.AddValue(pc[len(pc)-1], dom.LeafNode(mod.Value))
@@ -71,6 +59,28 @@ func applySingle(node dom.ContainerBuilder, mod Modification) {
 		}
 		current.Remove(pc[len(pc)-1])
 	}
+}
+
+func applyNonListItem(current dom.ContainerBuilder, c string) dom.ContainerBuilder {
+	x := current.Child(c)
+	if x == nil || !x.IsContainer() {
+		current = current.AddContainer(c)
+	} else {
+		current = x.(dom.ContainerBuilder)
+	}
+	return current
+}
+
+func applyListItem(current dom.ContainerBuilder, n string, idxes []int) dom.ContainerBuilder {
+	var l dom.ListBuilder
+	x := current.Child(n)
+	if x == nil || !x.IsList() {
+		l = current.AddList(n)
+	} else {
+		l = x.(dom.ListBuilder)
+	}
+	current = applyList(l, idxes)
+	return current
 }
 
 func Apply(node dom.ContainerBuilder, mods []Modification) {
