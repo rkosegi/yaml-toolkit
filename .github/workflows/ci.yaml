@@ -28,8 +28,6 @@ jobs:
 
       - name: Check out code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-python@v5
       - uses: pre-commit/action@v3.0.1
@@ -39,9 +37,3 @@ jobs:
 
       - name: Test
         run: go test -v ./... -coverprofile=coverage.out
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
