@@ -17,7 +17,7 @@ limitations under the License.
 package props
 
 import (
-	"golang.org/x/exp/slices"
+	"slices"
 	"strings"
 )
 

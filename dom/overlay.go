@@ -18,9 +18,9 @@ package dom
 
 import (
 	"github.com/rkosegi/yaml-toolkit/utils"
-	"golang.org/x/exp/slices"
 	"io"
 	"math"
+	"slices"
 	"strings"
 )
 
