@@ -115,10 +115,6 @@ func (c *containerImpl) Search(fn SearchValueFunc) []string {
 	return r
 }
 
-func (c *containerImpl) FindValue(val interface{}) []string {
-	return c.Search(SearchEqual(val))
-}
-
 func (c *containerImpl) IsContainer() bool {
 	return true
 }

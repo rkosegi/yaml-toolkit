@@ -57,10 +57,6 @@ func (m *overlayDocument) Search(fn SearchValueFunc) []Coordinate {
 	return r
 }
 
-func (m *overlayDocument) FindValue(val interface{}) []Coordinate {
-	return m.Search(SearchEqual(val))
-}
-
 func (m *overlayDocument) Layers() []string {
 	c := make([]string, len(m.names))
 	copy(c, m.names)

@@ -108,10 +108,6 @@ type Container interface {
 	Lookup(path string) Node
 	// Flatten flattens this Container into list of leaves
 	Flatten() map[string]Leaf
-	// FindValue finds all paths where Node's value is equal to given value.
-	// If no match is found, nil is returned.
-	// Deprecated: use Search(SearchEqual(x))
-	FindValue(val interface{}) []string
 	// Search finds all paths where Node's value is equal to given value according to provided SearchValueFunc.
 	// If no match is found, nil is returned.
 	Search(fn SearchValueFunc) []string
@@ -194,9 +190,6 @@ type OverlayDocument interface {
 	// LookupAny lookups data in all overlays (in creation order) and path.
 	// if no node is present at any level, nil is returned
 	LookupAny(path string) Node
-	// FindValue find all occurrences of given value in all layers
-	// Deprecated: use Search(SearchEqual(x))
-	FindValue(val interface{}) []Coordinate
 	// Search finds all occurrences of given value in all layers using custom SearchValueFunc
 	Search(fn SearchValueFunc) []Coordinate
 	// Populate puts dictionary into overlay at given path

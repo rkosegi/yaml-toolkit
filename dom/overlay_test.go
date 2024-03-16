@@ -152,13 +152,13 @@ func TestHasValue(t *testing.T) {
 	assert.False(t, hasValue(LeafNode(nil)))
 }
 
-func TestOverlayFindValue(t *testing.T) {
+func TestOverlaySearch(t *testing.T) {
 	d := NewOverlayDocument()
 	d.Put("first", "root.second", LeafNode(1))
-	res := d.FindValue(1)
+	res := d.Search(SearchEqual(1))
 	assert.Equal(t, 1, len(res))
 	assert.Equal(t, "first", res[0].Layer())
 	assert.Equal(t, "root.second", res[0].Path())
-	res = d.FindValue(2)
+	res = d.Search(SearchEqual(2))
 	assert.Equal(t, 0, len(res))
 }
