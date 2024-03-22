@@ -64,9 +64,9 @@ func (mg *merger) mergeListsMeld(l1, l2 List) List {
 		n1 := l1.Items()[i]
 		n2 := l2.Items()[i]
 		if n1.IsContainer() && n2.IsContainer() {
-			l.Set(uint(i), mg.mergeContainers(n1.(ContainerBuilder), n2.(ContainerBuilder)))
+			l.Set(uint(i), mg.mergeContainers(n1.(Container), n2.(Container)))
 		} else if n1.IsList() && n2.IsList() {
-			l.Set(uint(i), mg.listMergeFn(n1.(ListBuilder), n2.(ListBuilder)))
+			l.Set(uint(i), mg.listMergeFn(n1.(List), n2.(List)))
 		} else {
 			l.Set(uint(i), coalesce(n1, n2))
 		}
@@ -77,7 +77,7 @@ func (mg *merger) mergeListsMeld(l1, l2 List) List {
 	return l
 }
 
-func (mg *merger) mergeContainers(c1, c2 ContainerBuilder) Container {
+func (mg *merger) mergeContainers(c1, c2 Container) Container {
 	merged := map[string]Node{}
 	for k, v := range c1.Children() {
 		merged[k] = v
@@ -85,9 +85,9 @@ func (mg *merger) mergeContainers(c1, c2 ContainerBuilder) Container {
 	for k, v := range c2.Children() {
 		if n, exists := merged[k]; exists {
 			if n.IsContainer() && v.IsContainer() {
-				merged[k] = mg.mergeContainers(n.(ContainerBuilder), v.(ContainerBuilder))
+				merged[k] = mg.mergeContainers(n.(Container), v.(Container))
 			} else if n.IsList() && v.IsList() {
-				merged[k] = mg.listMergeFn(n.(ListBuilder), v.(ListBuilder))
+				merged[k] = mg.listMergeFn(n.(List), v.(List))
 			} else {
 				merged[k] = coalesce(n, v)
 			}
@@ -117,7 +117,7 @@ func (mg *merger) mergeOverlay(m *overlayDocument) Container {
 	var merged Container
 	merged = &containerBuilderImpl{}
 	for _, name := range m.names {
-		merged = mg.mergeContainers(merged.(ContainerBuilder), m.overlays[name])
+		merged = mg.mergeContainers(merged, m.overlays[name])
 	}
 	return merged
 }
