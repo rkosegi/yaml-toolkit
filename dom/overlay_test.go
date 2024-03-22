@@ -102,33 +102,6 @@ func TestLoadLookupList(t *testing.T) {
 	assert.Equal(t, "hello", n.(Leaf).Value())
 }
 
-func TestMergeSimple(t *testing.T) {
-	b1 := b.Container()
-	b1.AddValueAt("root.list", ListNode(LeafNode(123), LeafNode(456)))
-	b2 := b.Container()
-	b2.AddValueAt("root.list[2]", LeafNode(789))
-	c := mergeContainers(b1, b2)
-	assert.Equal(t, 3, len(c.Flatten()))
-}
-
-func TestMergeLists(t *testing.T) {
-	l := mergeLists(
-		ListNode(ListNode(LeafNode(123), LeafNode(456))).(ListBuilder),
-		ListNode(ListNode()).(ListBuilder),
-	)
-	assert.Equal(t, 1, len(l.Items()))
-	assert.Equal(t, 2, len(l.Items()[0].(List).Items()))
-}
-
-func TestMergeContainerFromTwoLists(t *testing.T) {
-	c1 := b.Container()
-	c1.AddValue("prop1", LeafNode(123))
-	c2 := b.Container()
-	c2.AddValue("prop2", LeafNode("abc"))
-	l := mergeLists(ListNode(c1), ListNode(c2))
-	assert.Equal(t, 1, len(l.Items()))
-}
-
 func TestCoalesce(t *testing.T) {
 	assert.Equal(t, nilLeaf, coalesce(nilLeaf))
 	assert.Equal(t, 123, coalesce(nilLeaf,

@@ -180,6 +180,9 @@ type ListBuilder interface {
 	Append(Node)
 }
 
+// MergeOption is function used to customize merger behavior
+type MergeOption func(*merger)
+
 // OverlayDocument represents multiple documents layered over each other.
 // It allows lookup across all layers while respecting precedence
 type OverlayDocument interface {
@@ -197,7 +200,7 @@ type OverlayDocument interface {
 	// Put puts Node value into overlay at given path
 	Put(overlay, path string, value Node)
 	// Merged returns read-only, merged view of all overlays
-	Merged() Container
+	Merged(option ...MergeOption) Container
 	// Layers return copy of list with all layer names
 	Layers() []string
 }

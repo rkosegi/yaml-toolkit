@@ -19,7 +19,6 @@ package dom
 import (
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"io"
-	"math"
 	"slices"
 	"strings"
 )
@@ -96,13 +95,10 @@ func ensurePath(node ContainerBuilder, pc []string) ContainerBuilder {
 	return node
 }
 
-func (m *overlayDocument) Merged() Container {
-	var merged Container
-	merged = &containerBuilderImpl{}
-	for _, name := range m.names {
-		merged = mergeContainers(merged.(ContainerBuilder), m.overlays[name])
-	}
-	return merged
+func (m *overlayDocument) Merged(opts ...MergeOption) Container {
+	mg := &merger{}
+	mg.init(opts...)
+	return mg.mergeOverlay(m)
 }
 
 func (m *overlayDocument) ensureOverlay(name string) ContainerBuilder {
@@ -167,55 +163,6 @@ func firstValidListItem(idx int, lists ...List) Node {
 		}
 	}
 	return nilLeaf
-}
-
-func mergeLists(l1, l2 ListBuilder) List {
-	c1 := len(l1.Items())
-	c2 := len(l2.Items())
-	max := int(math.Max(float64(c1), float64(c2)))
-	min := int(math.Min(float64(c1), float64(c2)))
-	l := &listBuilderImpl{}
-	for i := 0; i < max; i++ {
-		l.Append(nilLeaf)
-	}
-	for i := 0; i < min; i++ {
-		n1 := l1.Items()[i]
-		n2 := l2.Items()[i]
-		if n1.IsContainer() && n2.IsContainer() {
-			l.Set(uint(i), mergeContainers(n1.(ContainerBuilder), n2.(ContainerBuilder)))
-		} else if n1.IsList() && n2.IsList() {
-			l.Set(uint(i), mergeLists(n1.(ListBuilder), n2.(ListBuilder)))
-		} else {
-			l.Set(uint(i), coalesce(n1, n2))
-		}
-	}
-	for i := min; i < max; i++ {
-		l.Set(uint(i), firstValidListItem(i, l1, l2))
-	}
-	return l
-}
-
-func mergeContainers(c1, c2 ContainerBuilder) Container {
-	merged := map[string]Node{}
-	for k, v := range c1.Children() {
-		merged[k] = v
-	}
-	for k, v := range c2.Children() {
-		if n, exists := merged[k]; exists {
-			if n.IsContainer() && v.IsContainer() {
-				merged[k] = mergeContainers(n.(ContainerBuilder), v.(ContainerBuilder))
-			} else if n.IsList() && v.IsList() {
-				merged[k] = mergeLists(n.(ListBuilder), v.(ListBuilder))
-			} else {
-				merged[k] = coalesce(n, v)
-			}
-		} else {
-			merged[k] = v
-		}
-	}
-	r := &containerBuilderImpl{}
-	r.children = merged
-	return r
 }
 
 func leafMappingFn(n Leaf) interface{} {
