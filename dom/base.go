@@ -1,5 +1,5 @@
 /*
-Copyright 2023 Richard Kosegi
+Copyright 2024 Richard Kosegi
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,25 +16,16 @@ limitations under the License.
 
 package dom
 
-type leaf struct {
-	base
-	value interface{}
+type base struct{}
+
+func (b *base) IsContainer() bool {
+	return false
 }
 
-func (l *leaf) SameAs(node Node) bool {
-	return node != nil && node.IsLeaf()
+func (b *base) IsLeaf() bool {
+	return false
 }
 
-func (l *leaf) IsLeaf() bool {
-	return true
+func (b *base) IsList() bool {
+	return false
 }
-
-func (l *leaf) Value() interface{} {
-	return l.value
-}
-
-func LeafNode(val interface{}) Leaf {
-	return &leaf{value: val}
-}
-
-var _ Leaf = &leaf{}

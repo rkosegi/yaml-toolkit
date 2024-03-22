@@ -33,6 +33,7 @@ var (
 )
 
 type containerImpl struct {
+	base
 	children map[string]Node
 }
 
@@ -117,14 +118,6 @@ func (c *containerImpl) Search(fn SearchValueFunc) []string {
 
 func (c *containerImpl) IsContainer() bool {
 	return true
-}
-
-func (c *containerImpl) IsList() bool {
-	return false
-}
-
-func (c *containerImpl) IsLeaf() bool {
-	return false
 }
 
 func (c *containerImpl) SameAs(node Node) bool {

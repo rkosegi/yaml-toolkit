@@ -19,11 +19,8 @@ package dom
 import "fmt"
 
 type listImpl struct {
+	base
 	items []Node
-}
-
-func (l *listImpl) IsContainer() bool {
-	return false
 }
 
 func (l *listImpl) IsList() bool {
@@ -38,10 +35,6 @@ func (l *listImpl) Items() []Node {
 
 type listBuilderImpl struct {
 	listImpl
-}
-
-func (l *listBuilderImpl) IsLeaf() bool {
-	return false
 }
 
 func (l *listBuilderImpl) SameAs(node Node) bool {
