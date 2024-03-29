@@ -260,7 +260,7 @@ func (c *containerBuilderImpl) RemoveAt(path string) {
 func appendMap(current *map[string]interface{}, parent ContainerBuilder) {
 	for k, v := range *current {
 		if v == nil {
-			parent.AddValue(k, LeafNode(v))
+			parent.AddValue(k, nilLeaf)
 		} else {
 			t := reflect.ValueOf(v)
 			switch t.Kind() {
