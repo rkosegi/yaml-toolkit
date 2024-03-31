@@ -99,6 +99,9 @@ type List interface {
 	Items() []Node
 }
 
+// NodeList is sequence of zero or more Nodes
+type NodeList []Node
+
 // Container is element that has zero or more child Nodes
 type Container interface {
 	Node
