@@ -75,3 +75,18 @@ func TestMustSetOutOfBounds(t *testing.T) {
 	l.MustSet(0, LeafNode(123))
 	assert.Fail(t, "should not be here")
 }
+
+func TestListEquals(t *testing.T) {
+	l := &listBuilderImpl{}
+	l.Append(LeafNode(123))
+	l2 := &listBuilderImpl{}
+	l2.Append(LeafNode(123))
+	l3 := &listBuilderImpl{}
+	l3.Append(LeafNode(456))
+
+	assert.False(t, l.Equals(nil))
+	assert.False(t, l.Equals(nilLeaf))
+	assert.False(t, l.Equals(&listBuilderImpl{}))
+	assert.True(t, l.Equals(l2))
+	assert.False(t, l.Equals(l3))
+}

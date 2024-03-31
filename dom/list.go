@@ -37,6 +37,22 @@ type listBuilderImpl struct {
 	listImpl
 }
 
+func (l *listBuilderImpl) Equals(node Node) bool {
+	if node == nil || !node.IsList() {
+		return false
+	}
+	otherItems := node.(List).Items()
+	if len(otherItems) != len(l.items) {
+		return false
+	}
+	for i := 0; i < len(l.items); i++ {
+		if !l.items[i].Equals(otherItems[i]) {
+			return false
+		}
+	}
+	return true
+}
+
 func (l *listBuilderImpl) SameAs(node Node) bool {
 	return node != nil && node.IsList()
 }

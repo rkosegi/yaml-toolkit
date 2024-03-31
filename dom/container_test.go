@@ -286,3 +286,15 @@ root:
 		return true
 	})
 }
+
+func TestContainerEquals(t *testing.T) {
+	c := Builder().Container()
+	c.AddValueAt("a.b[1]", LeafNode("123"))
+	c2 := Builder().Container()
+	c2.AddValueAt("a.b[1]", LeafNode("123"))
+
+	assert.False(t, c.Equals(nil))
+	assert.False(t, c.Equals(LeafNode(2)))
+	assert.False(t, c.Equals(Builder().Container()))
+	assert.True(t, c.Equals(c2))
+}

@@ -75,6 +75,19 @@ func (c *containerImpl) Flatten() map[string]Leaf {
 	return ret
 }
 
+func (c *containerImpl) Equals(node Node) bool {
+	if node == nil || !node.IsContainer() {
+		return false
+	}
+	for k, v := range c.children {
+		other := node.(Container).Child(k)
+		if other == nil || !v.Equals(other) {
+			return false
+		}
+	}
+	return true
+}
+
 func (c *containerImpl) ensureChildren() {
 	if c.children == nil {
 		c.children = map[string]Node{}
