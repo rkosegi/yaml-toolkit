@@ -82,6 +82,8 @@ type Node interface {
 	// SameAs returns true if this node is of same type like other node.
 	// The other Node can be nil, in which case return value is false.
 	SameAs(Node) bool
+	// Equals return true is value of this node is equal to value of provided Node.
+	Equals(Node) bool
 }
 
 // Leaf represent Node of scalar value
