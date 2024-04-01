@@ -161,6 +161,15 @@ func (c *containerImpl) Lookup(path string) Node {
 	return current.Child(pc[len(pc)-1])
 }
 
+func (c *containerImpl) Clone() Node {
+	c2 := &containerImpl{}
+	c2.ensureChildren()
+	for k, v := range c.children {
+		c2.children[k] = v.Clone()
+	}
+	return c2
+}
+
 type containerBuilderImpl struct {
 	containerImpl
 }

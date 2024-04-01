@@ -33,8 +33,12 @@ func (l *listImpl) Items() []Node {
 	return c
 }
 
-type listBuilderImpl struct {
-	listImpl
+func (l *listImpl) Clone() Node {
+	l2 := &listImpl{}
+	for _, item := range l.items {
+		l2.items = append(l2.items, item.Clone())
+	}
+	return l2
 }
 
 func (l *listImpl) Equals(node Node) bool {
@@ -55,6 +59,10 @@ func (l *listImpl) Equals(node Node) bool {
 
 func (l *listImpl) SameAs(node Node) bool {
 	return node != nil && node.IsList()
+}
+
+type listBuilderImpl struct {
+	listImpl
 }
 
 func (l *listBuilderImpl) Clear() {

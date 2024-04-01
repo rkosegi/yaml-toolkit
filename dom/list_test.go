@@ -90,3 +90,11 @@ func TestListEquals(t *testing.T) {
 	assert.True(t, l.Equals(l2))
 	assert.False(t, l.Equals(l3))
 }
+
+func TestListClone(t *testing.T) {
+	l := ListNode(LeafNode(1), LeafNode(2))
+	l2 := l.Clone().(List)
+	assert.Equal(t, len(l2.Items()), len(l.Items()))
+	assert.Equal(t, l2.Items()[0], l.Items()[0])
+	assert.Equal(t, l2.Items()[1], l.Items()[1])
+}

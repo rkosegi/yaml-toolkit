@@ -298,3 +298,12 @@ func TestContainerEquals(t *testing.T) {
 	assert.False(t, c.Equals(Builder().Container()))
 	assert.True(t, c.Equals(c2))
 }
+
+func TestContainerClone(t *testing.T) {
+	c := Builder().Container()
+	c.AddValueAt("a.b[1]", LeafNode("123"))
+	c.AddValueAt("a.x.y", LeafNode(123))
+	c2 := c.Clone().(Container)
+	assert.Equal(t, 123, c2.Lookup("a.x.y").(Leaf).Value())
+	assert.Equal(t, "123", c2.Lookup("a.b[1]").(Leaf).Value())
+}
