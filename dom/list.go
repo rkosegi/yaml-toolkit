@@ -37,7 +37,7 @@ type listBuilderImpl struct {
 	listImpl
 }
 
-func (l *listBuilderImpl) Equals(node Node) bool {
+func (l *listImpl) Equals(node Node) bool {
 	if node == nil || !node.IsList() {
 		return false
 	}
@@ -53,7 +53,7 @@ func (l *listBuilderImpl) Equals(node Node) bool {
 	return true
 }
 
-func (l *listBuilderImpl) SameAs(node Node) bool {
+func (l *listImpl) SameAs(node Node) bool {
 	return node != nil && node.IsList()
 }
 
