@@ -23,6 +23,10 @@ type leaf struct {
 	value interface{}
 }
 
+func (l *leaf) Clone() Node {
+	return &leaf{value: l.value}
+}
+
 func (l *leaf) Equals(node Node) bool {
 	return node != nil && node.IsLeaf() && cmp.Equal(l.value, node.(Leaf).Value())
 }

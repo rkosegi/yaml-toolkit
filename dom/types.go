@@ -84,6 +84,8 @@ type Node interface {
 	SameAs(Node) bool
 	// Equals return true is value of this node is equal to value of provided Node.
 	Equals(Node) bool
+	// Clone returns deep copy of this Node.
+	Clone() Node
 }
 
 // Leaf represent Node of scalar value
