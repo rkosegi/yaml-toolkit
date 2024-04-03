@@ -104,3 +104,14 @@ func TestInvalidWriteTo(t *testing.T) {
 	_, err = m.WriteTo(&failingWriter{})
 	assert.Error(t, err)
 }
+
+type failingReader struct{}
+
+func (fr failingReader) Read([]byte) (n int, err error) {
+	return 0, anyErr
+}
+
+func TestManifestFromReaderFail(t *testing.T) {
+	_, err := ManifestFromReader(&failingReader{})
+	assert.Error(t, err)
+}

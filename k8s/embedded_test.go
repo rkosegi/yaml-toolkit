@@ -17,11 +17,19 @@ limitations under the License.
 package k8s
 
 import (
+	"errors"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/stretchr/testify/assert"
+	"io"
 	"os"
 	"testing"
 )
+
+var (
+	anyErr = errors.New("any error")
+)
+
+const tempFilePattern = "yt.*.yaml"
 
 func TestLoadEmbeddedYaml(t *testing.T) {
 	d, err := YamlDoc("../testdata/cm1.yaml", "application.yaml")
@@ -57,7 +65,7 @@ func TestLoadNonExistingFile(t *testing.T) {
 }
 
 func TestLoadMissingItem(t *testing.T) {
-	f, err := os.CreateTemp("", "yt.*.yaml")
+	f, err := os.CreateTemp("", tempFilePattern)
 	defer func() {
 		_ = os.Remove(f.Name())
 	}()
@@ -76,7 +84,7 @@ data: {}
 }
 
 func TestLoadInvalidDoc(t *testing.T) {
-	f, err := os.CreateTemp("", "yt.*.yaml")
+	f, err := os.CreateTemp("", tempFilePattern)
 	defer func() {
 		_ = os.Remove(f.Name())
 	}()
@@ -108,7 +116,7 @@ func TestLoadEmbeddedProps(t *testing.T) {
 	assert.NotNil(t, d)
 	assert.Equal(t, "123", d.Document().Lookup("prop2.level2.level3").(dom.Leaf).Value())
 
-	f, err := os.CreateTemp("", "yt.*.yaml")
+	f, err := os.CreateTemp("", tempFilePattern)
 	defer func() {
 		_ = os.Remove(f.Name())
 	}()
@@ -128,7 +136,7 @@ data: {}
 }
 
 func TestBuildCreate(t *testing.T) {
-	f, err := os.CreateTemp("", "yt.*.yaml")
+	f, err := os.CreateTemp("", tempFilePattern)
 	defer func() {
 		_ = os.Remove(f.Name())
 	}()
@@ -142,4 +150,54 @@ func TestBuildCreate(t *testing.T) {
 	err = doc.Save()
 	assert.NoError(t, err)
 	assert.NotNil(t, doc)
+}
+
+func TestFailBeforeSave(t *testing.T) {
+	f, err := os.CreateTemp("", tempFilePattern)
+	defer func() {
+		_ = os.Remove(f.Name())
+	}()
+	assert.NoError(t, err)
+	doc, err := NewBuilder().Manifest(f.Name()).
+		Encoder(EncodeEmbeddedDoc("embedded.txt", func(w io.Writer, v interface{}) error {
+			return anyErr
+		})).
+		Decoder(DecodeEmbeddedProps()).
+		Create("ConfigMap", "temp")
+	assert.NoError(t, err)
+	assert.NotNil(t, doc)
+	assert.Error(t, doc.Save())
+}
+
+func TestFailOnSave(t *testing.T) {
+	f, err := os.CreateTemp("", tempFilePattern)
+	defer func() {
+		_ = os.Remove(f.Name())
+	}()
+	assert.NoError(t, err)
+	doc, err := NewBuilder().Manifest(f.Name()).
+		Encoder(EncodeEmbeddedProps()).
+		Decoder(DecodeEmbeddedProps()).
+		Create("ConfigMap", "temp")
+	assert.NoError(t, err)
+	assert.NoError(t, os.Chmod(f.Name(), 0o400))
+	assert.NotNil(t, doc)
+	assert.Error(t, doc.Save())
+}
+
+func TestFailOnCreate(t *testing.T) {
+	f, err := os.CreateTemp("", tempFilePattern)
+	defer func() {
+		_ = os.Remove(f.Name())
+	}()
+	assert.NoError(t, f.Close())
+	// this will cause permission denied during document creation
+	assert.NoError(t, os.Chmod(f.Name(), 0o400))
+	assert.NoError(t, err)
+	doc, err := NewBuilder().Manifest(f.Name()).
+		Encoder(EncodeEmbeddedProps()).
+		Decoder(DecodeEmbeddedProps()).
+		Create("ConfigMap", "temp")
+	assert.Nil(t, doc)
+	assert.Error(t, err)
 }
