@@ -333,11 +333,9 @@ func (f *containerFactory) FromAny(v interface{}) ContainerBuilder {
 }
 
 func (f *containerFactory) FromMap(in map[string]interface{}) ContainerBuilder {
-	b := f.Container()
-	for k, v := range in {
-		b.AddValueAt(k, LeafNode(v))
-	}
-	return b
+	doc := containerBuilderImpl{}
+	appendMap(&in, &doc)
+	return &doc
 }
 
 func (f *containerFactory) Container() ContainerBuilder {
@@ -349,9 +347,7 @@ func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBui
 	if err := fn(r, &root); err != nil {
 		return nil, err
 	} else {
-		doc := containerBuilderImpl{}
-		appendMap(&root, &doc)
-		return &doc, err
+		return f.FromMap(root), nil
 	}
 }
 
