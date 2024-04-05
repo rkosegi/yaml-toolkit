@@ -69,7 +69,7 @@ func flattenContainer(node Container, path string, ret *map[string]Leaf) {
 }
 
 func (c *containerImpl) Flatten() map[string]Leaf {
-	ret := make(map[string]Leaf, 0)
+	ret := make(map[string]Leaf)
 	path := ""
 	flattenContainer(c, path, &ret)
 	return ret
