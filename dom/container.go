@@ -102,7 +102,7 @@ func (c *containerImpl) Child(name string) Node {
 		name2 := name[0:idx[0]]
 		if n, ok := c.children[name2]; ok {
 			if l, ok := n.(List); ok {
-				if index > len(l.Items())-1 {
+				if index > l.Size()-1 {
 					// index out of bounds
 					return nil
 				}
@@ -217,7 +217,7 @@ func ensureList(name string, parent ContainerBuilder) (ListBuilder, uint, string
 		list = l.(ListBuilder)
 	}
 	for i := 0; i <= index; i++ {
-		if len(list.Items()) <= i {
+		if list.Size() <= i {
 			list.Append(nilLeaf)
 		}
 	}

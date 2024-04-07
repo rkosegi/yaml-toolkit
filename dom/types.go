@@ -97,6 +97,8 @@ type Leaf interface {
 // List is collection of Nodes
 type List interface {
 	Node
+	// Size returns current count of items in this list
+	Size() int
 	// Items returns copy of slice of all nodes in this list
 	Items() []Node
 }

@@ -28,9 +28,13 @@ func (l *listImpl) IsList() bool {
 }
 
 func (l *listImpl) Items() []Node {
-	c := make([]Node, len(l.items))
+	c := make([]Node, l.Size())
 	copy(c, l.items)
 	return c
+}
+
+func (l *listImpl) Size() int {
+	return len(l.items)
 }
 
 func (l *listImpl) Clone() Node {

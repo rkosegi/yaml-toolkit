@@ -158,7 +158,7 @@ func coalesce(nodes ...Node) Node {
 
 func firstValidListItem(idx int, lists ...List) Node {
 	for _, list := range lists {
-		if len(list.Items()) > idx {
+		if list.Size() > idx {
 			return list.Items()[idx]
 		}
 	}
@@ -170,7 +170,7 @@ func leafMappingFn(n Leaf) interface{} {
 }
 
 func listMappingFn(n List) []interface{} {
-	res := make([]interface{}, len(n.Items()))
+	res := make([]interface{}, n.Size())
 	for i, item := range n.Items() {
 		if item.IsContainer() {
 			res[i] = containerMappingFn(item.(Container))

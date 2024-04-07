@@ -39,8 +39,8 @@ func TestMergeLists(t *testing.T) {
 		ListNode(ListNode(LeafNode(123), LeafNode(456))).(ListBuilder),
 		ListNode(ListNode()).(ListBuilder),
 	)
-	assert.Equal(t, 1, len(l.Items()))
-	assert.Equal(t, 2, len(l.Items()[0].(List).Items()))
+	assert.Equal(t, 1, l.Size())
+	assert.Equal(t, 2, l.Items()[0].(List).Size())
 }
 
 func TestMergeListsAppend(t *testing.T) {
@@ -55,7 +55,7 @@ func TestMergeListsAppend(t *testing.T) {
 			LeafNode(789),
 		),
 	)
-	assert.Equal(t, 3, len(l.Items()))
+	assert.Equal(t, 3, l.Size())
 	assert.Equal(t, 123, l.Items()[0].(Leaf).Value())
 	assert.Equal(t, 456, l.Items()[1].(Leaf).Value())
 	assert.Equal(t, 789, l.Items()[2].(Leaf).Value())
@@ -69,5 +69,5 @@ func TestMergeContainerFromTwoLists(t *testing.T) {
 	m := &merger{}
 	m.init()
 	l := m.mergeListsMeld(ListNode(c1), ListNode(c2))
-	assert.Equal(t, 1, len(l.Items()))
+	assert.Equal(t, 1, l.Size())
 }
