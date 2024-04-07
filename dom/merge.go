@@ -42,18 +42,18 @@ type merger struct {
 
 func mergeListsAppend(l1, l2 List) List {
 	l := &listBuilderImpl{}
-	for i := 0; i < len(l1.Items()); i++ {
+	for i := 0; i < l1.Size(); i++ {
 		l.Append(l1.Items()[i])
 	}
-	for i := 0; i < len(l2.Items()); i++ {
+	for i := 0; i < l2.Size(); i++ {
 		l.Append(l2.Items()[i])
 	}
 	return l
 }
 
 func (mg *merger) mergeListsMeld(l1, l2 List) List {
-	c1 := len(l1.Items())
-	c2 := len(l2.Items())
+	c1 := l1.Size()
+	c2 := l2.Size()
 	maxLen := int(math.Max(float64(c1), float64(c2)))
 	minLen := int(math.Min(float64(c1), float64(c2)))
 	l := &listBuilderImpl{}

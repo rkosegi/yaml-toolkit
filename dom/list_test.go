@@ -41,7 +41,7 @@ func TestList(t *testing.T) {
 	assert.False(t, l.IsContainer())
 	assert.False(t, l.IsLeaf())
 	assert.True(t, l.IsList())
-	assert.Equal(t, 3, len(l.Items()))
+	assert.Equal(t, 3, l.Size())
 	assert.Equal(t, 123, l.Items()[2].(Container).
 		Child("item3").(List).Items()[0].(Container).
 		Child("sub").(Leaf).Value())
@@ -53,7 +53,7 @@ func TestMutateList(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, doc)
 	l := doc.Child("root").(Container).Child("list").(ListBuilder)
-	assert.Equal(t, 3, len(l.Items()))
+	assert.Equal(t, 3, l.Size())
 
 	l.MustSet(0, LeafNode(123))
 	l.MustSet(1, LeafNode("abc"))
@@ -61,10 +61,10 @@ func TestMutateList(t *testing.T) {
 	assert.Equal(t, "abc", l.Items()[1].(Leaf).Value())
 	assert.Equal(t, 123, l.Items()[0].(Leaf).Value())
 	l.Clear()
-	assert.Equal(t, 0, len(l.Items()))
+	assert.Equal(t, 0, l.Size())
 	l.Set(0, LeafNode(123))
 	l.Set(1, LeafNode("abc"))
-	assert.Equal(t, 2, len(l.Items()))
+	assert.Equal(t, 2, l.Size())
 }
 
 func TestMustSetOutOfBounds(t *testing.T) {
@@ -94,7 +94,7 @@ func TestListEquals(t *testing.T) {
 func TestListClone(t *testing.T) {
 	l := ListNode(LeafNode(1), LeafNode(2))
 	l2 := l.Clone().(List)
-	assert.Equal(t, len(l2.Items()), len(l.Items()))
+	assert.Equal(t, l2.Size(), l.Size())
 	assert.Equal(t, l2.Items()[0], l.Items()[0])
 	assert.Equal(t, l2.Items()[1], l.Items()[1])
 }
