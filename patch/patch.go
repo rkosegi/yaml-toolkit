@@ -41,8 +41,6 @@ const (
 	OpTest    = Op("test")
 )
 
-type opFn func(obj *OpObj, target dom.ContainerBuilder) error
-
 // OpObj is operation object containing all necessary data to perform patch operation
 type OpObj struct {
 	Op    Op
