@@ -66,14 +66,14 @@ func TestPatchOpAdd(t *testing.T) {
 	assert.NoError(t, err)
 
 	c = makeTestContainer()
-	assert.Equal(t, 4, len(c.Lookup("root.list").(dom.List).Items()))
+	assert.Equal(t, 4, c.Lookup("root.list").(dom.List).Size())
 	err = Do(&OpObj{
 		Op:    OpAdd,
 		Path:  MustParsePath("/root/list/2"),
 		Value: dom.LeafNode(1),
 	}, c)
 	assert.NoError(t, err)
-	assert.Equal(t, 5, len(c.Lookup("root.list").(dom.List).Items()))
+	assert.Equal(t, 5, c.Lookup("root.list").(dom.List).Size())
 	assert.Equal(t, 1, c.Lookup("root.list[2]").(dom.Leaf).Value())
 }
 
