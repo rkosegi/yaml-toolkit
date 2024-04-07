@@ -24,17 +24,17 @@ import (
 
 func TestRemoveListItem(t *testing.T) {
 	l := dom.ListNode(dom.LeafNode(1), dom.LeafNode(2), dom.LeafNode(3))
-	assert.Equal(t, 3, len(l.Items()))
+	assert.Equal(t, 3, l.Size())
 	removeListItem(l, 1)
-	assert.Equal(t, 2, len(l.Items()))
+	assert.Equal(t, 2, l.Size())
 	assert.Equal(t, 1, l.Items()[0].(dom.Leaf).Value())
 	assert.Equal(t, 3, l.Items()[1].(dom.Leaf).Value())
 }
 
 func TestInsertListItem(t *testing.T) {
 	l := dom.ListNode(dom.LeafNode("a"), dom.LeafNode("b"), dom.LeafNode("c"))
-	assert.Equal(t, 3, len(l.Items()))
+	assert.Equal(t, 3, l.Size())
 	insertListItem(l, 3, dom.LeafNode("d"))
-	assert.Equal(t, 4, len(l.Items()))
+	assert.Equal(t, 4, l.Size())
 	assert.Equal(t, "d", l.Items()[3].(dom.Leaf).Value())
 }
