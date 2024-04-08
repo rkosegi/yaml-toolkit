@@ -266,3 +266,14 @@ list1:
 		Value: "item2",
 	}, res)
 }
+
+func TestDiffInnerList(t *testing.T) {
+	res := diffStrDocs(t, `
+root:
+  list1:
+    - item1`, `
+root:
+  list1:
+    - item1`)
+	assert.Equal(t, 0, len(*res))
+}
