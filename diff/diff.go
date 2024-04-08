@@ -91,8 +91,7 @@ func handleExisting(left, right dom.Node, path string, res *[]Modification) {
 		diff(left.(dom.Container), right.(dom.Container), path, res)
 	} else if left.IsList() && right.IsList() {
 		// lists don't merge
-		appendMod(ModDelete, path, nil, nil, res)
-		flattenList(left.(dom.List), path, res)
+		diffList(left.(dom.List), right.(dom.List), path, res)
 	} else if left.IsLeaf() && right.IsLeaf() {
 		if !cmp.Equal(left.(dom.Leaf).Value(), right.(dom.Leaf).Value()) {
 			// update
@@ -102,6 +101,13 @@ func handleExisting(left, right dom.Node, path string, res *[]Modification) {
 		// replace (del+add)
 		appendMod(ModDelete, path, nil, nil, res)
 		flattenNode(right, path, res)
+	}
+}
+
+func diffList(left, right dom.List, path string, res *[]Modification) {
+	if !left.Equals(right) {
+		appendMod(ModDelete, path, nil, nil, res)
+		flattenList(left, path, res)
 	}
 }
 
