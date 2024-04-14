@@ -177,6 +177,9 @@ type Coordinate interface {
 	Path() string
 }
 
+// Coordinates is collection of Coordinate
+type Coordinates []Coordinate
+
 type ListBuilder interface {
 	List
 	// Clear sets items to empty slice
@@ -203,7 +206,7 @@ type OverlayDocument interface {
 	// if no node is present at any level, nil is returned
 	LookupAny(path string) Node
 	// Search finds all occurrences of given value in all layers using custom SearchValueFunc
-	Search(fn SearchValueFunc) []Coordinate
+	Search(fn SearchValueFunc) Coordinates
 	// Populate puts dictionary into overlay at given path
 	Populate(overlay, path string, data *map[string]interface{})
 	// Put puts Node value into overlay at given path

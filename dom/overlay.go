@@ -17,6 +17,7 @@ limitations under the License.
 package dom
 
 import (
+	"fmt"
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"io"
 	"slices"
@@ -36,13 +37,25 @@ func (c *coordinate) Path() string {
 	return c.path
 }
 
+func (cs Coordinates) String() string {
+	sb := strings.Builder{}
+	sb.WriteString("[")
+	for _, c := range cs {
+		sb.WriteString("[")
+		sb.WriteString(fmt.Sprintf("layer=%s,path=%s", c.Layer(), c.Path()))
+		sb.WriteString("],")
+	}
+	sb.WriteString("]\n")
+	return strings.ReplaceAll(sb.String(), "],]", "]]")
+}
+
 type overlayDocument struct {
 	names    []string
 	overlays map[string]ContainerBuilder
 }
 
-func (m *overlayDocument) Search(fn SearchValueFunc) []Coordinate {
-	var r []Coordinate
+func (m *overlayDocument) Search(fn SearchValueFunc) Coordinates {
+	var r Coordinates
 	for _, l := range m.names {
 		if paths := m.overlays[l].Search(fn); paths != nil {
 			for _, path := range paths {
