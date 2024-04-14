@@ -129,6 +129,7 @@ func TestOverlaySearch(t *testing.T) {
 	d := NewOverlayDocument()
 	d.Put("first", "root.second", LeafNode(1))
 	res := d.Search(SearchEqual(1))
+	t.Log(res.String())
 	assert.Equal(t, 1, len(res))
 	assert.Equal(t, "first", res[0].Layer())
 	assert.Equal(t, "root.second", res[0].Path())
