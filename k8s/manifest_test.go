@@ -18,7 +18,7 @@ package k8s
 
 import (
 	"bytes"
-	"errors"
+	"github.com/rkosegi/yaml-toolkit/utils"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"os"
@@ -91,17 +91,11 @@ func TestInvalidBase64(t *testing.T) {
 	assert.Error(t, err)
 }
 
-type failingWriter struct{}
-
-func (f *failingWriter) Write(_ []byte) (int, error) {
-	return 0, errors.New("it just failed")
-}
-
 func TestInvalidWriteTo(t *testing.T) {
 	m, err := ManifestFromFile("../testdata/cm1.yaml")
 	assert.Nil(t, err)
 	assert.NotNil(t, m)
-	_, err = m.WriteTo(&failingWriter{})
+	_, err = m.WriteTo(utils.FailingWriter())
 	assert.Error(t, err)
 }
 

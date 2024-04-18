@@ -47,3 +47,13 @@ func TestToListPath(t *testing.T) {
 	assert.Equal(t, "[2]", ToListPath("", 2))
 	assert.Equal(t, "item[3]", ToListPath("item", 3))
 }
+
+func TestFailingReader(t *testing.T) {
+	_, err := FailingReader().Read([]byte{})
+	assert.Error(t, err)
+}
+
+func TestFailingWriter(t *testing.T) {
+	_, err := FailingWriter().Write([]byte{})
+	assert.Error(t, err)
+}
