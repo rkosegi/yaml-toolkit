@@ -18,19 +18,11 @@ package props
 
 import (
 	"bytes"
-	"errors"
+	"github.com/rkosegi/yaml-toolkit/utils"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 )
-
-var dummyErr = errors.New("some error")
-
-type failingWriter struct{}
-
-func (fw failingWriter) Write(p []byte) (n int, err error) {
-	return 0, dummyErr
-}
 
 func TestEncoderFn(t *testing.T) {
 	m := map[string]interface{}{
@@ -43,13 +35,7 @@ func TestEncoderFn(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Contains(t, buff.String(), "a.b.c=1\n")
 	assert.Contains(t, buff.String(), "x.y.z=Hi!\n")
-	assert.Error(t, EncoderFn(&failingWriter{}, m))
-}
-
-type failingReader struct{}
-
-func (fr *failingReader) Read(_ []byte) (n int, err error) {
-	return 0, dummyErr
+	assert.Error(t, EncoderFn(utils.FailingWriter(), m))
 }
 
 func TestDecoderFn(t *testing.T) {
@@ -60,6 +46,6 @@ func TestDecoderFn(t *testing.T) {
 	assert.Contains(t, m, "a.b.c")
 	assert.Contains(t, m, "x.y.z")
 
-	err = DecoderFn(&failingReader{}, m)
+	err = DecoderFn(utils.FailingReader(), m)
 	assert.Error(t, err)
 }

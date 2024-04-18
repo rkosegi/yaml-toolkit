@@ -17,12 +17,18 @@ limitations under the License.
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"io"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
+)
+
+var (
+	FileOpener = os.Open
 )
 
 // ToPath creates path from path and key name
@@ -70,4 +76,24 @@ func NewYamlEncoder(w io.Writer) *yaml.Encoder {
 	enc := yaml.NewEncoder(w)
 	enc.SetIndent(2)
 	return enc
+}
+
+type failingReader struct{}
+
+func (fr failingReader) Read([]byte) (int, error) {
+	return 0, errors.New("read just failed")
+}
+
+func FailingReader() io.Reader {
+	return &failingReader{}
+}
+
+type failingWriter struct{}
+
+func (fw failingWriter) Write([]byte) (int, error) {
+	return 0, errors.New("write just failed")
+}
+
+func FailingWriter() io.Writer {
+	return &failingWriter{}
 }
