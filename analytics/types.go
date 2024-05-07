@@ -127,8 +127,6 @@ type DependencyResolverBuilder interface {
 
 // DependencyResolutionReport contains result of property dependency resolution
 type DependencyResolutionReport struct {
-	// Keys of properties that has not been reached from source document (aka orphan properties)
-	Orphan []string
 	// All keys that where scanned during resolution
 	AllKeys []string
 	// Keys of properties that were not resolved

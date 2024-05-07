@@ -114,6 +114,7 @@ func (dr *dependencyResolver) Resolve(srcDoc dom.OverlayDocument,
 	used = unique(used)
 	orphan := subtract(allKeys, used)
 	slices.Sort(orphan)
+	slices.Sort(allKeys)
 	return &DependencyResolutionReport{
 		Map:        m,
 		AllKeys:    allKeys,
