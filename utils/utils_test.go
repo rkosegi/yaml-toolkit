@@ -57,3 +57,7 @@ func TestFailingWriter(t *testing.T) {
 	_, err := FailingWriter().Write([]byte{})
 	assert.Error(t, err)
 }
+
+func TestUnique(t *testing.T) {
+	assert.Equal(t, 3, len(Unique([]string{"a", "a", "b", "x", "x"})))
+}

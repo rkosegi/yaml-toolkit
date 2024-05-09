@@ -19,6 +19,7 @@ package analytics
 import (
 	"fmt"
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/utils"
 	"slices"
 	"strings"
 )
@@ -71,16 +72,6 @@ type dependencyResolver struct {
 	keyFilterFn                StringPredicateFn
 }
 
-func unique(in []string) []string {
-	ret := make([]string, 0)
-	for _, s := range in {
-		if !slices.Contains(ret, s) {
-			ret = append(ret, s)
-		}
-	}
-	return ret
-}
-
 func subtract(from []string, what []string) []string {
 	ret := make([]string, 0)
 	for _, i := range from {
@@ -111,7 +102,7 @@ func (dr *dependencyResolver) Resolve(srcDoc dom.OverlayDocument,
 			}
 		}
 	}
-	used = unique(used)
+	used = utils.Unique(used)
 	orphan := subtract(allKeys, used)
 	slices.Sort(orphan)
 	slices.Sort(allKeys)

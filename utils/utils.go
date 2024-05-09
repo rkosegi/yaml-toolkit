@@ -23,6 +23,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -96,4 +97,14 @@ func (fw failingWriter) Write([]byte) (int, error) {
 
 func FailingWriter() io.Writer {
 	return &failingWriter{}
+}
+
+func Unique(in []string) []string {
+	ret := make([]string, 0)
+	for _, s := range in {
+		if !slices.Contains(ret, s) {
+			ret = append(ret, s)
+		}
+	}
+	return ret
 }
