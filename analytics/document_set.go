@@ -94,6 +94,9 @@ func MergeTags() AddLayerOpt {
 	return func(_ *documentSet, _ string, context *docContext) {
 		context.mergeFn = func(newCtx *docContext, doc dom.ContainerBuilder) error {
 			context.tags = utils.Unique(append(context.tags, newCtx.tags...))
+			if context.doc == nil {
+				context.doc = newCtx.doc
+			}
 			return nil
 		}
 	}
