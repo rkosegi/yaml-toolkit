@@ -48,3 +48,16 @@ func TestDocumentSetAdd(t *testing.T) {
 	assert.Nil(t, ds.NamedDocument("invalid"))
 	assert.NotNil(t, ds.NamedDocument("../testdata/cm2.yaml"))
 }
+
+func TestDocumentSetMergeTags(t *testing.T) {
+	ds := NewDocumentSet()
+	assert.NoError(t, ds.AddPropertiesFromManifest("../testdata/secret3.yaml", WithTags("prop1")))
+	assert.NoError(t, ds.AddPropertiesFromManifest("../testdata/secret3.yaml", WithTags("prop2"), MergeTags()))
+	assert.Equal(t, 3, len(ds.(*documentSet).ctxMap["../testdata/secret3.yaml"].tags))
+}
+
+func TestDocumentSetMustCreate(t *testing.T) {
+	ds := NewDocumentSet()
+	assert.NoError(t, ds.AddPropertiesFromManifest("../testdata/secret3.yaml", WithTags("prop1")))
+	assert.Error(t, ds.AddPropertiesFromManifest("../testdata/secret3.yaml", WithTags("prop2"), MustCreate()))
+}

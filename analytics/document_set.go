@@ -17,6 +17,7 @@ limitations under the License.
 package analytics
 
 import (
+	"errors"
 	"fmt"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/k8s"
@@ -31,6 +32,10 @@ import (
 
 const (
 	wildcardTag = "*"
+)
+
+var (
+	ErrLayerAlreadyExists = errors.New("layer already exists")
 )
 
 var (
@@ -60,6 +65,8 @@ type docContext struct {
 	doc dom.ContainerBuilder
 	// list of tags
 	tags []string
+	// function used to merge 2 contexts
+	mergeFn func(ctx *docContext, doc dom.ContainerBuilder) error
 }
 
 // DefaultFileDecoderProvider is FileDecoderProvider that uses file suffix to choose dom.DecoderFunc
@@ -82,6 +89,25 @@ func WithTags(tag ...string) AddLayerOpt {
 	}
 }
 
+// MergeTags does not consider newly added dom.ContainerBuilder, it just merges tags into existing context
+func MergeTags() AddLayerOpt {
+	return func(_ *documentSet, _ string, context *docContext) {
+		context.mergeFn = func(newCtx *docContext, doc dom.ContainerBuilder) error {
+			context.tags = utils.Unique(append(context.tags, newCtx.tags...))
+			return nil
+		}
+	}
+}
+
+// MustCreate ensures that layer does not already exist
+func MustCreate() AddLayerOpt {
+	return func(_ *documentSet, _ string, context *docContext) {
+		context.mergeFn = func(newCtx *docContext, doc dom.ContainerBuilder) error {
+			return ErrLayerAlreadyExists
+		}
+	}
+}
+
 func (ds *documentSet) applyOpts(name string, ctx *docContext, opts ...AddLayerOpt) *docContext {
 	for _, opt := range defaultOpts {
 		opt(ds, name, ctx)
@@ -92,22 +118,35 @@ func (ds *documentSet) applyOpts(name string, ctx *docContext, opts ...AddLayerO
 	return ctx
 }
 
-func (ds *documentSet) addContext(name string, doc dom.ContainerBuilder, ctx *docContext) {
-	ctx.doc = doc
-	ds.ctxMap[name] = ctx
+func (ds *documentSet) addContext(name string, doc dom.ContainerBuilder, newCtx *docContext) error {
+	existingCtx, exists := ds.ctxMap[name]
+	if exists {
+		if newCtx.mergeFn != nil {
+			err := newCtx.mergeFn(existingCtx, doc)
+			if err != nil {
+				return err
+			}
+		}
+		ds.ctxMap[name] = newCtx
+		return nil
+	} else {
+		newCtx.doc = doc
+		ds.ctxMap[name] = newCtx
+		return nil
+	}
 }
 
 func (ds *documentSet) newContext(name string, opts ...AddLayerOpt) *docContext {
 	return ds.applyOpts(name, &docContext{}, opts...)
 }
 
-func (ds *documentSet) AddDocument(name string, doc dom.ContainerBuilder, opts ...AddLayerOpt) {
-	ds.addContext(name, doc, ds.newContext(name, opts...))
+func (ds *documentSet) AddDocument(name string, doc dom.ContainerBuilder, opts ...AddLayerOpt) error {
+	return ds.addContext(name, doc, ds.newContext(name, opts...))
 }
 
-func (ds *documentSet) AddUnnamedDocument(doc dom.ContainerBuilder, opts ...AddLayerOpt) {
+func (ds *documentSet) AddUnnamedDocument(doc dom.ContainerBuilder, opts ...AddLayerOpt) error {
 	ds.unnamedLayerId++
-	ds.AddDocument(fmt.Sprintf("default__%d", ds.unnamedLayerId), doc, opts...)
+	return ds.AddDocument(fmt.Sprintf("default__%d", ds.unnamedLayerId), doc, opts...)
 }
 
 func (ds *documentSet) AddDocumentFromReader(name string, r io.Reader, dec dom.DecoderFunc, opts ...AddLayerOpt) error {
@@ -115,8 +154,7 @@ func (ds *documentSet) AddDocumentFromReader(name string, r io.Reader, dec dom.D
 	if err != nil {
 		return err
 	}
-	ds.addContext(name, cb, ds.newContext(name, opts...))
-	return nil
+	return ds.AddDocument(name, cb, opts...)
 }
 
 func (ds *documentSet) AddDocumentFromFile(file string, dec dom.DecoderFunc, opts ...AddLayerOpt) error {
@@ -164,9 +202,8 @@ func (ds *documentSet) AddPropertiesFromManifest(manifest string, opts ...AddLay
 	if err != nil {
 		return err
 	} else {
-		ds.AddDocument(manifest, doc.Document(), opts...)
+		return ds.AddDocument(manifest, doc.Document(), opts...)
 	}
-	return nil
 }
 
 func containsAnyOf(col []string, contains []string) bool {

@@ -41,10 +41,10 @@ type DocumentSet interface {
 	AsOne() dom.OverlayDocument
 
 	// AddDocument adds given document into documentSet.
-	AddDocument(name string, doc dom.ContainerBuilder, opts ...AddLayerOpt)
+	AddDocument(name string, doc dom.ContainerBuilder, opts ...AddLayerOpt) error
 
 	// AddUnnamedDocument adds document that has no particular name designation, one will be generated internally
-	AddUnnamedDocument(doc dom.ContainerBuilder, opts ...AddLayerOpt)
+	AddUnnamedDocument(doc dom.ContainerBuilder, opts ...AddLayerOpt) error
 
 	// AddDocumentFromFile calls AddDocumentFromFileWithDecoder with second argument set to DefaultFileDecoderProvider.
 	AddDocumentFromFile(file string, dec dom.DecoderFunc, opts ...AddLayerOpt) error
