@@ -46,6 +46,14 @@ type documentSet struct {
 	unnamedLayerId int
 }
 
+func (ds *documentSet) NamedDocument(name string) dom.ContainerBuilder {
+	ctx := ds.ctxMap[name]
+	if ctx == nil {
+		return nil
+	}
+	return ctx.doc
+}
+
 // data structure to associate arbitrary data to document within the set
 type docContext struct {
 	// actual document
