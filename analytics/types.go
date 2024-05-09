@@ -33,6 +33,10 @@ type DocumentSet interface {
 	// TaggedSubset creates overlay document from all documents matching at least one of given tags
 	TaggedSubset(tag ...string) dom.OverlayDocument
 
+	// NamedDocument retrieves dom.ContainerBuilder associated with given name.
+	// If no such document exists, nil is returned.
+	NamedDocument(name string) dom.ContainerBuilder
+
 	// AsOne creates overlay document from all documents in this DocumentSet.
 	AsOne() dom.OverlayDocument
 

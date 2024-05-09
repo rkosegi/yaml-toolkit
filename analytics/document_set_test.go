@@ -45,4 +45,6 @@ func TestDocumentSetAdd(t *testing.T) {
 	assert.Error(t, ds.AddDocumentsFromDirectory("[]]", DefaultFileDecoderProvider))
 	assert.NoError(t, ds.AddDocumentsFromDirectory("../testdata/cm2.yaml", DefaultFileDecoderProvider))
 	assert.Error(t, ds.AddDocumentsFromDirectory("../testdata/invalid.yaml", DefaultFileDecoderProvider))
+	assert.Nil(t, ds.NamedDocument("invalid"))
+	assert.NotNil(t, ds.NamedDocument("../testdata/cm2.yaml"))
 }
