@@ -136,3 +136,12 @@ func TestOverlaySearch(t *testing.T) {
 	res = d.Search(SearchEqual(2))
 	assert.Equal(t, 0, len(res))
 }
+
+func TestOverlayLayers(t *testing.T) {
+	d := NewOverlayDocument()
+	d.Put("layer1", "root.next.next2", LeafNode(1))
+	d.Put("layer2", "root.other", LeafNode(5))
+	m := d.Layers()
+	assert.Equal(t, 2, len(m))
+	assert.Equal(t, 5, m["layer2"].Children()["root"].(Container).Children()["other"].(Leaf).Value())
+}

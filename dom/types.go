@@ -213,6 +213,7 @@ type OverlayDocument interface {
 	Put(overlay, path string, value Node)
 	// Merged returns read-only, merged view of all overlays
 	Merged(option ...MergeOption) Container
-	// Layers return copy of list with all layer names
-	Layers() []string
+	// Layers returns a copy of mapping between layer name and its associated Container.
+	// Containers are cloned using Node.Clone()
+	Layers() map[string]Container
 }
