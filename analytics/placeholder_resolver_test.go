@@ -55,9 +55,9 @@ func TestResolvePlaceholders(t *testing.T) {
 		Build()
 	rpt := res.Resolve(ds.AsOne())
 
-	assert.Equal(t, 3, len(rpt.FailedKeys))
+	assert.Equal(t, 6, len(rpt.FailedKeys))
 	res = NewPlaceholderResolverBuilder().
 		Build()
 	rpt = res.Resolve(ds.AsOne())
-	assert.Equal(t, 3, len(rpt.FailedKeys))
+	assert.Equal(t, 6, len(rpt.FailedKeys))
 }

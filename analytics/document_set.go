@@ -234,7 +234,7 @@ func (ds *documentSet) filtered(filterFn func(name string, ctx *docContext) bool
 	o := dom.NewOverlayDocument()
 	for n, c := range ds.ctxMap {
 		if filterFn(n, c) {
-			o.Put(n, "", c.doc)
+			o.Add(n, c.doc)
 		}
 	}
 	return o

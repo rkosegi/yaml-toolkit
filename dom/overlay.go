@@ -77,6 +77,13 @@ func (m *overlayDocument) Layers() map[string]Container {
 	return c
 }
 
+func (m *overlayDocument) Add(overlay string, value Container) {
+	cb := m.ensureOverlay(overlay)
+	for k, v := range value.Children() {
+		cb.AddValue(k, v)
+	}
+}
+
 func (m *overlayDocument) Put(overlay, path string, value Node) {
 	if value.IsContainer() {
 		for k, v := range value.(Container).Flatten() {

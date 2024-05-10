@@ -209,6 +209,8 @@ type OverlayDocument interface {
 	Search(fn SearchValueFunc) Coordinates
 	// Populate puts dictionary into overlay at given path
 	Populate(overlay, path string, data *map[string]interface{})
+	// Add adds elements from given Container into root of given layer
+	Add(overlay string, value Container)
 	// Put puts Node value into overlay at given path
 	Put(overlay, path string, value Node)
 	// Merged returns read-only, merged view of all overlays
