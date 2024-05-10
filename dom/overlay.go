@@ -69,9 +69,11 @@ func (m *overlayDocument) Search(fn SearchValueFunc) Coordinates {
 	return r
 }
 
-func (m *overlayDocument) Layers() []string {
-	c := make([]string, len(m.names))
-	copy(c, m.names)
+func (m *overlayDocument) Layers() map[string]Container {
+	c := make(map[string]Container, len(m.names))
+	for n, v := range m.overlays {
+		c[n] = v.Clone().(Container)
+	}
 	return c
 }
 
