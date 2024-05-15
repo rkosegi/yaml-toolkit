@@ -93,7 +93,7 @@ func (m *overlayDocument) Put(overlay, path string, value Node) {
 		current := m.ensureOverlay(overlay)
 		components := m.pathComponents(path)
 		current = ensurePath(current, components[:len(components)-1])
-		current.AddValue(components[len(components)-1], value.(Leaf))
+		current.AddValue(components[len(components)-1], value)
 	}
 }
 
