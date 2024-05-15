@@ -23,26 +23,6 @@ import (
 	"testing"
 )
 
-func srcDoc(t *testing.T) dom.ContainerBuilder {
-	c, err := b.FromReader(strings.NewReader(`
----
-server:
-  port: ${env.server.port}
-client:
-  url: ${env.client.url}
-default:
-  port: 8080
-`), dom.DefaultYamlDecoder)
-	assert.NoError(t, err)
-	return c
-}
-
-func loadDocsIntoSet(t *testing.T, ds DocumentSet) {
-	for k, v := range testDocSrc {
-		assert.NoError(t, ds.AddDocumentFromReader(k, strings.NewReader(v.doc), dom.DefaultYamlDecoder, WithTags(v.tags...)))
-	}
-}
-
 func TestDefaultDependencyResolver(t *testing.T) {
 	ds := NewDocumentSet()
 	loadDocsIntoSet(t, ds)

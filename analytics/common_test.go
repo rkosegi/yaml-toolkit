@@ -16,6 +16,13 @@ limitations under the License.
 
 package analytics
 
+import (
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/stretchr/testify/assert"
+	"strings"
+	"testing"
+)
+
 type testDocsData struct {
 	doc  string
 	tags []string
@@ -77,3 +84,9 @@ defaults:
 		},
 	}
 )
+
+func loadDocsIntoSet(t *testing.T, ds DocumentSet) {
+	for k, v := range testDocSrc {
+		assert.NoError(t, ds.AddDocumentFromReader(k, strings.NewReader(v.doc), dom.DefaultYamlDecoder, WithTags(v.tags...)))
+	}
+}
