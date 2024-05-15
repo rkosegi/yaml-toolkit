@@ -223,6 +223,51 @@ func (m *overlayDocument) Serialize(writer io.Writer, mappingFunc NodeMappingFun
 	return encFn(writer, mappingFunc(m.Merged()))
 }
 
+func walkNode(layer, path string, parent, node Node, fn OverlayVisitorFn) bool {
+	if node.IsContainer() {
+		if !walkContainer(layer, path, node.(ContainerBuilder), fn) {
+			return false
+		}
+	} else if node.IsList() {
+		if !walkList(layer, path, node.(ListBuilder), fn) {
+			return false
+		}
+	} else {
+		if !fn(layer, path, parent, node) {
+			return false
+		}
+	}
+	return true
+}
+
+func walkList(layer, path string, list ListBuilder, fn OverlayVisitorFn) bool {
+	for idx, li := range list.Items() {
+		p := utils.ToListPath(path, idx)
+		if walkNode(layer, p, list, li, fn) == false {
+			return false
+		}
+	}
+	return true
+}
+
+func walkContainer(layer, path string, con ContainerBuilder, fn OverlayVisitorFn) bool {
+	for k, v := range con.Children() {
+		p := utils.ToPath(path, k)
+		if walkNode(layer, p, con, v, fn) == false {
+			return false
+		}
+	}
+	return true
+}
+
+func (m *overlayDocument) Walk(fn OverlayVisitorFn) {
+	for l, c := range m.overlays {
+		if !walkContainer(l, "", c, fn) {
+			return
+		}
+	}
+}
+
 func NewOverlayDocument() OverlayDocument {
 	return &overlayDocument{
 		names:    []string{},

@@ -154,3 +154,28 @@ func TestOverlayAdd(t *testing.T) {
 	d.Add("layer1", c)
 	assert.Equal(t, 123, d.Layers()["layer1"].Children()["sub1.sub2"].(Leaf).Value())
 }
+
+func TestOverlayWalk(t *testing.T) {
+	d := NewOverlayDocument()
+	d.Put("layer1", "root.sub10.sub21", LeafNode("leaf1"))
+	d.Put("layer2", "root.sub11.list22", ListNode(
+		LeafNode(1),
+		LeafNode(2),
+		LeafNode(3),
+	))
+	var cnt int
+	d.Walk(func(layer, path string, parent Node, node Node) bool {
+		cnt++
+		if node.IsLeaf() && node.(Leaf).Value() == 2 {
+			return false
+		}
+		return true
+	})
+	assert.Equal(t, 3, cnt)
+	cnt = 0
+	d.Walk(func(layer, path string, parent Node, node Node) bool {
+		cnt++
+		return true
+	})
+	assert.Equal(t, 4, cnt)
+}
