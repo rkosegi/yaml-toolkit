@@ -145,6 +145,10 @@ type ContainerBuilder interface {
 
 type WalkFn func(path string, parent ContainerBuilder, node Node) bool
 
+// OverlayVisitorFn visits every node in OverlayDocument.
+// Returning false from this function will cause termination of process.
+type OverlayVisitorFn func(layer, path string, parent Node, node Node) bool
+
 var (
 	// CompactFn is WalkFn that you can use to compact document tree by removing empty containers.
 	CompactFn = func(path string, parent ContainerBuilder, node Node) bool {
@@ -218,4 +222,6 @@ type OverlayDocument interface {
 	// Layers returns a copy of mapping between layer name and its associated Container.
 	// Containers are cloned using Node.Clone()
 	Layers() map[string]Container
+	// Walk walks every layer in this document and visits every node.
+	Walk(fn OverlayVisitorFn)
 }
