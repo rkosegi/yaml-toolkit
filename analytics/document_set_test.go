@@ -61,3 +61,35 @@ func TestDocumentSetMustCreate(t *testing.T) {
 	assert.NoError(t, ds.AddPropertiesFromManifest("../testdata/secret3.yaml", WithTags("prop1")))
 	assert.Error(t, ds.AddPropertiesFromManifest("../testdata/secret3.yaml", WithTags("prop2"), MustCreate()))
 }
+
+func TestDocumentSetOrder(t *testing.T) {
+	ds := NewDocumentSet()
+	assert.NoError(t, ds.AddDocument("name1", b.Container(), WithTags("tag3")))
+	assert.NoError(t, ds.AddDocument("name2", b.Container(), WithTags("tag1")))
+	assert.NoError(t, ds.AddDocument("name3", b.Container(), WithTags("tag1")))
+	assert.NoError(t, ds.AddDocument("name4", b.Container(), WithTags("tag2")))
+	assert.NoError(t, ds.AddDocument("name5", b.Container(), WithTags("tag2")))
+
+	var (
+		od     dom.OverlayDocument
+		layers []string
+	)
+	layers = ds.AsOne().LayerNames()
+	assert.Equal(t, "name1", layers[0])
+
+	od = ds.TaggedSubset("tag1")
+	layers = od.LayerNames()
+	assert.Equal(t, "name2", layers[0])
+	assert.Equal(t, "name3", layers[1])
+
+	od = ds.TaggedSubset("tag2")
+	layers = od.LayerNames()
+	assert.Equal(t, "name4", layers[0])
+	assert.Equal(t, "name5", layers[1])
+
+	od = ds.TaggedSubset("tag1", "tag3")
+	layers = od.LayerNames()
+	assert.Equal(t, "name1", layers[0])
+	assert.Equal(t, "name2", layers[1])
+	assert.Equal(t, "name3", layers[2])
+}

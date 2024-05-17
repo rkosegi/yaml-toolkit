@@ -47,7 +47,9 @@ var (
 )
 
 type documentSet struct {
-	ctxMap         map[string]*docContext
+	ctxMap map[string]*docContext
+	// this is same as keys in ctxMap, but here we preserve insertion order
+	names          []string
 	unnamedLayerId int
 }
 
@@ -131,10 +133,12 @@ func (ds *documentSet) addContext(name string, doc dom.ContainerBuilder, newCtx 
 			}
 		}
 		ds.ctxMap[name] = newCtx
+		ds.names = append(ds.names, name)
 		return nil
 	} else {
 		newCtx.doc = doc
 		ds.ctxMap[name] = newCtx
+		ds.names = append(ds.names, name)
 		return nil
 	}
 }
@@ -232,7 +236,8 @@ func (ds *documentSet) AsOne() dom.OverlayDocument {
 
 func (ds *documentSet) filtered(filterFn func(name string, ctx *docContext) bool) dom.OverlayDocument {
 	o := dom.NewOverlayDocument()
-	for n, c := range ds.ctxMap {
+	for _, n := range ds.names {
+		c := ds.ctxMap[n]
 		if filterFn(n, c) {
 			o.Add(n, c.doc)
 		}
