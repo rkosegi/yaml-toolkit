@@ -32,7 +32,7 @@ func TestIsPossiblePlaceholder(t *testing.T) {
 
 func TestResolvePlaceholders(t *testing.T) {
 	ds := NewDocumentSet()
-	ds.AddUnnamedDocument(b.FromMap(map[string]interface{}{
+	assert.NoError(t, ds.AddUnnamedDocument(b.FromProperties(map[string]interface{}{
 		"key1.key2.key31": "${key1.key2.key32}",
 		"key1.key2.key32": 3,
 		"key1.key2.key33": "${key1.key2.key34}",
@@ -40,7 +40,7 @@ func TestResolvePlaceholders(t *testing.T) {
 		"key1.key2.key41": "${key1.key2.key42}",
 		"key1.key2.key42": "${unresolved}",
 		"key1.key2.key43": "${unresolved}",
-	}))
+	})))
 	res := NewPlaceholderResolverBuilder().
 		OnResolutionFailure(func(key, value string, coordinates dom.Coordinates) {
 			t.Logf("resolution failed,key=%s, value=%s, coordinates=%s", key, value, coordinates.String())
@@ -55,9 +55,9 @@ func TestResolvePlaceholders(t *testing.T) {
 		Build()
 	rpt := res.Resolve(ds.AsOne())
 
-	assert.Equal(t, 6, len(rpt.FailedKeys))
+	assert.Equal(t, 3, len(rpt.FailedKeys))
 	res = NewPlaceholderResolverBuilder().
 		Build()
 	rpt = res.Resolve(ds.AsOne())
-	assert.Equal(t, 6, len(rpt.FailedKeys))
+	assert.Equal(t, 3, len(rpt.FailedKeys))
 }

@@ -168,6 +168,8 @@ type ContainerFactory interface {
 	FromReader(r io.Reader, fn DecoderFunc) (ContainerBuilder, error)
 	// FromMap creates ContainerBuilder pre-populated with data from provided map
 	FromMap(in map[string]interface{}) ContainerBuilder
+	// FromProperties is similar to FromMap except that keys are parsed into path before inserting into ContainerBuilder
+	FromProperties(in map[string]interface{}) ContainerBuilder
 	// FromAny creates ContainerBuilder from any object. Any error encountered in process will result in panic.
 	// This method uses YAML codec internally to perform translation between raw interface and map
 	FromAny(v interface{}) ContainerBuilder

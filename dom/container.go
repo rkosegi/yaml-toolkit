@@ -338,6 +338,14 @@ func (f *containerFactory) FromMap(in map[string]interface{}) ContainerBuilder {
 	return &doc
 }
 
+func (f *containerFactory) FromProperties(in map[string]interface{}) ContainerBuilder {
+	b := f.Container()
+	for k, v := range in {
+		b.AddValueAt(k, LeafNode(v))
+	}
+	return b
+}
+
 func (f *containerFactory) Container() ContainerBuilder {
 	return &containerBuilderImpl{}
 }
