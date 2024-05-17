@@ -179,8 +179,10 @@ func TestOverlayWalk(t *testing.T) {
 	))
 	var cnt int
 	d.Walk(func(layer, path string, parent Node, node Node) bool {
+		t.Logf("layer=%s, path=%s, parent=%v, node=%v", layer, path, parent, node)
 		cnt++
 		if node.IsLeaf() && node.(Leaf).Value() == 2 {
+			t.Logf("Hit false condition, terminating walk")
 			return false
 		}
 		return true
