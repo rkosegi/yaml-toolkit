@@ -222,6 +222,8 @@ type OverlayDocument interface {
 	// Layers returns a copy of mapping between layer name and its associated Container.
 	// Containers are cloned using Node.Clone()
 	Layers() map[string]Container
+	// LayerNames returns copy of list of all layer names, in insertion order
+	LayerNames() []string
 	// Walk walks every layer in this document and visits every node.
 	Walk(fn OverlayVisitorFn)
 }

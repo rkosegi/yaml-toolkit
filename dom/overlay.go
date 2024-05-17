@@ -77,6 +77,12 @@ func (m *overlayDocument) Layers() map[string]Container {
 	return c
 }
 
+func (m *overlayDocument) LayerNames() []string {
+	names := make([]string, len(m.names))
+	copy(names, m.names)
+	return names
+}
+
 func (m *overlayDocument) Add(overlay string, value Container) {
 	cb := m.ensureOverlay(overlay)
 	for k, v := range value.Children() {
