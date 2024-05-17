@@ -18,6 +18,7 @@ package dom
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -144,6 +145,19 @@ func TestOverlayLayers(t *testing.T) {
 	m := d.Layers()
 	assert.Equal(t, 2, len(m))
 	assert.Equal(t, 5, m["layer2"].Children()["root"].(Container).Children()["other"].(Leaf).Value())
+}
+
+func TestOverlayLayerNames(t *testing.T) {
+	layers := 10
+	d := NewOverlayDocument()
+	for i := 0; i < layers; i++ {
+		d.Put(fmt.Sprintf("layer-%d", i), "root", LeafNode(i))
+	}
+	m := d.LayerNames()
+	assert.Equal(t, layers, len(m))
+	for i := 0; i < layers; i++ {
+		assert.Equal(t, fmt.Sprintf("layer-%d", i), m[i])
+	}
 }
 
 func TestOverlayAdd(t *testing.T) {
