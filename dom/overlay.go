@@ -267,8 +267,9 @@ func walkContainer(layer, path string, con ContainerBuilder, fn OverlayVisitorFn
 }
 
 func (m *overlayDocument) Walk(fn OverlayVisitorFn) {
-	for l, c := range m.overlays {
-		if !walkContainer(l, "", c, fn) {
+	for _, n := range m.names {
+		c := m.overlays[n]
+		if !walkContainer(n, "", c, fn) {
 			return
 		}
 	}
