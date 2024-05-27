@@ -351,7 +351,7 @@ func (f *containerFactory) Container() ContainerBuilder {
 }
 
 func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBuilder, error) {
-	var root map[string]interface{}
+	root := make(map[string]interface{})
 	if err := fn(r, &root); err != nil {
 		return nil, err
 	} else {
