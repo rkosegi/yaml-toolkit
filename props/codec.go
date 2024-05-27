@@ -38,9 +38,9 @@ func DecoderFn(r io.Reader, x interface{}) error {
 		return err
 	}
 	p, _ := properties.Load(data, properties.UTF8)
-	m := x.(map[string]interface{})
+	m := x.(*map[string]interface{})
 	for k, v := range p.Map() {
-		m[k] = v
+		(*m)[k] = v
 	}
 	return nil
 }
