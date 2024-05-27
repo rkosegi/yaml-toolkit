@@ -19,6 +19,7 @@ package props
 import (
 	"fmt"
 	"github.com/magiconair/properties"
+	"github.com/rkosegi/yaml-toolkit/utils"
 	"io"
 )
 
@@ -38,9 +39,12 @@ func DecoderFn(r io.Reader, x interface{}) error {
 		return err
 	}
 	p, _ := properties.Load(data, properties.UTF8)
-	m := x.(*map[string]interface{})
+	m2 := make(map[string]interface{})
 	for k, v := range p.Map() {
-		(*m)[k] = v
+		m2[k] = v
+	}
+	for k, v := range utils.Unflatten(m2) {
+		(*(x.(*map[string]interface{})))[k] = v
 	}
 	return nil
 }

@@ -40,11 +40,11 @@ func TestEncoderFn(t *testing.T) {
 
 func TestDecoderFn(t *testing.T) {
 	m := make(map[string]interface{})
-	err := DecoderFn(strings.NewReader("a.b.c=1\nx.y.z=Hi!\n"), &m)
+	err := DecoderFn(strings.NewReader("a.b=1\nx.y=Hi!\n"), &m)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(m))
-	assert.Contains(t, m, "a.b.c")
-	assert.Contains(t, m, "x.y.z")
+	assert.Equal(t, "1", m["a"].(map[string]interface{})["b"])
+	assert.Equal(t, "Hi!", m["x"].(map[string]interface{})["y"])
 
 	err = DecoderFn(utils.FailingReader(), m)
 	assert.Error(t, err)
