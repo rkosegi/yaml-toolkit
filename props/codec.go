@@ -19,13 +19,29 @@ package props
 import (
 	"fmt"
 	"github.com/magiconair/properties"
+	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"io"
 )
 
+func encodeKv(k string, v interface{}, w io.Writer) error {
+	_, err := w.Write([]byte(fmt.Sprintf("%s=%v\n", k, v)))
+	return err
+}
+
 func EncoderFn(w io.Writer, x interface{}) error {
 	for k, v := range x.(map[string]interface{}) {
-		_, err := w.Write([]byte(fmt.Sprintf("%s=%v\n", k, v)))
+		err := encodeKv(k, v, w)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func DomEncoderFn(w io.Writer, x interface{}) error {
+	for k, v := range x.(dom.Container).Children() {
+		err := encodeKv(k, v.(dom.Leaf).Value(), w)
 		if err != nil {
 			return err
 		}
