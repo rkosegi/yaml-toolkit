@@ -142,6 +142,10 @@ func (c *containerImpl) Children() map[string]Node {
 	return c.children
 }
 
+func (c *containerImpl) Serialize(writer io.Writer, mappingFunc NodeMappingFunc, encFn EncoderFunc) error {
+	return encFn(writer, mappingFunc(c))
+}
+
 func (c *containerImpl) Lookup(path string) Node {
 	if path == "" {
 		return nil
@@ -194,10 +198,6 @@ func (c *containerBuilderImpl) AddList(name string) ListBuilder {
 
 func (c *containerBuilderImpl) Remove(name string) {
 	delete(c.children, name)
-}
-
-func (c *containerBuilderImpl) Serialize(writer io.Writer, mappingFunc NodeMappingFunc, encFn EncoderFunc) error {
-	return encFn(writer, mappingFunc(c))
 }
 
 func (c *containerBuilderImpl) AddContainer(name string) ContainerBuilder {
