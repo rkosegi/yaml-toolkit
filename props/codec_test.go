@@ -18,6 +18,7 @@ package props
 
 import (
 	"bytes"
+	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"github.com/stretchr/testify/assert"
 	"strings"
@@ -36,6 +37,20 @@ func TestEncoderFn(t *testing.T) {
 	assert.Contains(t, buff.String(), "a.b.c=1\n")
 	assert.Contains(t, buff.String(), "x.y.z=Hi!\n")
 	assert.Error(t, EncoderFn(utils.FailingWriter(), m))
+}
+
+func TestDomEncoderFn(t *testing.T) {
+	m := map[string]interface{}{
+		"a.b.c": 1,
+		"x.y.z": "Hi!",
+	}
+	var buff bytes.Buffer
+	c := dom.Builder().FromMap(m)
+	err := DomEncoderFn(&buff, c)
+	assert.NoError(t, err)
+	assert.Contains(t, buff.String(), "a.b.c=1\n")
+	assert.Contains(t, buff.String(), "x.y.z=Hi!\n")
+	assert.Error(t, DomEncoderFn(utils.FailingWriter(), c))
 }
 
 func TestDecoderFn(t *testing.T) {
