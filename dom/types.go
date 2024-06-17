@@ -109,6 +109,7 @@ type NodeList []Node
 // Container is element that has zero or more child Nodes
 type Container interface {
 	Node
+	Serializable
 	// Children returns mapping between child name and its corresponding Node
 	Children() map[string]Node
 	// Child returns single child Node by its name
@@ -125,7 +126,6 @@ type Container interface {
 // ContainerBuilder is mutable extension of Container
 type ContainerBuilder interface {
 	Container
-	Serializable
 	// AddValue adds Node value into this Container
 	AddValue(name string, value Node)
 	// AddValueAt adds Leaf value into this Container at given path.
