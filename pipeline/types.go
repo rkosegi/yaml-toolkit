@@ -21,11 +21,11 @@ import (
 	"fmt"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/patch"
+	"regexp"
 )
 
 var (
 	ErrNoDataToSet   = errors.New("no data to set")
-	ErrPathMissing   = errors.New("path can't be empty")
 	ErrTemplateEmpty = errors.New("template cannot be empty")
 	ErrWriteToEmpty  = errors.New("writeTo cannot be empty")
 	ErrNotContainer  = errors.New("data element must be container when no path is provided")
@@ -116,6 +116,11 @@ type OpSpec struct {
 	// Template allows to render value at runtime
 	Template *TemplateOp `yaml:"template,omitempty"`
 
+	// Env adds OS environment variables into data document
+	Env *EnvOp `yaml:"env,omitempty"`
+
+	// Export exports data document into file
+	Export *ExportOp `yaml:"export,omitempty"`
 	// ForEach execute same operation in a loop for every configured item
 	ForEach *ForEachOp `yaml:"forEach,omitempty"`
 }
@@ -142,6 +147,43 @@ type ActionMeta struct {
 	// Execution of this step is skipped when this expression is evaluated to false.
 	// If value of this field is omitted, then this action is executed.
 	When *string `yaml:"when,omitempty"`
+}
+
+// EnvOp is used to import OS environment variables into data
+type EnvOp struct {
+	// Optional regexp which defines what to include. Only item names matching this regexp are added into data document.
+	Include *regexp.Regexp `yaml:"include,omitempty"`
+
+	// Optional regexp which defines what to exclude. Only item names NOT matching this regexp are added into data document.
+	// Exclusion is considered after inclusion regexp is processed.
+	Exclude *regexp.Regexp `yaml:"exclude,omitempty"`
+
+	// Optional path within data tree under which "Env" container will be put.
+	// When omitted, then "Env" goes to root of data.
+	Path string `yaml:"path,omitempty"`
+
+	// for mock purposes only. this could be used to override os.Environ() to arbitrary func
+	envGetter func() []string
+}
+
+type OutputFormat string
+
+const (
+	OutputFormatYaml       = OutputFormat("yaml")
+	OutputFormatJson       = OutputFormat("json")
+	OutputFormatProperties = OutputFormat("properties")
+)
+
+// ExportOp allows to export data into file
+type ExportOp struct {
+	// File to export data onto
+	File string
+	// Path within data tree pointing to dom.Container to export. Empty path denotes whole document.
+	// If path does not resolve or resolves to dom.Node that is not dom.Container,
+	// then empty document will be exported.
+	Path string
+	// Format of output file.
+	Format OutputFormat
 }
 
 type ForEachOp struct {
