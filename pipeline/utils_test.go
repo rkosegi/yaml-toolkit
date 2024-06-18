@@ -19,6 +19,7 @@ package pipeline
 import (
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/stretchr/testify/assert"
+	"regexp"
 	"testing"
 )
 
@@ -48,4 +49,9 @@ func TestSafeStrDeref(t *testing.T) {
 func TestSafeStrListSize(t *testing.T) {
 	assert.Equal(t, 0, safeStrListSize(nil))
 	assert.Equal(t, 1, safeStrListSize(&([]string{"a"})))
+}
+
+func TestSafeRegexpDeref(t *testing.T) {
+	assert.Equal(t, "", safeRegexpDeref(nil))
+	assert.Equal(t, "abc", safeRegexpDeref(regexp.MustCompile(`abc`)))
 }

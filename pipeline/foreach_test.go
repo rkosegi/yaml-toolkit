@@ -42,6 +42,11 @@ func TestForeachStringItem(t *testing.T) {
 					"X": "abc",
 				},
 			},
+			Env: &EnvOp{},
+			Export: &ExportOp{
+				File:   "/tmp/a-{{ .forEach }}.yaml",
+				Format: OutputFormatYaml,
+			},
 		},
 	}
 	d := b.Container()

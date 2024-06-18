@@ -32,6 +32,12 @@ func (as OpSpec) toList() []Action {
 	if as.Template != nil {
 		actions = append(actions, as.Template)
 	}
+	if as.Export != nil {
+		actions = append(actions, as.Export)
+	}
+	if as.Env != nil {
+		actions = append(actions, as.Env)
+	}
 	if as.ForEach != nil {
 		actions = append(actions, as.ForEach)
 	}
@@ -65,10 +71,16 @@ func (as OpSpec) CloneWith(ctx ActionContext) Action {
 	if as.Template != nil {
 		r.Template = as.Template.CloneWith(ctx).(*TemplateOp)
 	}
+	if as.Export != nil {
+		r.Export = as.Export.CloneWith(ctx).(*ExportOp)
+	}
+	if as.Env != nil {
+		r.Env = as.Env.CloneWith(ctx).(*EnvOp)
+	}
 	return r
 }
 
 func (as OpSpec) String() string {
-	return fmt.Sprintf("OpSpec[ForEach=%v,Import=%v,Patch=%v,Set=%v,Template=%v]",
-		as.ForEach, as.Import, as.Patch, as.Set, as.Template)
+	return fmt.Sprintf("OpSpec[Env=%s,Export=%v,ForEach=%v,Import=%v,Patch=%v,Set=%v,Template=%v]",
+		as.Env, as.Export, as.ForEach, as.Import, as.Patch, as.Set, as.Template)
 }

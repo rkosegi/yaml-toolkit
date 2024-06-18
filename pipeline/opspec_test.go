@@ -43,6 +43,14 @@ func TestOpSpecCloneWith(t *testing.T) {
 			Path: "{{ .Path }}",
 			Mode: ParseFileModeYaml,
 		},
+		Env: &EnvOp{
+			Path: "{{ .Path }}",
+		},
+		Export: &ExportOp{
+			File:   "/tmp/file.yaml",
+			Path:   "{{ .Path }}",
+			Format: OutputFormatYaml,
+		},
 	}
 
 	a := o.CloneWith(mockActCtx(b.FromMap(map[string]interface{}{
@@ -54,4 +62,6 @@ func TestOpSpecCloneWith(t *testing.T) {
 	assert.Equal(t, "root.sub2", a.Import.Path)
 	assert.Equal(t, "/root/sub3", a.Patch.Path)
 	assert.Equal(t, "root.sub2", a.Template.WriteTo)
+	assert.Equal(t, "root.sub2", a.Export.Path)
+	assert.Equal(t, "root.sub2", a.Env.Path)
 }

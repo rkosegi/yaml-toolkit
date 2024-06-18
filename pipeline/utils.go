@@ -19,6 +19,7 @@ package pipeline
 import (
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"os"
+	"regexp"
 	"slices"
 	"strings"
 )
@@ -43,6 +44,13 @@ func safeStrDeref(in *string) string {
 		return ""
 	}
 	return *in
+}
+
+func safeRegexpDeref(re *regexp.Regexp) string {
+	if re == nil {
+		return ""
+	}
+	return re.String()
 }
 
 func safeStrListSize(in *[]string) int {
