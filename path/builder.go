@@ -32,6 +32,16 @@ func (b *builder) Build() Path {
 }
 
 func (b *builder) Append(opts ...AppendOpt) Builder {
+	b.components = append(b.components, *buildComponent(opts...))
+	return b
+}
+
+// NewBuilder creates new Builder
+func NewBuilder() Builder {
+	return &builder{}
+}
+
+func buildComponent(opts ...AppendOpt) *component {
 	if len(opts) == 0 {
 		panic("no append option provided by caller")
 	}
@@ -39,10 +49,9 @@ func (b *builder) Append(opts ...AppendOpt) Builder {
 	for _, opt := range opts {
 		opt(c)
 	}
-	b.components = append(b.components, *c)
-	return b
+	return c
 }
 
-func NewBuilder() Builder {
-	return &builder{}
+func BuildComponent(opts ...AppendOpt) Component {
+	return buildComponent(opts...)
 }
