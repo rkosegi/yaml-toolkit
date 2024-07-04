@@ -63,3 +63,15 @@ type Path interface {
 }
 
 type AppendOpt func(*component)
+
+// Parser interface is implemented by different Path syntax parsers.
+type Parser interface {
+	// Parse parses source string into Path
+	Parse(string) (Path, error)
+}
+
+// Serializer is interface that allows to serialize Path into lexical form
+type Serializer interface {
+	// Serialize serializes path into lexical representation
+	Serialize(Path) string
+}

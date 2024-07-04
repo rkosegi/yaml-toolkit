@@ -49,7 +49,7 @@ func TestBuilderAppendNoOption(t *testing.T) {
 	defer func() {
 		recover()
 	}()
-	NewBuilder().Append()
+	BuildComponent()
 	assert.Fail(t, "should not be here")
 }
 
