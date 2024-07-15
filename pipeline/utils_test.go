@@ -32,7 +32,13 @@ func mockEmptyActCtx() ActionContext {
 }
 
 func mockActCtx(data dom.ContainerBuilder) ActionContext {
-	return New(WithData(data)).(*exec).newCtx()
+	return New(WithData(data)).(*exec).newCtx(nil)
+}
+
+func TestGetActionFromContext(t *testing.T) {
+	ac := mockEmptyActCtx().(*actContext)
+	ac.c = &ExportOp{}
+	assert.NotNil(t, ac.Action())
 }
 
 func TestNonEmpty(t *testing.T) {

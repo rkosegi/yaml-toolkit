@@ -39,6 +39,7 @@ type actContext struct {
 	t TemplateEngine
 }
 
+func (ac actContext) Action() Action                 { return ac.c }
 func (ac actContext) Data() dom.ContainerBuilder     { return ac.d }
 func (ac actContext) Factory() dom.ContainerFactory  { return ac.f }
 func (ac actContext) Executor() Executor             { return ac.e }
@@ -47,8 +48,9 @@ func (ac actContext) Snapshot() map[string]interface{} {
 	return dom.DefaultNodeMappingFn(ac.Data()).(map[string]interface{})
 }
 
-func (p *exec) newCtx() *actContext {
+func (p *exec) newCtx(a Action) *actContext {
 	return &actContext{
+		c: a,
 		d: p.gd,
 		e: p,
 		f: b,
@@ -57,7 +59,7 @@ func (p *exec) newCtx() *actContext {
 }
 
 func (p *exec) Execute(act Action) (err error) {
-	ctx := p.newCtx()
+	ctx := p.newCtx(act)
 	p.l.OnBefore(ctx)
 	defer p.l.OnAfter(ctx, err)
 	err = act.Do(ctx)

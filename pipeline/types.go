@@ -86,6 +86,8 @@ type ActionContext interface {
 	Executor() Executor
 	// TemplateEngine return reference to TemplateEngine
 	TemplateEngine() TemplateEngine
+	// Action return reference to actual Action
+	Action() Action
 }
 
 // Action is implemented by actions within ActionSpec
