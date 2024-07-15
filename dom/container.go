@@ -190,6 +190,12 @@ func (c *containerBuilderImpl) Walk(fn WalkFn) {
 	}
 }
 
+func (c *containerBuilderImpl) Merge(other Container, opts ...MergeOption) ContainerBuilder {
+	m := &merger{}
+	m.init(opts...)
+	return m.mergeContainers(c, other)
+}
+
 func (c *containerBuilderImpl) AddList(name string) ListBuilder {
 	lb := &listBuilderImpl{}
 	c.add(name, lb)

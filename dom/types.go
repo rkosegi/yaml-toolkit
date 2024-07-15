@@ -141,6 +141,8 @@ type ContainerBuilder interface {
 	RemoveAt(path string)
 	// Walk walks whole document tree, visiting every node
 	Walk(fn WalkFn)
+	// Merge creates new Container instance and merge current Container with other into it.
+	Merge(other Container, opts ...MergeOption) ContainerBuilder
 }
 
 type WalkFn func(path string, parent ContainerBuilder, node Node) bool

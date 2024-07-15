@@ -317,3 +317,15 @@ func TestContainerClone(t *testing.T) {
 	assert.Equal(t, 123, c2.Lookup("a.x.y").(Leaf).Value())
 	assert.Equal(t, "123", c2.Lookup("a.b[1]").(Leaf).Value())
 }
+
+func TestMergeContainers(t *testing.T) {
+	a := b.Container()
+	c := b.Container()
+	a.AddValueAt("l1.l2c", LeafNode(7))
+	a.AddValueAt("l1.l2d", LeafNode("0987"))
+	c.AddValueAt("l1.l2a", LeafNode("123"))
+	c.AddValueAt("l1.l2b", LeafNode("abc"))
+	d := c.Merge(a)
+	assert.Equal(t, 4, len(d.Lookup("l1").(Container).Children()))
+	assert.Equal(t, "abc", d.Lookup("l1.l2b").(Leaf).Value())
+}
