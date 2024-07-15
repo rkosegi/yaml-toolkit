@@ -77,7 +77,7 @@ func (mg *merger) mergeListsMeld(l1, l2 List) List {
 	return l
 }
 
-func (mg *merger) mergeContainers(c1, c2 Container) Container {
+func (mg *merger) mergeContainers(c1, c2 Container) ContainerBuilder {
 	merged := map[string]Node{}
 	for k, v := range c1.Children() {
 		merged[k] = v
