@@ -139,33 +139,6 @@ func (ps *PatchOp) CloneWith(ctx ActionContext) Action {
 	}
 }
 
-func (sa *SetOp) String() string {
-	return fmt.Sprintf("Set[Path=%s]", sa.Path)
-}
-
-func (sa *SetOp) Do(ctx ActionContext) error {
-	gd := ctx.Data()
-	if sa.Data == nil {
-		return ErrNoDataToSet
-	}
-	data := ctx.Factory().FromMap(sa.Data)
-	if len(sa.Path) > 0 {
-		gd.AddValueAt(sa.Path, data)
-	} else {
-		for k, v := range data.Children() {
-			gd.AddValueAt(k, v)
-		}
-	}
-	return nil
-}
-
-func (sa *SetOp) CloneWith(ctx ActionContext) Action {
-	return &SetOp{
-		Data: sa.Data,
-		Path: ctx.TemplateEngine().RenderLenient(sa.Path, ctx.Snapshot()),
-	}
-}
-
 func (ts *TemplateOp) String() string {
 	return fmt.Sprintf("Template[WriteTo=%s]", ts.WriteTo)
 }

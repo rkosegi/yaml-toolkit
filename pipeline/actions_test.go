@@ -161,38 +161,6 @@ func TestExecutePatchOp(t *testing.T) {
 	assert.Error(t, New(WithData(gd)).Execute(&ps))
 }
 
-func TestExecuteSetOp(t *testing.T) {
-	var (
-		ss  SetOp
-		gd  dom.ContainerBuilder
-		err error
-	)
-	ss = SetOp{
-		Data: map[string]interface{}{
-			"sub1": 123,
-		},
-	}
-	gd = b.Container()
-	assert.NoError(t, New(WithData(gd)).Execute(&ss))
-	assert.Equal(t, 123, gd.Lookup("sub1").(dom.Leaf).Value())
-
-	ss = SetOp{
-		Data: map[string]interface{}{
-			"sub1": 123,
-		},
-		Path: "sub0",
-	}
-	gd = b.Container()
-	assert.NoError(t, New(WithData(gd)).Execute(&ss))
-	assert.Equal(t, 123, gd.Lookup("sub0.sub1").(dom.Leaf).Value())
-	assert.Contains(t, ss.String(), "sub0")
-
-	ss = SetOp{}
-	err = New(WithData(gd)).Execute(&ss)
-	assert.Error(t, err)
-	assert.Equal(t, ErrNoDataToSet, err)
-}
-
 func TestExecuteTemplateOp(t *testing.T) {
 	var (
 		err error
