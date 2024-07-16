@@ -217,6 +217,13 @@ type PatchOp struct {
 	Value map[string]interface{} `yaml:"value,omitempty"`
 }
 
+type SetStrategy string
+
+const (
+	SetStrategyReplace = SetStrategy("replace")
+	SetStrategyMerge   = SetStrategy("merge")
+)
+
 // SetOp sets data in global data document at given path.
 type SetOp struct {
 	// Arbitrary data to put into data tree
@@ -225,6 +232,9 @@ type SetOp struct {
 	// Path at which to put data.
 	// If omitted, then data are merged into root of document
 	Path string `yaml:"path,omitempty"`
+
+	// Strategy defines how that are handled when conflict during set/add of data occur.
+	Strategy *SetStrategy `yaml:"strategy,omitempty"`
 }
 
 // TemplateOp can be used to render value from data at runtime.

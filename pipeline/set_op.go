@@ -18,7 +18,45 @@ package pipeline
 
 import (
 	"fmt"
+	"github.com/rkosegi/yaml-toolkit/dom"
 )
+
+type setHandlerFn func(path string, orig, other dom.ContainerBuilder)
+
+func setOpMergeIfContainersReplaceOtherwise(orig, other dom.ContainerBuilder) {
+	for k, v := range other.Children() {
+		origChild := orig.Child(k)
+		if origChild != nil && origChild.IsContainer() && v.IsContainer() {
+			orig.AddValue(k, origChild.(dom.ContainerBuilder).Merge(v.(dom.Container)))
+		} else {
+			orig.AddValue(k, v)
+		}
+	}
+}
+
+var setHandlerFnMap = map[SetStrategy]setHandlerFn{
+	SetStrategyMerge: func(path string, orig, other dom.ContainerBuilder) {
+		if len(path) > 0 {
+			dest := orig.Lookup(path)
+			if dest != nil && dest.IsContainer() {
+				orig.AddValueAt(path, dest.(dom.ContainerBuilder).Merge(other))
+			} else {
+				orig.AddValueAt(path, other)
+			}
+		} else {
+			setOpMergeIfContainersReplaceOtherwise(orig, other)
+		}
+	},
+	SetStrategyReplace: func(path string, orig, other dom.ContainerBuilder) {
+		if len(path) > 0 {
+			orig.AddValueAt(path, other)
+		} else {
+			for k, v := range other.Children() {
+				orig.AddValueAt(k, v)
+			}
+		}
+	},
+}
 
 func (sa *SetOp) String() string {
 	return fmt.Sprintf("Set[Path=%s]", sa.Path)
@@ -29,14 +67,15 @@ func (sa *SetOp) Do(ctx ActionContext) error {
 	if sa.Data == nil {
 		return ErrNoDataToSet
 	}
-	data := ctx.Factory().FromMap(sa.Data)
-	if len(sa.Path) > 0 {
-		gd.AddValueAt(sa.Path, data)
-	} else {
-		for k, v := range data.Children() {
-			gd.AddValueAt(k, v)
-		}
+	if sa.Strategy == nil {
+		sa.Strategy = setStrategyPointer(SetStrategyReplace)
 	}
+	handler, exists := setHandlerFnMap[*sa.Strategy]
+	if !exists {
+		return fmt.Errorf("SetOp: unknown SetStrategy %s", *sa.Strategy)
+	}
+	data := ctx.Factory().FromMap(sa.Data)
+	handler(sa.Path, gd, data)
 	return nil
 }
 
