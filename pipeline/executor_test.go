@@ -113,6 +113,7 @@ func TestExecute(t *testing.T) {
 						Data: map[string]interface{}{
 							"leaf": "abcd",
 						},
+						Strategy: setStrategyPointer(SetStrategyReplace),
 					},
 				},
 			},
@@ -228,6 +229,7 @@ func TestExecuteInnerSteps(t *testing.T) {
 						Data: map[string]interface{}{
 							"root.sub": 123,
 						},
+						Strategy: setStrategyPointer(SetStrategyReplace),
 					},
 				},
 			},
@@ -241,6 +243,7 @@ func TestExecuteInnerSteps(t *testing.T) {
 						Data: map[string]interface{}{
 							"root.sub": 456,
 						},
+						Strategy: setStrategyPointer(SetStrategyReplace),
 					},
 				},
 			},

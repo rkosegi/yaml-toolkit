@@ -47,7 +47,8 @@ func TestChildActionsCloneWith(t *testing.T) {
 					Data: map[string]interface{}{
 						"abcd": 123,
 					},
-					Path: "{{ .sub1.leaf1 }}",
+					Path:     "{{ .sub1.leaf1 }}",
+					Strategy: setStrategyPointer(SetStrategyReplace),
 				},
 			},
 		},
