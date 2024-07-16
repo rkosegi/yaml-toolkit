@@ -74,5 +74,5 @@ func (te templateEngine) EvalBool(template string, data map[string]interface{}) 
 	if err != nil {
 		return false, err
 	}
-	return strconv.ParseBool(val)
+	return strconv.ParseBool(strings.TrimSpace(val))
 }
