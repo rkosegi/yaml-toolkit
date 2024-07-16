@@ -46,6 +46,10 @@ func safeStrDeref(in *string) string {
 	return *in
 }
 
+func setStrategyPointer(s SetStrategy) *SetStrategy {
+	return &s
+}
+
 func safeRegexpDeref(re *regexp.Regexp) string {
 	if re == nil {
 		return ""
