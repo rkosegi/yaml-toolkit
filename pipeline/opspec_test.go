@@ -51,6 +51,9 @@ func TestOpSpecCloneWith(t *testing.T) {
 			Path:   "{{ .Path }}",
 			Format: OutputFormatYaml,
 		},
+		Abort: &AbortOp{
+			Message: "abort",
+		},
 	}
 
 	a := o.CloneWith(mockActCtx(b.FromMap(map[string]interface{}{

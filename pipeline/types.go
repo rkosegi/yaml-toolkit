@@ -125,6 +125,9 @@ type OpSpec struct {
 	Export *ExportOp `yaml:"export,omitempty"`
 	// ForEach execute same operation in a loop for every configured item
 	ForEach *ForEachOp `yaml:"forEach,omitempty"`
+
+	// Abort is able to signal error, so that pipeline can abort execution
+	Abort *AbortOp `yaml:"abort,omitempty"`
 }
 
 type ActionSpec struct {
