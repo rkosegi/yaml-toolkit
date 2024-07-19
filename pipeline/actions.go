@@ -140,26 +140,26 @@ func (ps *PatchOp) CloneWith(ctx ActionContext) Action {
 }
 
 func (ts *TemplateOp) String() string {
-	return fmt.Sprintf("Template[WriteTo=%s]", ts.WriteTo)
+	return fmt.Sprintf("Template[Path=%s]", ts.Path)
 }
 
 func (ts *TemplateOp) Do(ctx ActionContext) error {
 	if len(ts.Template) == 0 {
 		return ErrTemplateEmpty
 	}
-	if len(ts.WriteTo) == 0 {
-		return ErrWriteToEmpty
+	if len(ts.Path) == 0 {
+		return ErrPathEmpty
 	}
 	val, err := ctx.TemplateEngine().Render(ts.Template, map[string]interface{}{
 		"Data": ctx.Snapshot(),
 	})
-	ctx.Data().AddValueAt(ts.WriteTo, dom.LeafNode(val))
+	ctx.Data().AddValueAt(ts.Path, dom.LeafNode(val))
 	return err
 }
 
 func (ts *TemplateOp) CloneWith(ctx ActionContext) Action {
 	return &TemplateOp{
 		Template: ts.Template,
-		WriteTo:  ctx.TemplateEngine().RenderLenient(ts.WriteTo, ctx.Snapshot()),
+		Path:     ctx.TemplateEngine().RenderLenient(ts.Path, ctx.Snapshot()),
 	}
 }

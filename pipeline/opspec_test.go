@@ -37,7 +37,7 @@ func TestOpSpecCloneWith(t *testing.T) {
 			Action: OpSpec{},
 		},
 		Template: &TemplateOp{
-			WriteTo: "{{ .Path }}",
+			Path: "{{ .Path }}",
 		},
 		Import: &ImportOp{
 			Path: "{{ .Path }}",
@@ -64,7 +64,7 @@ func TestOpSpecCloneWith(t *testing.T) {
 	assert.Equal(t, "root.sub2", a.Set.Path)
 	assert.Equal(t, "root.sub2", a.Import.Path)
 	assert.Equal(t, "/root/sub3", a.Patch.Path)
-	assert.Equal(t, "root.sub2", a.Template.WriteTo)
+	assert.Equal(t, "root.sub2", a.Template.Path)
 	assert.Equal(t, "root.sub2", a.Export.Path)
 	assert.Equal(t, "root.sub2", a.Env.Path)
 }
