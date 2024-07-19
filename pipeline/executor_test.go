@@ -136,7 +136,7 @@ func TestExecute(t *testing.T) {
 				Operations: OpSpec{
 					Template: &TemplateOp{
 						Template: "{{ mul 1 2 3 4 5 6 }}",
-						WriteTo:  "Results.Factorial",
+						Path:     "Results.Factorial",
 					},
 				},
 			},

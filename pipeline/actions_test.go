@@ -172,7 +172,7 @@ func TestExecuteTemplateOp(t *testing.T) {
 	gd.AddValueAt("root.leaf1", dom.LeafNode(123456))
 	ts = TemplateOp{
 		Template: `{{ (mul .Data.root.leaf1 2) | quote }}`,
-		WriteTo:  "result.x1",
+		Path:     "result.x1",
 	}
 	assert.NoError(t, New(WithData(gd)).Execute(&ts))
 	assert.Equal(t, "\"246912\"", gd.Lookup("result.x1").(dom.Leaf).Value())
@@ -184,23 +184,23 @@ func TestExecuteTemplateOp(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, ErrTemplateEmpty, err)
 
-	// empty writeTo error
+	// empty path error
 	ts = TemplateOp{
 		Template: `TEST`,
 	}
 	err = New(WithData(gd)).Execute(&ts)
 	assert.Error(t, err)
-	assert.Equal(t, ErrWriteToEmpty, err)
+	assert.Equal(t, ErrPathEmpty, err)
 
 	ts = TemplateOp{
 		Template: `{{}}{{`,
-		WriteTo:  "result",
+		Path:     "result",
 	}
 	assert.Error(t, New(WithData(gd)).Execute(&ts))
 
 	ts = TemplateOp{
 		Template: `{{ invalid_func }}`,
-		WriteTo:  "result",
+		Path:     "result",
 	}
 	assert.Error(t, New(WithData(gd)).Execute(&ts))
 }

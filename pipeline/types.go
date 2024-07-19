@@ -27,7 +27,7 @@ import (
 var (
 	ErrNoDataToSet   = errors.New("no data to set")
 	ErrTemplateEmpty = errors.New("template cannot be empty")
-	ErrWriteToEmpty  = errors.New("writeTo cannot be empty")
+	ErrPathEmpty     = errors.New("path cannot be empty")
 	ErrNotContainer  = errors.New("data element must be container when no path is provided")
 )
 
@@ -246,5 +246,5 @@ type TemplateOp struct {
 	// template to render
 	Template string `yaml:"template"`
 	// path within global data tree where to set result at
-	WriteTo string `yaml:"writeTo"`
+	Path string `yaml:"path"`
 }
