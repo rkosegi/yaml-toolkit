@@ -18,6 +18,7 @@ package dom
 
 import (
 	"github.com/stretchr/testify/assert"
+	"strings"
 	"testing"
 )
 
@@ -70,4 +71,33 @@ func TestMergeContainerFromTwoLists(t *testing.T) {
 	m.init()
 	l := m.mergeListsMeld(ListNode(c1), ListNode(c2))
 	assert.Equal(t, 1, l.Size())
+}
+
+func TestCoalesce(t *testing.T) {
+	assert.Equal(t, nilLeaf, coalesce(nilLeaf))
+	assert.Equal(t, 123, coalesce(nilLeaf,
+		LeafNode(123), nilLeaf).(Leaf).Value())
+}
+
+func TestMergeOverrideLeafValue(t *testing.T) {
+	d1 := `
+---
+root:
+  sub1:
+    sub2:
+      leaf: 1
+`
+	d2 := `
+---
+root:
+  sub1:
+    sub2:
+      leaf: 2
+`
+	orig, err := b.FromReader(strings.NewReader(d1), DefaultYamlDecoder)
+	assert.NoError(t, err)
+	override, err := b.FromReader(strings.NewReader(d2), DefaultYamlDecoder)
+	assert.NoError(t, err)
+	result := orig.Merge(override)
+	assert.Equal(t, 2, result.Lookup("root.sub1.sub2.leaf").(Leaf).Value())
 }

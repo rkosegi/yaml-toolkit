@@ -175,15 +175,6 @@ func hasValue(n Node) bool {
 	return true
 }
 
-func coalesce(nodes ...Node) Node {
-	for _, node := range nodes {
-		if hasValue(node) {
-			return node
-		}
-	}
-	return nilLeaf
-}
-
 func firstValidListItem(idx int, lists ...List) Node {
 	for _, list := range lists {
 		if list.Size() > idx {
