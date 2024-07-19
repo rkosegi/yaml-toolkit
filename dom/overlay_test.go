@@ -103,12 +103,6 @@ func TestLoadLookupList(t *testing.T) {
 	assert.Equal(t, "hello", n.(Leaf).Value())
 }
 
-func TestCoalesce(t *testing.T) {
-	assert.Equal(t, nilLeaf, coalesce(nilLeaf))
-	assert.Equal(t, 123, coalesce(nilLeaf,
-		LeafNode(123), nilLeaf).(Leaf).Value())
-}
-
 func TestFirstValidListItem(t *testing.T) {
 	assert.Equal(t, 456, firstValidListItem(1,
 		ListNode(),

@@ -16,7 +16,10 @@ limitations under the License.
 
 package dom
 
-import "math"
+import (
+	"math"
+	"slices"
+)
 
 func defaultListMerger() MergeOption {
 	return func(m *merger) {
@@ -120,4 +123,14 @@ func (mg *merger) mergeOverlay(m *overlayDocument) Container {
 		merged = mg.mergeContainers(merged, m.overlays[name])
 	}
 	return merged
+}
+
+func coalesce(nodes ...Node) Node {
+	slices.Reverse(nodes)
+	for _, node := range nodes {
+		if hasValue(node) {
+			return node
+		}
+	}
+	return nilLeaf
 }
