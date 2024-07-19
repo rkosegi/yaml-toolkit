@@ -16,7 +16,10 @@ limitations under the License.
 
 package pipeline
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func (as OpSpec) toList() []Action {
 	actions := make([]Action, 0)
@@ -40,6 +43,9 @@ func (as OpSpec) toList() []Action {
 	}
 	if as.ForEach != nil {
 		actions = append(actions, as.ForEach)
+	}
+	if as.Abort != nil {
+		actions = append(actions, as.Abort)
 	}
 	return actions
 }
@@ -77,10 +83,41 @@ func (as OpSpec) CloneWith(ctx ActionContext) Action {
 	if as.Env != nil {
 		r.Env = as.Env.CloneWith(ctx).(*EnvOp)
 	}
+	if as.Abort != nil {
+		r.Abort = as.Abort.CloneWith(ctx).(*AbortOp)
+	}
 	return r
 }
 
 func (as OpSpec) String() string {
-	return fmt.Sprintf("OpSpec[Env=%s,Export=%v,ForEach=%v,Import=%v,Patch=%v,Set=%v,Template=%v]",
-		as.Env, as.Export, as.ForEach, as.Import, as.Patch, as.Set, as.Template)
+	var sb strings.Builder
+	parts := make([]string, 0)
+	sb.WriteString("OpSpec[")
+	if as.Abort != nil {
+		parts = append(parts, fmt.Sprintf("Abort=%v", as.Abort.String()))
+	}
+	if as.Env != nil {
+		parts = append(parts, fmt.Sprintf("Env=%v", as.Env.String()))
+	}
+	if as.Export != nil {
+		parts = append(parts, fmt.Sprintf("Export=%v", as.Export.String()))
+	}
+	if as.ForEach != nil {
+		parts = append(parts, fmt.Sprintf("ForEach=%v", as.ForEach.String()))
+	}
+	if as.Import != nil {
+		parts = append(parts, fmt.Sprintf("Import=%v", as.Import.String()))
+	}
+	if as.Patch != nil {
+		parts = append(parts, fmt.Sprintf("Patch=%v", as.Patch.String()))
+	}
+	if as.Set != nil {
+		parts = append(parts, fmt.Sprintf("Set=%v", as.Set.String()))
+	}
+	if as.Template != nil {
+		parts = append(parts, fmt.Sprintf("Template=%v", as.Template.String()))
+	}
+	sb.WriteString(strings.Join(parts, ","))
+	sb.WriteString("]")
+	return sb.String()
 }
