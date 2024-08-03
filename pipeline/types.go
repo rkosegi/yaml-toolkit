@@ -121,6 +121,9 @@ type OpSpec struct {
 	// Env adds OS environment variables into data document
 	Env *EnvOp `yaml:"env,omitempty"`
 
+	// Exec executes program
+	Exec *ExecOp `yaml:"exec,omitempty"`
+
 	// Export exports data document into file
 	Export *ExportOp `yaml:"export,omitempty"`
 	// ForEach execute same operation in a loop for every configured item
@@ -169,6 +172,15 @@ type EnvOp struct {
 
 	// for mock purposes only. this could be used to override os.Environ() to arbitrary func
 	envGetter func() []string
+}
+
+type ExecOp struct {
+	// Program to execute
+	Program string `yaml:"program,omitempty"`
+	// Optional arguments for program
+	Args *[]string `yaml:"args,omitempty"`
+	// List of exit codes that are assumed to be valid
+	ValidExitCodes *[]int `yaml:"validExitCodes,omitempty"`
 }
 
 type OutputFormat string

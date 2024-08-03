@@ -46,6 +46,9 @@ func TestOpSpecCloneWith(t *testing.T) {
 		Env: &EnvOp{
 			Path: "{{ .Path }}",
 		},
+		Exec: &ExecOp{
+			Program: "{{ .Shell }}",
+		},
 		Export: &ExportOp{
 			File:   "/tmp/file.yaml",
 			Path:   "{{ .Path }}",
@@ -59,6 +62,7 @@ func TestOpSpecCloneWith(t *testing.T) {
 	a := o.CloneWith(mockActCtx(b.FromMap(map[string]interface{}{
 		"Path":  "root.sub2",
 		"Path3": "/root/sub3",
+		"Shell": "/bin/bash",
 	}))).(OpSpec)
 	t.Log(a.String())
 	assert.Equal(t, "root.sub2", a.Set.Path)
@@ -67,4 +71,5 @@ func TestOpSpecCloneWith(t *testing.T) {
 	assert.Equal(t, "root.sub2", a.Template.Path)
 	assert.Equal(t, "root.sub2", a.Export.Path)
 	assert.Equal(t, "root.sub2", a.Env.Path)
+	assert.Equal(t, "/bin/bash", a.Exec.Program)
 }

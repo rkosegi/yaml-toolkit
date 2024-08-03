@@ -82,3 +82,14 @@ func sortActionNames(actions ChildActions) []string {
 func actionNames(actions ChildActions) string {
 	return strings.Join(sortActionNames(actions), ",")
 }
+
+func safeRenderStrSlice(args *[]string, te TemplateEngine, data map[string]interface{}) *[]string {
+	if args == nil {
+		return nil
+	}
+	r := make([]string, len(*args))
+	for i, arg := range *args {
+		r[i] = te.RenderLenient(arg, data)
+	}
+	return &r
+}

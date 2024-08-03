@@ -47,6 +47,10 @@ func TestForeachStringItem(t *testing.T) {
 				File:   "/tmp/a-{{ .forEach }}.yaml",
 				Format: OutputFormatYaml,
 			},
+			Exec: &ExecOp{
+				Program: "sh",
+				Args:    &[]string{"-c", "rm /tmp/a-{{ .forEach }}.yaml"},
+			},
 		},
 	}
 	d := b.Container()
