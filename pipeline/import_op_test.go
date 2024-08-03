@@ -18,7 +18,6 @@ package pipeline
 
 import (
 	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/patch"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -114,93 +113,4 @@ func TestExecuteImportOp(t *testing.T) {
 		Mode: "invalid-mode",
 	}
 	assert.Error(t, New(WithData(gd)).Execute(&is))
-}
-
-func TestExecutePatchOp(t *testing.T) {
-	var (
-		ps PatchOp
-		gd dom.ContainerBuilder
-	)
-
-	ps = PatchOp{
-		Op:   patch.OpAdd,
-		Path: "@#$%^&",
-	}
-	assert.Error(t, New(WithData(gd)).Execute(&ps))
-
-	gd = b.Container()
-	gd.AddValueAt("root.sub1.leaf2", dom.LeafNode("abcd"))
-	ps = PatchOp{
-		Op:   patch.OpReplace,
-		Path: "/root/sub1",
-		Value: map[string]interface{}{
-			"leaf2": "xyz",
-		},
-	}
-	assert.NoError(t, New(WithData(gd)).Execute(&ps))
-	assert.Equal(t, "xyz", gd.Lookup("root.sub1.leaf2").(dom.Leaf).Value())
-	assert.Contains(t, ps.String(), "Op=replace,Path=/root/sub1")
-
-	gd = b.Container()
-	gd.AddValueAt("root.sub1.leaf3", dom.LeafNode("abcd"))
-	ps = PatchOp{
-		Op:   patch.OpMove,
-		From: "/root/sub1",
-		Path: "/root/sub2",
-	}
-	assert.NoError(t, New(WithData(gd)).Execute(&ps))
-	assert.Equal(t, "abcd", gd.Lookup("root.sub2.leaf3").(dom.Leaf).Value())
-
-	gd = b.Container()
-	gd.AddValueAt("root.sub1.leaf3", dom.LeafNode("abcd"))
-	ps = PatchOp{
-		Op:   patch.OpMove,
-		From: "%#$&^^*&",
-		Path: "/root/sub2",
-	}
-	assert.Error(t, New(WithData(gd)).Execute(&ps))
-}
-
-func TestExecuteTemplateOp(t *testing.T) {
-	var (
-		err error
-		ts  TemplateOp
-		gd  dom.ContainerBuilder
-	)
-
-	gd = b.Container()
-	gd.AddValueAt("root.leaf1", dom.LeafNode(123456))
-	ts = TemplateOp{
-		Template: `{{ (mul .Data.root.leaf1 2) | quote }}`,
-		Path:     "result.x1",
-	}
-	assert.NoError(t, New(WithData(gd)).Execute(&ts))
-	assert.Equal(t, "\"246912\"", gd.Lookup("result.x1").(dom.Leaf).Value())
-	assert.Contains(t, ts.String(), "result.x1")
-
-	// empty template error
-	ts = TemplateOp{}
-	err = New(WithData(gd)).Execute(&ts)
-	assert.Error(t, err)
-	assert.Equal(t, ErrTemplateEmpty, err)
-
-	// empty path error
-	ts = TemplateOp{
-		Template: `TEST`,
-	}
-	err = New(WithData(gd)).Execute(&ts)
-	assert.Error(t, err)
-	assert.Equal(t, ErrPathEmpty, err)
-
-	ts = TemplateOp{
-		Template: `{{}}{{`,
-		Path:     "result",
-	}
-	assert.Error(t, New(WithData(gd)).Execute(&ts))
-
-	ts = TemplateOp{
-		Template: `{{ invalid_func }}`,
-		Path:     "result",
-	}
-	assert.Error(t, New(WithData(gd)).Execute(&ts))
 }

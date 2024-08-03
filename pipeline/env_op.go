@@ -47,6 +47,23 @@ var (
 // TODO: merge with same thing from analytics package and move it to common place
 type StringPredicateFn func(string) bool
 
+// EnvOp is used to import OS environment variables into data
+type EnvOp struct {
+	// Optional regexp which defines what to include. Only item names matching this regexp are added into data document.
+	Include *regexp.Regexp `yaml:"include,omitempty"`
+
+	// Optional regexp which defines what to exclude. Only item names NOT matching this regexp are added into data document.
+	// Exclusion is considered after inclusion regexp is processed.
+	Exclude *regexp.Regexp `yaml:"exclude,omitempty"`
+
+	// Optional path within data tree under which "Env" container will be put.
+	// When omitted, then "Env" goes to root of data.
+	Path string `yaml:"path,omitempty"`
+
+	// for mock purposes only. this could be used to override os.Environ() to arbitrary func
+	envGetter func() []string
+}
+
 func (eo *EnvOp) Do(ctx ActionContext) error {
 	var (
 		inclFn StringPredicateFn

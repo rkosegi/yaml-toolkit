@@ -23,6 +23,15 @@ import (
 	"slices"
 )
 
+type ExecOp struct {
+	// Program to execute
+	Program string `yaml:"program,omitempty"`
+	// Optional arguments for program
+	Args *[]string `yaml:"args,omitempty"`
+	// List of exit codes that are assumed to be valid
+	ValidExitCodes *[]int `yaml:"validExitCodes,omitempty"`
+}
+
 func (e *ExecOp) String() string {
 	return fmt.Sprintf("Exec[Program=%s,Args=%d]", e.Program, safeStrListSize(e.Args))
 }

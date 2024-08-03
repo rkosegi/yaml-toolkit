@@ -58,6 +58,26 @@ var setHandlerFnMap = map[SetStrategy]setHandlerFn{
 	},
 }
 
+type SetStrategy string
+
+const (
+	SetStrategyReplace = SetStrategy("replace")
+	SetStrategyMerge   = SetStrategy("merge")
+)
+
+// SetOp sets data in global data document at given path.
+type SetOp struct {
+	// Arbitrary data to put into data tree
+	Data map[string]interface{} `yaml:"data"`
+
+	// Path at which to put data.
+	// If omitted, then data are merged into root of document
+	Path string `yaml:"path,omitempty"`
+
+	// Strategy defines how that are handled when conflict during set/add of data occur.
+	Strategy *SetStrategy `yaml:"strategy,omitempty"`
+}
+
 func (sa *SetOp) String() string {
 	return fmt.Sprintf("Set[Path=%s]", sa.Path)
 }
