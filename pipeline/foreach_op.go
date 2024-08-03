@@ -22,6 +22,13 @@ import (
 	"path/filepath"
 )
 
+type ForEachOp struct {
+	Glob *string   `yaml:"glob,omitempty"`
+	Item *[]string `yaml:"item,omitempty"`
+	// Action to perform for every item
+	Action OpSpec `yaml:"action"`
+}
+
 func (fea *ForEachOp) Do(ctx ActionContext) error {
 	if nonEmpty(fea.Glob) {
 		if matches, err := filepath.Glob(*fea.Glob); err != nil {

@@ -23,6 +23,26 @@ import (
 	"os"
 )
 
+type OutputFormat string
+
+const (
+	OutputFormatYaml       = OutputFormat("yaml")
+	OutputFormatJson       = OutputFormat("json")
+	OutputFormatProperties = OutputFormat("properties")
+)
+
+// ExportOp allows to export data into file
+type ExportOp struct {
+	// File to export data onto
+	File string
+	// Path within data tree pointing to dom.Container to export. Empty path denotes whole document.
+	// If path does not resolve or resolves to dom.Node that is not dom.Container,
+	// then empty document will be exported.
+	Path string
+	// Format of output file.
+	Format OutputFormat
+}
+
 func (e *ExportOp) String() string {
 	return fmt.Sprintf("Export[file=%s,format=%s,path=%s]", e.File, e.Format, e.Path)
 }

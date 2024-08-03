@@ -21,6 +21,35 @@ import (
 	"strings"
 )
 
+// OpSpec is specification of operation.
+type OpSpec struct {
+	// Set sets data in data document.
+	Set *SetOp `yaml:"set,omitempty"`
+
+	// Patch performs RFC6902-style patch on data document.
+	Patch *PatchOp `yaml:"patch,omitempty"`
+
+	// Import loads content of file into data document.
+	Import *ImportOp `yaml:"import,omitempty"`
+
+	// Template allows to render value at runtime
+	Template *TemplateOp `yaml:"template,omitempty"`
+
+	// Env adds OS environment variables into data document
+	Env *EnvOp `yaml:"env,omitempty"`
+
+	// Exec executes program
+	Exec *ExecOp `yaml:"exec,omitempty"`
+
+	// Export exports data document into file
+	Export *ExportOp `yaml:"export,omitempty"`
+	// ForEach execute same operation in a loop for every configured item
+	ForEach *ForEachOp `yaml:"forEach,omitempty"`
+
+	// Abort is able to signal error, so that pipeline can abort execution
+	Abort *AbortOp `yaml:"abort,omitempty"`
+}
+
 func (as OpSpec) toList() []Action {
 	actions := make([]Action, 0)
 	if as.Set != nil {
