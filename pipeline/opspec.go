@@ -41,6 +41,9 @@ func (as OpSpec) toList() []Action {
 	if as.Env != nil {
 		actions = append(actions, as.Env)
 	}
+	if as.Exec != nil {
+		actions = append(actions, as.Exec)
+	}
 	if as.ForEach != nil {
 		actions = append(actions, as.ForEach)
 	}
@@ -83,6 +86,9 @@ func (as OpSpec) CloneWith(ctx ActionContext) Action {
 	if as.Env != nil {
 		r.Env = as.Env.CloneWith(ctx).(*EnvOp)
 	}
+	if as.Exec != nil {
+		r.Exec = as.Exec.CloneWith(ctx).(*ExecOp)
+	}
 	if as.Abort != nil {
 		r.Abort = as.Abort.CloneWith(ctx).(*AbortOp)
 	}
@@ -101,6 +107,9 @@ func (as OpSpec) String() string {
 	}
 	if as.Export != nil {
 		parts = append(parts, fmt.Sprintf("Export=%v", as.Export.String()))
+	}
+	if as.Exec != nil {
+		parts = append(parts, fmt.Sprintf("Exec=%v", as.Exec.String()))
 	}
 	if as.ForEach != nil {
 		parts = append(parts, fmt.Sprintf("ForEach=%v", as.ForEach.String()))
