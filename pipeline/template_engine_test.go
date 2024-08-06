@@ -61,3 +61,26 @@ func TestRenderTemplate(t *testing.T) {
 	_, err = renderTemplate("{{ .a }}", "", sprig.TxtFuncMap())
 	assert.Error(t, err)
 }
+
+func TestTemplateEngineRenderTpl(t *testing.T) {
+	var (
+		out string
+		err error
+	)
+	out, err = renderTemplate("{{ tpl .T . }}", map[string]interface{}{
+		"T": "{{ add .X 3 }}",
+		"X": 10,
+	}, sprig.TxtFuncMap())
+	assert.NoError(t, err)
+	assert.Equal(t, "13", out)
+}
+
+func TestTemplateEngineRenderTplInvalid(t *testing.T) {
+	var (
+		err error
+	)
+	_, err = renderTemplate("{{ tpl .T . }}", map[string]interface{}{
+		"T": "{{",
+	}, sprig.TxtFuncMap())
+	assert.Error(t, err)
+}
