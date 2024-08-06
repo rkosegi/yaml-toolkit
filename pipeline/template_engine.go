@@ -27,8 +27,25 @@ type templateEngine struct {
 	fm template.FuncMap
 }
 
+func tplFunc(tmpl *template.Template) func(string, interface{}) (string, error) {
+	return func(tpl string, data interface{}) (string, error) {
+		t, _ := tmpl.Clone()
+		t, err := tmpl.New(tmpl.Name()).Parse(tpl)
+		if err != nil {
+			return "", err
+		}
+		var buf strings.Builder
+		err = t.Execute(&buf, data)
+		return buf.String(), err
+	}
+}
+
 func renderTemplate(tmplStr string, data interface{}, fm template.FuncMap) (string, error) {
 	tmpl := template.New("tmpl").Funcs(fm)
+	tmpl.Funcs(template.FuncMap{
+		"tpl": tplFunc(tmpl),
+	})
+	tplFunc(tmpl)
 	_, err := tmpl.Parse(tmplStr)
 	if err != nil {
 		return "", err
