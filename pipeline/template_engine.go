@@ -18,6 +18,7 @@ package pipeline
 
 import (
 	"bytes"
+	"github.com/rkosegi/yaml-toolkit/utils"
 	"strconv"
 	"strings"
 	"text/template"
@@ -40,12 +41,18 @@ func tplFunc(tmpl *template.Template) func(string, interface{}) (string, error) 
 	}
 }
 
+func toYamlFunc(v interface{}) (string, error) {
+	var buf strings.Builder
+	err := utils.NewYamlEncoder(&buf).Encode(v)
+	return strings.TrimSuffix(buf.String(), "\n"), err
+}
+
 func renderTemplate(tmplStr string, data interface{}, fm template.FuncMap) (string, error) {
 	tmpl := template.New("tmpl").Funcs(fm)
 	tmpl.Funcs(template.FuncMap{
-		"tpl": tplFunc(tmpl),
+		"tpl":    tplFunc(tmpl),
+		"toYaml": toYamlFunc,
 	})
-	tplFunc(tmpl)
 	_, err := tmpl.Parse(tmplStr)
 	if err != nil {
 		return "", err

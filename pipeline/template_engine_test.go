@@ -84,3 +84,18 @@ func TestTemplateEngineRenderTplInvalid(t *testing.T) {
 	}, sprig.TxtFuncMap())
 	assert.Error(t, err)
 }
+
+func TestTemplateEngineRenderToYaml(t *testing.T) {
+	var (
+		out string
+		err error
+	)
+	out, err = renderTemplate("{{ toYaml . }}", map[string]interface{}{
+		"x": map[string]interface{}{
+			"z": "abc",
+		},
+		"y": 25,
+	}, sprig.TxtFuncMap())
+	assert.NoError(t, err)
+	assert.Equal(t, "x:\n  z: abc\n\"y\": 25", out)
+}
