@@ -25,6 +25,7 @@ import (
 
 func TestExportOpDo(t *testing.T) {
 	var (
+		eo  *ExportOp
 		err error
 	)
 	f, err := os.CreateTemp("", "yt_export*.json")
@@ -37,7 +38,7 @@ func TestExportOpDo(t *testing.T) {
 		_ = os.Remove(f.Name())
 	})
 	t.Logf("created temporary file: %s", f.Name())
-	eo := &ExportOp{
+	eo = &ExportOp{
 		File:   f.Name(),
 		Path:   "root.sub1",
 		Format: OutputFormatJson,
@@ -50,6 +51,22 @@ func TestExportOpDo(t *testing.T) {
 	fi, err := os.Stat(f.Name())
 	assert.NotNil(t, fi)
 	assert.NoError(t, err)
+
+	eo = &ExportOp{
+		File:   f.Name(),
+		Path:   "root.sub1.sub2",
+		Format: OutputFormatText,
+	}
+	err = eo.Do(mockActCtx(d))
+	assert.NoError(t, err)
+
+	eo = &ExportOp{
+		File:   f.Name(),
+		Path:   "root.sub1",
+		Format: OutputFormatText,
+	}
+	err = eo.Do(mockActCtx(d))
+	assert.Error(t, err)
 }
 
 func TestExportOpDoInvalidDirectory(t *testing.T) {

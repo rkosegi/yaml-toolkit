@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/props"
+	"io"
 	"os"
 )
 
@@ -29,15 +30,18 @@ const (
 	OutputFormatYaml       = OutputFormat("yaml")
 	OutputFormatJson       = OutputFormat("json")
 	OutputFormatProperties = OutputFormat("properties")
+	OutputFormatText       = OutputFormat("text")
 )
 
 // ExportOp allows to export data into file
 type ExportOp struct {
 	// File to export data onto
 	File string
-	// Path within data tree pointing to dom.Container to export. Empty path denotes whole document.
-	// If path does not resolve or resolves to dom.Node that is not dom.Container,
-	// then empty document will be exported.
+	// Path within data tree pointing to dom.Node to export. Empty path denotes whole document.
+	// If path does not resolve, then empty document will be exported.
+	// If output format is "text" then path must point to leaf.
+	// Any other output format must point to dom.Container.
+	// If neither of these conditions are met, then it is considered as if path does not resolve at all.
 	Path string
 	// Format of output file.
 	Format OutputFormat
@@ -49,16 +53,14 @@ func (e *ExportOp) String() string {
 
 func (e *ExportOp) Do(ctx ActionContext) (err error) {
 	var (
-		d   dom.Node
-		enc dom.EncoderFunc
+		d      dom.Node
+		enc    dom.EncoderFunc
+		defVal dom.Node
 	)
+	defVal = b.Container()
 	d = ctx.Data()
 	if len(e.Path) > 0 {
 		d = ctx.Data().Lookup(e.Path)
-	}
-	// use empty container, since path lookup didn't yield anything useful
-	if d == nil || !d.IsContainer() {
-		d = b.Container()
 	}
 	switch e.Format {
 	case OutputFormatYaml:
@@ -67,11 +69,19 @@ func (e *ExportOp) Do(ctx ActionContext) (err error) {
 		enc = dom.DefaultJsonEncoder
 	case OutputFormatProperties:
 		enc = props.EncoderFn
+	case OutputFormatText:
+		enc = func(w io.Writer, v interface{}) error {
+			_, err := fmt.Fprintf(w, "%v", v)
+			return err
+		}
+		defVal = dom.LeafNode("")
 
 	default:
 		return fmt.Errorf("unknown output format: %s", e.Format)
 	}
-
+	if d == nil {
+		d = defVal
+	}
 	f, err := os.OpenFile(e.File, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
@@ -79,6 +89,12 @@ func (e *ExportOp) Do(ctx ActionContext) (err error) {
 	defer func() {
 		_ = f.Close()
 	}()
+	if e.Format == OutputFormatText {
+		if !d.IsLeaf() {
+			return fmt.Errorf("unsupported node for 'text' format: %v", d)
+		}
+		return enc(f, d.(dom.Leaf).Value())
+	}
 	return enc(f, dom.DefaultNodeMappingFn(d.(dom.Container)))
 }
 
