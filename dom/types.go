@@ -62,7 +62,7 @@ func DefaultJsonEncoder(w io.Writer, v interface{}) error {
 }
 
 func DefaultNodeMappingFn(n Container) interface{} {
-	return containerMappingFn(n.(Container))
+	return containerMappingFn(n)
 }
 
 // Serializable interface allows to persist data into provided io.Writer
