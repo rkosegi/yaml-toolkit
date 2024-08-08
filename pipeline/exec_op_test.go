@@ -19,6 +19,7 @@ package pipeline
 import (
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 )
 
@@ -31,6 +32,30 @@ func TestExecOpDo(t *testing.T) {
 	var (
 		eo *ExecOp
 	)
+	fout, err := os.CreateTemp("", "yt.*.txt")
+	ferr, err := os.CreateTemp("", "yt.*.txt")
+	defer func() {
+		t.Logf("removing %s", fout.Name())
+		_ = os.Remove(fout.Name())
+		t.Logf("removing %s", ferr.Name())
+		_ = os.Remove(ferr.Name())
+	}()
+	assert.NoError(t, err)
+	eo = &ExecOp{
+		Program: "sh",
+		Args:    &[]string{"-c", "echo abcd"},
+		Stdout:  strPointer(fout.Name()),
+		Stderr:  strPointer(ferr.Name()),
+	}
+	assert.NoError(t, eo.Do(mockEmptyActCtx()))
+
+	eo = &ExecOp{
+		Program: "sh",
+		Args:    &[]string{"-c", "echo abcd"},
+		Stdout:  strPointer("/"),
+	}
+	assert.Error(t, eo.Do(mockEmptyActCtx()))
+
 	eo = &ExecOp{
 		Program:        "sh",
 		Args:           &[]string{"-c", "exit 3"},

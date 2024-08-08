@@ -19,6 +19,8 @@ package pipeline
 import (
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	osx "os/exec"
 	"slices"
 )
@@ -30,6 +32,12 @@ type ExecOp struct {
 	Args *[]string `yaml:"args,omitempty"`
 	// List of exit codes that are assumed to be valid
 	ValidExitCodes *[]int `yaml:"validExitCodes,omitempty"`
+	// Path to file where program's stdout will be written upon completion.
+	// Any error occurred during write will result in panic.
+	Stdout *string
+	// Path to file where program's stderr will be written upon completion
+	// Any error occurred during write will result in panic.
+	Stderr *string
 }
 
 func (e *ExecOp) String() string {
@@ -37,6 +45,7 @@ func (e *ExecOp) String() string {
 }
 
 func (e *ExecOp) Do(_ ActionContext) error {
+	var closables []io.Closer
 	if e.ValidExitCodes == nil {
 		e.ValidExitCodes = &[]int{}
 	}
@@ -44,6 +53,34 @@ func (e *ExecOp) Do(_ ActionContext) error {
 		e.Args = &[]string{}
 	}
 	cmd := osx.Command(e.Program, *e.Args...)
+	defer func() {
+		for _, closer := range closables {
+			_ = closer.Close()
+		}
+	}()
+	type streamTgt struct {
+		output *string
+		target *io.Writer
+	}
+	for _, stream := range []streamTgt{
+		{
+			output: e.Stdout,
+			target: &cmd.Stdout,
+		},
+		{
+			output: e.Stderr,
+			target: &cmd.Stderr,
+		},
+	} {
+		if stream.output != nil {
+			out, err := os.OpenFile(*stream.output, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+			if err != nil {
+				return err
+			}
+			*stream.target = out
+			closables = append(closables, out)
+		}
+	}
 	err := cmd.Run()
 	var exitErr *osx.ExitError
 	if errors.As(err, &exitErr) {
