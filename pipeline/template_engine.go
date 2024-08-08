@@ -47,11 +47,25 @@ func toYamlFunc(v interface{}) (string, error) {
 	return strings.TrimSuffix(buf.String(), "\n"), err
 }
 
+// isEmptyFunc returns true if given argument is nil, or empty string
+func isEmptyFunc(v interface{}) bool {
+	if v == nil {
+		return true
+	}
+	if str, ok := v.(string); ok {
+		if str == "" {
+			return true
+		}
+	}
+	return false
+}
+
 func renderTemplate(tmplStr string, data interface{}, fm template.FuncMap) (string, error) {
 	tmpl := template.New("tmpl").Funcs(fm)
 	tmpl.Funcs(template.FuncMap{
-		"tpl":    tplFunc(tmpl),
-		"toYaml": toYamlFunc,
+		"tpl":     tplFunc(tmpl),
+		"toYaml":  toYamlFunc,
+		"isEmpty": isEmptyFunc,
 	})
 	_, err := tmpl.Parse(tmplStr)
 	if err != nil {

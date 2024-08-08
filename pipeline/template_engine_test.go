@@ -99,3 +99,30 @@ func TestTemplateEngineRenderToYaml(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "x:\n  z: abc\n\"y\": 25", out)
 }
+
+func TestTemplateFuncIsEmpty(t *testing.T) {
+	type testCase struct {
+		v   interface{}
+		res bool
+	}
+	for _, v := range []testCase{
+		{
+			v:   "",
+			res: true,
+		},
+		{
+			v:   nil,
+			res: true,
+		},
+		{
+			v:   "a",
+			res: false,
+		},
+		{
+			v:   struct{}{},
+			res: false,
+		},
+	} {
+		assert.Equal(t, v.res, isEmptyFunc(v.v))
+	}
+}
