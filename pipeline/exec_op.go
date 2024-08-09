@@ -44,7 +44,7 @@ func (e *ExecOp) String() string {
 	return fmt.Sprintf("Exec[Program=%s,Args=%d]", e.Program, safeStrListSize(e.Args))
 }
 
-func (e *ExecOp) Do(_ ActionContext) error {
+func (e *ExecOp) Do(ctx ActionContext) error {
 	var closables []io.Closer
 	if e.ValidExitCodes == nil {
 		e.ValidExitCodes = &[]int{}
@@ -52,7 +52,9 @@ func (e *ExecOp) Do(_ ActionContext) error {
 	if e.Args == nil {
 		e.Args = &[]string{}
 	}
-	cmd := osx.Command(e.Program, *e.Args...)
+	snapshot := ctx.Snapshot()
+	prog := ctx.TemplateEngine().RenderLenient(e.Program, snapshot)
+	cmd := osx.Command(prog, *safeRenderStrSlice(e.Args, ctx.TemplateEngine(), snapshot)...)
 	defer func() {
 		for _, closer := range closables {
 			_ = closer.Close()
