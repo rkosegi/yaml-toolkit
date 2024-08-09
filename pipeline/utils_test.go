@@ -61,3 +61,24 @@ func TestSafeRegexpDeref(t *testing.T) {
 	assert.Equal(t, "", safeRegexpDeref(nil))
 	assert.Equal(t, "abc", safeRegexpDeref(regexp.MustCompile(`abc`)))
 }
+
+func TestSafeRenderStrPointerNil(t *testing.T) {
+	assert.Nil(t, safeRenderStrPointer(nil, mockEmptyActCtx().TemplateEngine(), nil))
+}
+
+func TestSafeRenderStrPointer(t *testing.T) {
+	s := "{{ .X }}"
+	d := b.FromMap(map[string]interface{}{
+		"X": "abc",
+	})
+	c := mockActCtx(d)
+	assert.Equal(t, "abc", *safeRenderStrPointer(&s, c.TemplateEngine(), c.Snapshot()))
+}
+
+func TestSafeCopyIntSlice(t *testing.T) {
+	var x *[]int
+	assert.Nil(t, safeCopyIntSlice(nil))
+	a := []int{1, 2, 5}
+	x = safeCopyIntSlice(&a)
+	assert.Equal(t, 3, len(*x))
+}

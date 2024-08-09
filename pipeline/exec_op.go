@@ -75,6 +75,8 @@ func (e *ExecOp) Do(ctx ActionContext) error {
 		},
 	} {
 		if stream.output != nil {
+			s := ctx.TemplateEngine().RenderLenient(*stream.output, snapshot)
+			stream.output = &s
 			out, err := os.OpenFile(*stream.output, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 			if err != nil {
 				return err
@@ -98,7 +100,10 @@ func (e *ExecOp) Do(ctx ActionContext) error {
 func (e *ExecOp) CloneWith(ctx ActionContext) Action {
 	ss := ctx.Snapshot()
 	return &ExecOp{
-		Program: ctx.TemplateEngine().RenderLenient(e.Program, ss),
-		Args:    safeRenderStrSlice(e.Args, ctx.TemplateEngine(), ss),
+		Program:        ctx.TemplateEngine().RenderLenient(e.Program, ss),
+		Args:           safeRenderStrSlice(e.Args, ctx.TemplateEngine(), ss),
+		Stdout:         safeRenderStrPointer(e.Stdout, ctx.TemplateEngine(), ss),
+		Stderr:         safeRenderStrPointer(e.Stderr, ctx.TemplateEngine(), ss),
+		ValidExitCodes: safeCopyIntSlice(e.ValidExitCodes),
 	}
 }

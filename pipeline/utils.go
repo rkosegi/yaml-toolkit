@@ -83,6 +83,23 @@ func actionNames(actions ChildActions) string {
 	return strings.Join(sortActionNames(actions), ",")
 }
 
+func safeCopyIntSlice(in *[]int) *[]int {
+	if in == nil {
+		return nil
+	}
+	r := make([]int, len(*in))
+	copy(r, *in)
+	return &r
+}
+
+func safeRenderStrPointer(str *string, te TemplateEngine, data map[string]interface{}) *string {
+	if str == nil {
+		return nil
+	}
+	s := te.RenderLenient(*str, data)
+	return &s
+}
+
 func safeRenderStrSlice(args *[]string, te TemplateEngine, data map[string]interface{}) *[]string {
 	if args == nil {
 		return nil
