@@ -18,7 +18,11 @@ package pipeline
 
 import (
 	"bytes"
+	"fmt"
+	"github.com/rkosegi/yaml-toolkit/analytics"
+	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/utils"
+	"os"
 	"strconv"
 	"strings"
 	"text/template"
@@ -60,12 +64,46 @@ func isEmptyFunc(v interface{}) bool {
 	return false
 }
 
+// un-flatten map
+func unflattenFunc(v map[string]interface{}) map[string]interface{} {
+	return utils.Unflatten(v)
+}
+
+// fileExistsFunc checks if files exists.
+// Any error is swallowed and will cause function to return false, as if file does not exist.
+func fileExistsFunc(f string) bool {
+	_, err := os.Stat(f)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+// mergeFilesFunc merges 0 or more files into single map[string]interface{}
+func mergeFilesFunc(files ...string) (map[string]interface{}, error) {
+	ds := analytics.NewDocumentSet()
+	result := make(map[string]interface{})
+	for _, f := range files {
+		err := ds.AddDocumentFromFile(f, analytics.DefaultFileDecoderProvider(f))
+		if err != nil {
+			return nil, err
+		}
+	}
+	for k, v := range ds.AsOne().Merged(dom.ListsMergeAppend()).Flatten() {
+		result[k] = fmt.Sprintf("%v", v.Value())
+	}
+	return result, nil
+}
+
 func renderTemplate(tmplStr string, data interface{}, fm template.FuncMap) (string, error) {
 	tmpl := template.New("tmpl").Funcs(fm)
 	tmpl.Funcs(template.FuncMap{
-		"tpl":     tplFunc(tmpl),
-		"toYaml":  toYamlFunc,
-		"isEmpty": isEmptyFunc,
+		"tpl":        tplFunc(tmpl),
+		"toYaml":     toYamlFunc,
+		"isEmpty":    isEmptyFunc,
+		"unflatten":  unflattenFunc,
+		"fileExists": fileExistsFunc,
+		"mergeFiles": mergeFilesFunc,
 	})
 	_, err := tmpl.Parse(tmplStr)
 	if err != nil {
