@@ -19,6 +19,7 @@ package pipeline
 import (
 	sprig "github.com/go-task/slim-sprig/v3"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 )
 
@@ -125,4 +126,59 @@ func TestTemplateFuncIsEmpty(t *testing.T) {
 	} {
 		assert.Equal(t, v.res, isEmptyFunc(v.v))
 	}
+}
+
+func TestTemplateFuncUnflatten(t *testing.T) {
+	r := unflattenFunc(map[string]interface{}{
+		"a.b": 1,
+		"c":   "hello",
+	})
+	assert.Equal(t, 2, len(r))
+	assert.Equal(t, 1, r["a"].(map[string]interface{})["b"])
+	assert.Equal(t, "hello", r["c"])
+}
+
+func TestTemplateFuncFileExists(t *testing.T) {
+	assert.False(t, fileExistsFunc("/this/definitely/shouldn't exists"))
+	f, err := os.CreateTemp("", "yt*.txt")
+	assert.NoError(t, err)
+	if err != nil {
+		return
+	}
+	t.Cleanup(func() {
+		t.Logf("cleanup temporary file %s", f.Name())
+		_ = os.Remove(f.Name())
+	})
+	assert.True(t, fileExistsFunc(f.Name()))
+}
+
+func TestTemplateFuncMergeFiles(t *testing.T) {
+	f1, err := os.CreateTemp("", "yt*.yaml")
+	assert.NoError(t, err)
+	assert.NoError(t, os.WriteFile(f1.Name(), []byte("A: 1"), 0o664))
+	f2, err := os.CreateTemp("", "yt*.json")
+	assert.NoError(t, err)
+	assert.NoError(t, os.WriteFile(f2.Name(), []byte("{ \"B\": 2 }"), 0o664))
+	res, err := mergeFilesFunc(f1.Name(), f2.Name())
+	assert.NoError(t, err)
+	assert.NotNil(t, res)
+	t.Cleanup(func() {
+		t.Logf("cleanup temporary file %s", f1.Name())
+		_ = os.Remove(f1.Name())
+		t.Logf("cleanup temporary file %s", f2.Name())
+		_ = os.Remove(f2.Name())
+	})
+}
+
+func TestTemplateFuncMergeFilesInvalid(t *testing.T) {
+	f2, err := os.CreateTemp("", "yt*.json")
+	assert.NoError(t, err)
+	assert.NoError(t, os.WriteFile(f2.Name(), []byte("NOT_A_JSON"), 0o664))
+	res, err := mergeFilesFunc(f2.Name())
+	assert.Error(t, err)
+	assert.Nil(t, res)
+	t.Cleanup(func() {
+		t.Logf("cleanup temporary file %s", f2.Name())
+		_ = os.Remove(f2.Name())
+	})
 }
