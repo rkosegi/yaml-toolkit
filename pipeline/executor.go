@@ -37,6 +37,7 @@ type actContext struct {
 	e Executor
 	f dom.ContainerFactory
 	t TemplateEngine
+	l *listenerLoggerAdapter
 }
 
 func (ac actContext) Action() Action                 { return ac.c }
@@ -44,6 +45,7 @@ func (ac actContext) Data() dom.ContainerBuilder     { return ac.d }
 func (ac actContext) Factory() dom.ContainerFactory  { return ac.f }
 func (ac actContext) Executor() Executor             { return ac.e }
 func (ac actContext) TemplateEngine() TemplateEngine { return ac.t }
+func (ac actContext) Logger() Logger                 { return ac.l }
 func (ac actContext) Snapshot() map[string]interface{} {
 	return dom.DefaultNodeMappingFn(ac.Data()).(map[string]interface{})
 }
@@ -55,6 +57,7 @@ func (p *exec) newCtx(a Action) *actContext {
 		e: p,
 		f: b,
 		t: p.t,
+		l: &listenerLoggerAdapter{l: p.l},
 	}
 }
 
@@ -70,6 +73,15 @@ type noopListener struct{}
 
 func (n *noopListener) OnBefore(ActionContext)       {}
 func (n *noopListener) OnAfter(ActionContext, error) {}
+func (n *noopListener) OnLog(...interface{})         {}
+
+type listenerLoggerAdapter struct {
+	l Listener
+}
+
+func (n *listenerLoggerAdapter) Log(v ...interface{}) {
+	n.l.OnLog(v)
+}
 
 type Opt func(*exec)
 

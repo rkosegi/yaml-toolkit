@@ -23,6 +23,7 @@ import (
 	"os"
 	osx "os/exec"
 	"slices"
+	"strings"
 )
 
 type ExecOp struct {
@@ -85,6 +86,7 @@ func (e *ExecOp) Do(ctx ActionContext) error {
 			closables = append(closables, out)
 		}
 	}
+	ctx.Logger().Log(fmt.Sprintf("prog=%s,args=[%s]", e.Program, strings.Join(*e.Args, ",")))
 	err := cmd.Run()
 	var exitErr *osx.ExitError
 	if errors.As(err, &exitErr) {
