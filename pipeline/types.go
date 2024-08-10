@@ -43,13 +43,22 @@ type TemplateEngine interface {
 	EvalBool(template string, data map[string]interface{}) (bool, error)
 }
 
+// Logger interface allows arbitrary messages to be logged by actions.
+type Logger interface {
+	// Log logs given values.
+	// Format of values passed to this method is undefined.
+	Log(v ...interface{})
+}
+
 // Listener interface allows hook into execution of Action.
 type Listener interface {
-	// OnBefore is called just before act is executed
+	// OnBefore is called just before action is executed
 	OnBefore(ctx ActionContext)
-	// OnAfter is called sometime after act is executed, regardless of result.
+	// OnAfter is called sometime after action is executed, regardless of result.
 	// Any error returned by invoking Do() method is returned as last parameter.
 	OnAfter(ctx ActionContext, err error)
+	// OnLog is called whenever action invokes Log method on Logger instance
+	OnLog(v ...interface{})
 }
 
 // ActionContext is created by Executor implementation for sole purpose of invoking Action's Do function.
@@ -66,6 +75,8 @@ type ActionContext interface {
 	TemplateEngine() TemplateEngine
 	// Action return reference to actual Action
 	Action() Action
+	// Logger gets reference to Logger interface
+	Logger() Logger
 }
 
 // Action is implemented by actions within ActionSpec
