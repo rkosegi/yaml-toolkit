@@ -73,6 +73,16 @@ func fileExistsFunc(f string) bool {
 	return true
 }
 
+// isDirFunc checks if provided path points to directory.
+// Any error is swallowed and will cause function to return false.
+func isDirFunc(path string) bool {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return fi.IsDir()
+}
+
 // mergeFilesFunc merges 0 or more files into single map[string]interface{}
 func mergeFilesFunc(files ...string) (map[string]interface{}, error) {
 	ds := analytics.NewDocumentSet()

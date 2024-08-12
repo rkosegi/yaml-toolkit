@@ -182,3 +182,14 @@ func TestTemplateFuncMergeFilesInvalid(t *testing.T) {
 		_ = os.Remove(f2.Name())
 	})
 }
+
+func TestTemplateFuncIsDir(t *testing.T) {
+	d, err := os.MkdirTemp("", "yt*")
+	assert.NoError(t, err)
+	t.Cleanup(func() {
+		t.Logf("deleting temporary directory %s", d)
+		_ = os.RemoveAll(d)
+	})
+	assert.True(t, isDirFunc(d))
+	assert.False(t, isDirFunc("/i hope/this/path/does/not/exist"))
+}
