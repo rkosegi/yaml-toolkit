@@ -58,7 +58,7 @@ type Listener interface {
 	// Any error returned by invoking Do() method is returned as last parameter.
 	OnAfter(ctx ActionContext, err error)
 	// OnLog is called whenever action invokes Log method on Logger instance
-	OnLog(v ...interface{})
+	OnLog(ctx ActionContext, v ...interface{})
 }
 
 // ActionContext is created by Executor implementation for sole purpose of invoking Action's Do function.
