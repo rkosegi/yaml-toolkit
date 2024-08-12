@@ -51,7 +51,7 @@ func (ac actContext) Snapshot() map[string]interface{} {
 }
 
 func (p *exec) newCtx(a Action) *actContext {
-	return &actContext{
+	ctx := &actContext{
 		c: a,
 		d: p.gd,
 		e: p,
@@ -59,6 +59,8 @@ func (p *exec) newCtx(a Action) *actContext {
 		t: p.t,
 		l: &listenerLoggerAdapter{l: p.l},
 	}
+	ctx.l.c = ctx
+	return ctx
 }
 
 func (p *exec) Execute(act Action) (err error) {
@@ -71,16 +73,17 @@ func (p *exec) Execute(act Action) (err error) {
 
 type noopListener struct{}
 
-func (n *noopListener) OnBefore(ActionContext)       {}
-func (n *noopListener) OnAfter(ActionContext, error) {}
-func (n *noopListener) OnLog(...interface{})         {}
+func (n *noopListener) OnBefore(ActionContext)              {}
+func (n *noopListener) OnAfter(ActionContext, error)        {}
+func (n *noopListener) OnLog(ActionContext, ...interface{}) {}
 
 type listenerLoggerAdapter struct {
+	c ActionContext
 	l Listener
 }
 
 func (n *listenerLoggerAdapter) Log(v ...interface{}) {
-	n.l.OnLog(v)
+	n.l.OnLog(n.c, v)
 }
 
 type Opt func(*exec)
