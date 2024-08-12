@@ -145,10 +145,7 @@ func TestTemplateFuncFileExists(t *testing.T) {
 	if err != nil {
 		return
 	}
-	t.Cleanup(func() {
-		t.Logf("cleanup temporary file %s", f.Name())
-		_ = os.Remove(f.Name())
-	})
+	removeFilesLater(t, f)
 	assert.True(t, fileExistsFunc(f.Name()))
 }
 
@@ -162,12 +159,7 @@ func TestTemplateFuncMergeFiles(t *testing.T) {
 	res, err := mergeFilesFunc(f1.Name(), f2.Name())
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
-	t.Cleanup(func() {
-		t.Logf("cleanup temporary file %s", f1.Name())
-		_ = os.Remove(f1.Name())
-		t.Logf("cleanup temporary file %s", f2.Name())
-		_ = os.Remove(f2.Name())
-	})
+	removeFilesLater(t, f1, f2)
 }
 
 func TestTemplateFuncMergeFilesInvalid(t *testing.T) {
@@ -177,19 +169,13 @@ func TestTemplateFuncMergeFilesInvalid(t *testing.T) {
 	res, err := mergeFilesFunc(f2.Name())
 	assert.Error(t, err)
 	assert.Nil(t, res)
-	t.Cleanup(func() {
-		t.Logf("cleanup temporary file %s", f2.Name())
-		_ = os.Remove(f2.Name())
-	})
+	removeFilesLater(t, f2)
 }
 
 func TestTemplateFuncIsDir(t *testing.T) {
 	d, err := os.MkdirTemp("", "yt*")
 	assert.NoError(t, err)
-	t.Cleanup(func() {
-		t.Logf("deleting temporary directory %s", d)
-		_ = os.RemoveAll(d)
-	})
+	removeDirsLater(t, d)
 	assert.True(t, isDirFunc(d))
 	assert.False(t, isDirFunc("/i hope/this/path/does/not/exist"))
 }
@@ -198,10 +184,7 @@ func TestTemplateFuncGlob(t *testing.T) {
 	d, err := os.MkdirTemp("", "yt*")
 	assert.NoError(t, err)
 	assert.NoError(t, os.WriteFile(d+"/1.yaml", []byte{}, 0o664))
-	t.Cleanup(func() {
-		t.Logf("deleting temporary directory %s", d)
-		_ = os.RemoveAll(d)
-	})
+	removeDirsLater(t, d)
 	files, err := globFunc(d + "/*.yaml")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(files))

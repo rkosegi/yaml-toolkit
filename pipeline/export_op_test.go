@@ -33,10 +33,7 @@ func TestExportOpDo(t *testing.T) {
 	if err != nil {
 		return
 	}
-	t.Cleanup(func() {
-		t.Logf("cleanup temporary file %s", f.Name())
-		_ = os.Remove(f.Name())
-	})
+	removeFilesLater(t, f)
 	t.Logf("created temporary file: %s", f.Name())
 	eo = &ExportOp{
 		File:   f.Name(),
@@ -90,10 +87,7 @@ func TestExportOpDoNonExistentPath(t *testing.T) {
 	if err != nil {
 		return
 	}
-	t.Cleanup(func() {
-		t.Logf("cleanup temporary file %s", f.Name())
-		_ = os.Remove(f.Name())
-	})
+	removeFilesLater(t, f)
 	eo := &ExportOp{
 		File:   f.Name(),
 		Path:   "this.path.does.not.exist",

@@ -34,12 +34,7 @@ func TestExecOpDo(t *testing.T) {
 	)
 	fout, err := os.CreateTemp("", "yt.*.txt")
 	ferr, err := os.CreateTemp("", "yt.*.txt")
-	defer func() {
-		t.Logf("removing %s", fout.Name())
-		_ = os.Remove(fout.Name())
-		t.Logf("removing %s", ferr.Name())
-		_ = os.Remove(ferr.Name())
-	}()
+	removeFilesLater(t, fout, ferr)
 	assert.NoError(t, err)
 	eo = &ExecOp{
 		Program: "sh",

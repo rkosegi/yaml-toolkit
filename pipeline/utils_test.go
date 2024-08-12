@@ -19,6 +19,7 @@ package pipeline
 import (
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"regexp"
 	"testing"
 )
@@ -33,6 +34,24 @@ func mockEmptyActCtx() ActionContext {
 
 func mockActCtx(data dom.ContainerBuilder) ActionContext {
 	return New(WithData(data)).(*exec).newCtx(nil)
+}
+
+func removeFilesLater(t *testing.T, files ...*os.File) {
+	t.Cleanup(func() {
+		for _, f := range files {
+			t.Logf("cleanup temporary file %s", f.Name())
+			_ = os.Remove(f.Name())
+		}
+	})
+}
+
+func removeDirsLater(t *testing.T, dirs ...string) {
+	t.Cleanup(func() {
+		for _, f := range dirs {
+			t.Logf("delete temporary directory %s", f)
+			_ = os.RemoveAll(f)
+		}
+	})
 }
 
 func TestGetActionFromContext(t *testing.T) {
