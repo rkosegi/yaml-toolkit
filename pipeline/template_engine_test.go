@@ -193,3 +193,16 @@ func TestTemplateFuncIsDir(t *testing.T) {
 	assert.True(t, isDirFunc(d))
 	assert.False(t, isDirFunc("/i hope/this/path/does/not/exist"))
 }
+
+func TestTemplateFuncGlob(t *testing.T) {
+	d, err := os.MkdirTemp("", "yt*")
+	assert.NoError(t, err)
+	assert.NoError(t, os.WriteFile(d+"/1.yaml", []byte{}, 0o664))
+	t.Cleanup(func() {
+		t.Logf("deleting temporary directory %s", d)
+		_ = os.RemoveAll(d)
+	})
+	files, err := globFunc(d + "/*.yaml")
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(files))
+}
