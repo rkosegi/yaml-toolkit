@@ -37,6 +37,7 @@ func renderTemplate(tmplStr string, data interface{}, fm template.FuncMap) (stri
 		"fileExists": fileExistsFunc,
 		"mergeFiles": mergeFilesFunc,
 		"isDir":      isDirFunc,
+		"glob":       globFunc,
 	})
 	_, err := tmpl.Parse(tmplStr)
 	if err != nil {

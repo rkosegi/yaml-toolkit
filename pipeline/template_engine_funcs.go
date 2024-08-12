@@ -22,6 +22,7 @@ import (
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 )
@@ -81,6 +82,11 @@ func isDirFunc(path string) bool {
 		return false
 	}
 	return fi.IsDir()
+}
+
+// globFunc exposes filepath.Glob
+func globFunc(pattern string) ([]string, error) {
+	return filepath.Glob(pattern)
 }
 
 // mergeFilesFunc merges 0 or more files into single map[string]interface{}
