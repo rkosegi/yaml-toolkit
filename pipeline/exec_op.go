@@ -55,7 +55,8 @@ func (e *ExecOp) Do(ctx ActionContext) error {
 	}
 	snapshot := ctx.Snapshot()
 	prog := ctx.TemplateEngine().RenderLenient(e.Program, snapshot)
-	cmd := osx.Command(prog, *safeRenderStrSlice(e.Args, ctx.TemplateEngine(), snapshot)...)
+	args := *safeRenderStrSlice(e.Args, ctx.TemplateEngine(), snapshot)
+	cmd := osx.Command(prog, args...)
 	defer func() {
 		for _, closer := range closables {
 			_ = closer.Close()
@@ -86,7 +87,7 @@ func (e *ExecOp) Do(ctx ActionContext) error {
 			closables = append(closables, out)
 		}
 	}
-	ctx.Logger().Log(fmt.Sprintf("prog=%s,args=[%s]", e.Program, strings.Join(*e.Args, ",")))
+	ctx.Logger().Log(fmt.Sprintf("prog=%s,args=[%s]", prog, strings.Join(args, ",")))
 	err := cmd.Run()
 	var exitErr *osx.ExitError
 	if errors.As(err, &exitErr) {
