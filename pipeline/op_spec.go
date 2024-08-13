@@ -46,6 +46,9 @@ type OpSpec struct {
 	// ForEach execute same operation in a loop for every configured item
 	ForEach *ForEachOp `yaml:"forEach,omitempty"`
 
+	// Log logs arbitrary message to logger
+	Log *LogOp `yaml:"log,omitempty"`
+
 	// Abort is able to signal error, so that pipeline can abort execution
 	Abort *AbortOp `yaml:"abort,omitempty"`
 }
@@ -75,6 +78,9 @@ func (as OpSpec) toList() []Action {
 	}
 	if as.ForEach != nil {
 		actions = append(actions, as.ForEach)
+	}
+	if as.Log != nil {
+		actions = append(actions, as.Log)
 	}
 	if as.Abort != nil {
 		actions = append(actions, as.Abort)
@@ -118,6 +124,9 @@ func (as OpSpec) CloneWith(ctx ActionContext) Action {
 	if as.Exec != nil {
 		r.Exec = as.Exec.CloneWith(ctx).(*ExecOp)
 	}
+	if as.Log != nil {
+		r.Log = as.Log.CloneWith(ctx).(*LogOp)
+	}
 	if as.Abort != nil {
 		r.Abort = as.Abort.CloneWith(ctx).(*AbortOp)
 	}
@@ -145,6 +154,9 @@ func (as OpSpec) String() string {
 	}
 	if as.Import != nil {
 		parts = append(parts, fmt.Sprintf("Import=%v", as.Import.String()))
+	}
+	if as.Log != nil {
+		parts = append(parts, fmt.Sprintf("Log=%v", as.Log.String()))
 	}
 	if as.Patch != nil {
 		parts = append(parts, fmt.Sprintf("Patch=%v", as.Patch.String()))

@@ -51,6 +51,9 @@ func TestForeachStringItem(t *testing.T) {
 				Program: "sh",
 				Args:    &[]string{"-c", "rm /tmp/a-{{ .forEach }}.yaml"},
 			},
+			Log: &LogOp{
+				Message: "Hi {{ .forEach }}",
+			},
 		},
 	}
 	d := b.Container()

@@ -54,6 +54,9 @@ func TestOpSpecCloneWith(t *testing.T) {
 			Path:   "{{ .Path }}",
 			Format: OutputFormatYaml,
 		},
+		Log: &LogOp{
+			Message: "Path: {{ .Path }}",
+		},
 		Abort: &AbortOp{
 			Message: "abort",
 		},
