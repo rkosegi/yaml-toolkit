@@ -41,9 +41,7 @@ func (ts *TemplateOp) Do(ctx ActionContext) error {
 	if len(ts.Path) == 0 {
 		return ErrPathEmpty
 	}
-	val, err := ctx.TemplateEngine().Render(ts.Template, map[string]interface{}{
-		"Data": ctx.Snapshot(),
-	})
+	val, err := ctx.TemplateEngine().Render(ts.Template, ctx.Snapshot())
 	ctx.Data().AddValueAt(ts.Path, dom.LeafNode(val))
 	return err
 }

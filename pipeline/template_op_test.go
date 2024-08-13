@@ -32,7 +32,7 @@ func TestExecuteTemplateOp(t *testing.T) {
 	gd = b.Container()
 	gd.AddValueAt("root.leaf1", dom.LeafNode(123456))
 	ts = TemplateOp{
-		Template: `{{ (mul .Data.root.leaf1 2) | quote }}`,
+		Template: `{{ (mul .root.leaf1 2) | quote }}`,
 		Path:     "result.x1",
 	}
 	assert.NoError(t, New(WithData(gd)).Execute(&ts))
