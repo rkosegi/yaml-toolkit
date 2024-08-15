@@ -79,12 +79,13 @@ func (ia *ImportOp) String() string {
 }
 
 func (ia *ImportOp) Do(ctx ActionContext) error {
-	val, err := parseFile(ia.File, ia.Mode)
+	val, err := parseFile(ctx.TemplateEngine().RenderLenient(ia.File, ctx.Snapshot()), ia.Mode)
 	if err != nil {
 		return err
 	}
-	if len(ia.Path) > 0 {
-		ctx.Data().AddValueAt(ia.Path, val)
+	p := ctx.TemplateEngine().RenderLenient(ia.Path, ctx.Snapshot())
+	if len(p) > 0 {
+		ctx.Data().AddValueAt(p, val)
 	} else {
 		if !val.IsContainer() {
 			return ErrNotContainer
