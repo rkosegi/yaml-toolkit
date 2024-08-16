@@ -66,8 +66,8 @@ func (p *exec) newCtx(a Action) *actContext {
 func (p *exec) Execute(act Action) (err error) {
 	ctx := p.newCtx(act)
 	p.l.OnBefore(ctx)
-	defer p.l.OnAfter(ctx, err)
 	err = act.Do(ctx)
+	p.l.OnAfter(ctx, err)
 	return err
 }
 

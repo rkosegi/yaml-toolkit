@@ -24,6 +24,13 @@ import (
 	"strings"
 )
 
+func strTruncIfNeeded(in string, size int) string {
+	if len(in) <= size {
+		return in
+	}
+	return in[0:size]
+}
+
 func parseFile(path string, mode ParseFileMode) (dom.Node, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {

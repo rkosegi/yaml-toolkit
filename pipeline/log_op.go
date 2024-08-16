@@ -31,7 +31,7 @@ func (lo *LogOp) Do(ctx ActionContext) error {
 }
 
 func (lo *LogOp) String() string {
-	return fmt.Sprintf("Log[message=%s]", lo.Message)
+	return fmt.Sprintf("Log[message(%d)=%s]", len(lo.Message), strTruncIfNeeded(lo.Message, 5))
 }
 
 func (lo *LogOp) CloneWith(ctx ActionContext) Action {
