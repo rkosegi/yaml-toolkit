@@ -90,7 +90,7 @@ func globFunc(pattern string) ([]string, error) {
 }
 
 // mergeFilesFunc merges 0 or more files into single map[string]interface{}
-func mergeFilesFunc(files ...string) (map[string]interface{}, error) {
+func mergeFilesFunc(files []string) (map[string]interface{}, error) {
 	ds := analytics.NewDocumentSet()
 	result := make(map[string]interface{})
 	for _, f := range files {
