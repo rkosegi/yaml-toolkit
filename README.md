@@ -54,3 +54,79 @@ func main() {
 	}
 }
 ```
+
+### Compute difference between 2 documents
+
+<table>
+<thead><tr><th>Left</th><th>Right</th></tr></thead>
+<tbody>
+<tr><td><code>left.yaml</code></td><td><code>right.yaml</code></td></tr>
+<tr><td>
+
+```yaml
+---
+root:
+  sub1:
+    leaf1: abc
+    leaf2: 123
+  list:
+    - 1
+    - 2
+```
+</td><td>
+
+```yaml
+---
+root:
+  sub1:
+    leaf1: def
+    leaf3: 789
+  list:
+    - 3
+```
+</td>
+</tr>
+</tbody>
+</table>
+
+```go
+package main
+
+import (
+	"fmt"
+	yta "github.com/rkosegi/yaml-toolkit/analytics"
+	ydiff "github.com/rkosegi/yaml-toolkit/diff"
+)
+
+func main() {
+	dp := yta.DefaultFileDecoderProvider(".yaml")
+	ds := yta.NewDocumentSet()
+	err := ds.AddDocumentFromFile("left.yaml", dp, yta.WithTags("left"))
+	if err != nil {
+		panic(err)
+	}
+	err = ds.AddDocumentFromFile("right.yaml", dp, yta.WithTags("right"))
+	if err != nil {
+		panic(err)
+	}
+	changes := ydiff.Diff(
+		ds.TaggedSubset("right").Merged(),
+		ds.TaggedSubset("left").Merged(),
+	)
+	fmt.Printf("All changes: %d\n", len(*changes))
+	for _, change := range *changes {
+		fmt.Printf("%s: %s => %v\n", change.Type, change.Path, change.Value)
+	}
+}
+```
+
+output:
+```
+All changes: 5
+Delete: root.list => <nil>
+Add: root.list[0] => 3
+Change: root.sub1.leaf1 => abc
+Delete: root.sub1.leaf2 => <nil>
+Add: root.sub1.leaf3 => 789
+
+```
