@@ -94,6 +94,11 @@ func TestSafeRenderStrPointer(t *testing.T) {
 	assert.Equal(t, "abc", *safeRenderStrPointer(&s, c.TemplateEngine(), c.Snapshot()))
 }
 
+func TestStrTruncIfNeeded(t *testing.T) {
+	assert.Equal(t, "Hello", strTruncIfNeeded("Hello world", 5))
+	assert.Equal(t, "Hell", strTruncIfNeeded("Hell", 5))
+}
+
 func TestSafeCopyIntSlice(t *testing.T) {
 	var x *[]int
 	assert.Nil(t, safeCopyIntSlice(nil))
