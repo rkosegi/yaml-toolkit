@@ -49,10 +49,10 @@ func TestSerialize(t *testing.T) {
 	c.AddValue("test3", LeafNode("no"))
 	d.Put("", "key2", c)
 	var buf bytes.Buffer
-	assert.Nil(t, d.Serialize(&buf, DefaultNodeMappingFn, DefaultYamlEncoder))
+	assert.Nil(t, d.Serialize(&buf, DefaultNodeEncoderFn, DefaultYamlEncoder))
 	assert.True(t, buf.Len() > 0)
 	buf.Reset()
-	assert.Nil(t, d.Serialize(&buf, DefaultNodeMappingFn, DefaultYamlEncoder))
+	assert.Nil(t, d.Serialize(&buf, DefaultNodeEncoderFn, DefaultYamlEncoder))
 	assert.True(t, buf.Len() > 0)
 }
 
@@ -76,7 +76,7 @@ func TestLoad(t *testing.T) {
 	assert.Equal(t, 1, len(d.Layers()))
 
 	var buf bytes.Buffer
-	assert.Nil(t, d.Serialize(&buf, DefaultNodeMappingFn, DefaultYamlEncoder))
+	assert.Nil(t, d.Serialize(&buf, DefaultNodeEncoderFn, DefaultYamlEncoder))
 	var node yaml.Node
 	err = yaml.NewDecoder(&buf).Decode(&node)
 	assert.NoError(t, err)

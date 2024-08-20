@@ -21,7 +21,6 @@ import (
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"gopkg.in/yaml.v3"
 	"io"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -141,7 +140,7 @@ func (c *containerImpl) Children() map[string]Node {
 	return c.children
 }
 
-func (c *containerImpl) Serialize(writer io.Writer, mappingFunc NodeMappingFunc, encFn EncoderFunc) error {
+func (c *containerImpl) Serialize(writer io.Writer, mappingFunc NodeEncoderFunc, encFn EncoderFunc) error {
 	return encFn(writer, mappingFunc(c))
 }
 
@@ -284,44 +283,6 @@ func (c *containerBuilderImpl) RemoveAt(path string) {
 	}
 }
 
-func appendMap(current *map[string]interface{}, parent ContainerBuilder) {
-	for k, v := range *current {
-		if v == nil {
-			parent.AddValue(k, nilLeaf)
-		} else {
-			t := reflect.ValueOf(v)
-			switch t.Kind() {
-			case reflect.Map:
-				ref := v.(map[string]interface{})
-				appendMap(&ref, parent.AddContainer(k))
-			case reflect.Slice, reflect.Array:
-				appendSlice(v.([]interface{}), parent.AddList(k))
-			case reflect.Int, reflect.Float64, reflect.String, reflect.Bool:
-				parent.AddValue(k, LeafNode(v))
-			}
-		}
-	}
-}
-
-func appendSlice(items []interface{}, l ListBuilder) {
-	for _, item := range items {
-		t := reflect.ValueOf(item)
-		switch t.Kind() {
-		case reflect.Map:
-			ref := item.(map[string]interface{})
-			c := &containerBuilderImpl{}
-			appendMap(&ref, c)
-			l.Append(c)
-		case reflect.Slice, reflect.Array:
-			list := &listBuilderImpl{}
-			appendSlice(item.([]interface{}), list)
-			l.Append(list)
-		case reflect.Int, reflect.Float64, reflect.String, reflect.Bool:
-			l.Append(LeafNode(item))
-		}
-	}
-}
-
 type containerFactory struct {
 }
 
@@ -338,9 +299,7 @@ func (f *containerFactory) FromAny(v interface{}) ContainerBuilder {
 }
 
 func (f *containerFactory) FromMap(in map[string]interface{}) ContainerBuilder {
-	doc := containerBuilderImpl{}
-	appendMap(&in, &doc)
-	return &doc
+	return DefaultNodeDecoderFn(in).(ContainerBuilder)
 }
 
 func (f *containerFactory) FromProperties(in map[string]interface{}) ContainerBuilder {

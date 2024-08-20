@@ -146,7 +146,7 @@ func (m *overlayDocument) Populate(overlay, path string, data *map[string]interf
 	if path != "" {
 		current = ensurePath(current, m.pathComponents(path))
 	}
-	appendMap(data, current)
+	decodeContainerFn(data, current)
 }
 
 func (m *overlayDocument) Lookup(overlay, path string) Node {
@@ -184,39 +184,7 @@ func firstValidListItem(idx int, lists ...List) Node {
 	return nilLeaf
 }
 
-func leafMappingFn(n Leaf) interface{} {
-	return n.Value()
-}
-
-func listMappingFn(n List) []interface{} {
-	res := make([]interface{}, n.Size())
-	for i, item := range n.Items() {
-		if item.IsContainer() {
-			res[i] = containerMappingFn(item.(Container))
-		} else if item.IsList() {
-			res[i] = listMappingFn(item.(List))
-		} else {
-			res[i] = leafMappingFn(item.(Leaf))
-		}
-	}
-	return res
-}
-
-func containerMappingFn(n Container) map[string]interface{} {
-	res := map[string]interface{}{}
-	for k, v := range n.(Container).Children() {
-		if v.IsContainer() {
-			res[k] = containerMappingFn(v.(Container))
-		} else if v.IsList() {
-			res[k] = listMappingFn(v.(List))
-		} else {
-			res[k] = leafMappingFn(v.(Leaf))
-		}
-	}
-	return res
-}
-
-func (m *overlayDocument) Serialize(writer io.Writer, mappingFunc NodeMappingFunc, encFn EncoderFunc) error {
+func (m *overlayDocument) Serialize(writer io.Writer, mappingFunc NodeEncoderFunc, encFn EncoderFunc) error {
 	return encFn(writer, mappingFunc(m.Merged()))
 }
 

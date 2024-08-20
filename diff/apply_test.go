@@ -42,7 +42,7 @@ level1:
 		},
 	})
 	var buf bytes.Buffer
-	err = doc.Serialize(&buf, dom.DefaultNodeMappingFn, dom.DefaultYamlEncoder)
+	err = doc.Serialize(&buf, dom.DefaultNodeEncoderFn, dom.DefaultYamlEncoder)
 	assert.Nil(t, err)
 	assert.Equal(t, `leaf0: 1234
 leafX: null
@@ -89,7 +89,7 @@ level1:
 		},
 	})
 	var buf bytes.Buffer
-	err = doc.Serialize(&buf, dom.DefaultNodeMappingFn, dom.DefaultYamlEncoder)
+	err = doc.Serialize(&buf, dom.DefaultNodeEncoderFn, dom.DefaultYamlEncoder)
 	assert.Nil(t, err)
 	assert.Equal(t, `leaf0: 1234
 level1:

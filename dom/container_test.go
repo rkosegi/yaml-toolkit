@@ -69,7 +69,7 @@ func TestBuildAndSerialize(t *testing.T) {
 		AddContainer("level3").
 		AddValue("leaf1", LeafNode("Hello"))
 	var buf bytes.Buffer
-	err := builder.Serialize(&buf, DefaultNodeMappingFn, DefaultJsonEncoder)
+	err := builder.Serialize(&buf, DefaultNodeEncoderFn, DefaultJsonEncoder)
 	assert.Nil(t, err)
 	assert.Equal(t, `{
   "root": {
@@ -92,7 +92,7 @@ func TestRemove(t *testing.T) {
 		AddValue("leaf1", LeafNode("Hello"))
 	builder.Remove("root")
 	var buf bytes.Buffer
-	err := builder.Serialize(&buf, DefaultNodeMappingFn, DefaultJsonEncoder)
+	err := builder.Serialize(&buf, DefaultNodeEncoderFn, DefaultJsonEncoder)
 	assert.Nil(t, err)
 	assert.Equal(t, "{}\n", buf.String())
 }
@@ -182,7 +182,7 @@ func TestAddValueAt(t *testing.T) {
 	)
 	assert.Equal(t, "abc", c.Lookup("test1.test2.test31").(Leaf).Value())
 	var buff bytes.Buffer
-	err := c.Serialize(&buff, DefaultNodeMappingFn, DefaultYamlEncoder)
+	err := c.Serialize(&buff, DefaultNodeEncoderFn, DefaultYamlEncoder)
 	assert.Nil(t, err)
 }
 
