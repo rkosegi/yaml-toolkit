@@ -95,7 +95,7 @@ func DecodeEmbeddedDoc(item string, decFn dom.DecoderFunc) DecodeInternalFn {
 func EncodeEmbeddedDoc(item string, encFn dom.EncoderFunc) EncodeInternalFn {
 	return func(m Manifest, node dom.ContainerBuilder) error {
 		var buff bytes.Buffer
-		if err := node.Serialize(&buff, dom.DefaultNodeMappingFn, encFn); err != nil {
+		if err := node.Serialize(&buff, dom.DefaultNodeEncoderFn, encFn); err != nil {
 			return err
 		}
 		m.StringData().Update(item, buff.String())

@@ -34,8 +34,15 @@ func SearchEqual(in interface{}) SearchValueFunc {
 	}
 }
 
-// NodeMappingFunc maps internal Container value into external data representation
+// NodeMappingFunc maps internal Container value into external data representation.
+// Deprecated. Use NodeEncoderFunc
 type NodeMappingFunc func(Container) interface{}
+
+// NodeEncoderFunc maps internal Container value into external data representation
+type NodeEncoderFunc func(Container) interface{}
+
+// NodeDecoderFunc takes external data representation and decode it to Container
+type NodeDecoderFunc func(map[string]interface{}) Container
 
 // EncoderFunc encodes raw value into stream using provided io.Writer
 type EncoderFunc func(w io.Writer, v interface{}) error
@@ -61,14 +68,25 @@ func DefaultJsonEncoder(w io.Writer, v interface{}) error {
 	return e.Encode(v)
 }
 
+func DefaultNodeEncoderFn(n Container) interface{} {
+	return DefaultNodeMappingFn(n)
+}
+
+// Deprecated. Use DefaultNodeEncoderFn
 func DefaultNodeMappingFn(n Container) interface{} {
-	return containerMappingFn(n)
+	return encodeContainerFn(n)
+}
+
+func DefaultNodeDecoderFn(m map[string]interface{}) Container {
+	cb := containerBuilderImpl{}
+	decodeContainerFn(&m, &cb)
+	return &cb
 }
 
 // Serializable interface allows to persist data into provided io.Writer
 type Serializable interface {
 	// Serialize writes content into given writer, while encoding using provided EncoderFunc
-	Serialize(writer io.Writer, mappingFunc NodeMappingFunc, encFn EncoderFunc) error
+	Serialize(writer io.Writer, mappingFunc NodeEncoderFunc, encFn EncoderFunc) error
 }
 
 // Node is elemental unit of document. At runtime, it could be either Leaf or Container.

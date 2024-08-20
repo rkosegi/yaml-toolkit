@@ -186,7 +186,7 @@ level1:
 	}, res)
 	Apply(cright, *res)
 	var buf bytes.Buffer
-	err = cright.Serialize(&buf, dom.DefaultNodeMappingFn, dom.DefaultYamlEncoder)
+	err = cright.Serialize(&buf, dom.DefaultNodeEncoderFn, dom.DefaultYamlEncoder)
 	assert.Nil(t, err)
 	assert.Equal(t, `another:
   container:
