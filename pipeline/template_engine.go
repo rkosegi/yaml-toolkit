@@ -30,14 +30,17 @@ type templateEngine struct {
 func renderTemplate(tmplStr string, data interface{}, fm template.FuncMap) (string, error) {
 	tmpl := template.New("tmpl").Funcs(fm)
 	tmpl.Funcs(template.FuncMap{
-		"tpl":        tplFunc(tmpl),
-		"toYaml":     toYamlFunc,
-		"isEmpty":    isEmptyFunc,
-		"unflatten":  unflattenFunc,
-		"fileExists": fileExistsFunc,
-		"mergeFiles": mergeFilesFunc,
-		"isDir":      isDirFunc,
-		"glob":       globFunc,
+		"tpl":            tplFunc(tmpl),
+		"toYaml":         toYamlFunc,
+		"isEmpty":        isEmptyFunc,
+		"unflatten":      unflattenFunc,
+		"fileExists":     fileExistsFunc,
+		"mergeFiles":     mergeFilesFunc,
+		"isDir":          isDirFunc,
+		"glob":           globFunc,
+		"dom2yaml":       dom2yamlFunc,
+		"dom2json":       dom2jsonFunc,
+		"dom2properties": dom2propertiesFunc,
 	})
 	_, err := tmpl.Parse(tmplStr)
 	if err != nil {

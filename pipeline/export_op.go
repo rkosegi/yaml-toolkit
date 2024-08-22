@@ -95,7 +95,7 @@ func (e *ExportOp) Do(ctx ActionContext) (err error) {
 		}
 		return enc(f, d.(dom.Leaf).Value())
 	}
-	return enc(f, dom.DefaultNodeMappingFn(d.(dom.Container)))
+	return enc(f, dom.DefaultNodeEncoderFn(d.(dom.Container)))
 }
 
 func (e *ExportOp) CloneWith(ctx ActionContext) Action {
