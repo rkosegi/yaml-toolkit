@@ -47,7 +47,7 @@ func (ac actContext) Executor() Executor             { return ac.e }
 func (ac actContext) TemplateEngine() TemplateEngine { return ac.t }
 func (ac actContext) Logger() Logger                 { return ac.l }
 func (ac actContext) Snapshot() map[string]interface{} {
-	return dom.DefaultNodeMappingFn(ac.Data()).(map[string]interface{})
+	return dom.DefaultNodeEncoderFn(ac.Data()).(map[string]interface{})
 }
 
 func (p *exec) newCtx(a Action) *actContext {

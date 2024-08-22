@@ -189,3 +189,45 @@ func TestTemplateFuncGlob(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(files))
 }
+
+func TestTemplateFuncDom2Yaml(t *testing.T) {
+	type testCase struct {
+		format string
+		exp    string
+	}
+	d, err := os.MkdirTemp("", "yt*")
+	assert.NoError(t, err)
+	removeDirsLater(t, d)
+	f1, err := os.CreateTemp(d, "yt*.yaml")
+	assert.NoError(t, err)
+	f2, err := os.CreateTemp(d, "yt*.yaml")
+	assert.NoError(t, err)
+	_, err = f1.Write([]byte("a: 1"))
+	assert.NoError(t, err)
+	_, err = f2.Write([]byte("b: 2\n"))
+	assert.NoError(t, err)
+	for _, tc := range []testCase{
+		{
+			format: "properties",
+			exp:    "a=1",
+		},
+		{
+			format: "yaml",
+			exp:    "a: 1",
+		},
+		{
+			format: "json",
+			exp:    `"a": 1`,
+		},
+	} {
+		var res string
+		res, err = renderTemplate(`{{ mergeFiles ( glob ( printf "%s/*.yaml" .Temp ) ) | dom2`+tc.format+` | trim }}`,
+			map[string]interface{}{
+				"Temp": d,
+			}, sprig.HermeticTxtFuncMap())
+		t.Logf("Merged content using format '%s':\n%s", tc.format, res)
+		assert.NoError(t, err)
+		assert.Contains(t, res, tc.exp)
+	}
+	removeFilesLater(t, f1, f2)
+}
