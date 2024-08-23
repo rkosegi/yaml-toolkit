@@ -119,6 +119,10 @@ type List interface {
 	Size() int
 	// Items returns copy of slice of all nodes in this list
 	Items() []Node
+
+	// AsSlice converts recursively content of this List into []interface{}.
+	// Result consists from Go vanilla constructs only.
+	AsSlice() []interface{}
 }
 
 // NodeList is sequence of zero or more Nodes
@@ -136,6 +140,10 @@ type Container interface {
 	Lookup(path string) Node
 	// Flatten flattens this Container into list of leaves
 	Flatten() map[string]Leaf
+
+	// AsMap converts recursively content of this container into map[string]interface{}
+	// Result consists from Go vanilla constructs only and thus could be directly used in Go templates.
+	AsMap() map[string]interface{}
 	// Search finds all paths where Node's value is equal to given value according to provided SearchValueFunc.
 	// If no match is found, nil is returned.
 	Search(fn SearchValueFunc) []string

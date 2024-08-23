@@ -33,6 +33,10 @@ func (l *listImpl) Items() []Node {
 	return c
 }
 
+func (l *listImpl) AsSlice() []interface{} {
+	return encoderListFn(l)
+}
+
 func (l *listImpl) Size() int {
 	return len(l.items)
 }
