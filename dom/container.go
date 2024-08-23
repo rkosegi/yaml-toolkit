@@ -73,6 +73,10 @@ func (c *containerImpl) Flatten() map[string]Leaf {
 	return ret
 }
 
+func (c *containerImpl) AsMap() map[string]interface{} {
+	return encodeContainerFn(c)
+}
+
 func (c *containerImpl) Equals(node Node) bool {
 	if node == nil || !node.IsContainer() {
 		return false

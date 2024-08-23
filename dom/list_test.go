@@ -98,3 +98,12 @@ func TestListClone(t *testing.T) {
 	assert.Equal(t, l2.Items()[0], l.Items()[0])
 	assert.Equal(t, l2.Items()[1], l.Items()[1])
 }
+
+func TestListAsSlice(t *testing.T) {
+	l := ListNode(LeafNode(1), LeafNode(2), LeafNode(3))
+	l2 := l.AsSlice()
+	assert.Equal(t, 3, len(l2))
+	assert.Equal(t, 1, l2[0])
+	assert.Equal(t, 2, l2[1])
+	assert.Equal(t, 3, l2[2])
+}
