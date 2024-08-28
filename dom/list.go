@@ -73,28 +73,32 @@ type listBuilderImpl struct {
 	listImpl
 }
 
-func (l *listBuilderImpl) Clear() {
+func (l *listBuilderImpl) Clear() ListBuilder {
 	l.items = []Node{}
+	return l
 }
 
-func (l *listBuilderImpl) Set(index uint, item Node) {
+func (l *listBuilderImpl) Set(index uint, item Node) ListBuilder {
 	for i := 0; i <= int(index); i++ {
 		if i > len(l.items)-1 {
 			l.Append(nilLeaf)
 		}
 	}
 	l.items[index] = item
+	return l
 }
 
-func (l *listBuilderImpl) MustSet(index uint, item Node) {
+func (l *listBuilderImpl) MustSet(index uint, item Node) ListBuilder {
 	if int(index) > len(l.items)-1 {
 		panic(fmt.Sprintf("index out of bounds: %d", index))
 	}
 	l.items[index] = item
+	return l
 }
 
-func (l *listBuilderImpl) Append(item Node) {
+func (l *listBuilderImpl) Append(item Node) ListBuilder {
 	l.items = append(l.items, item)
+	return l
 }
 
 func ListNode(items ...Node) ListBuilder {
