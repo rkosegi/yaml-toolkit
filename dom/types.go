@@ -153,18 +153,18 @@ type Container interface {
 type ContainerBuilder interface {
 	Container
 	// AddValue adds Node value into this Container
-	AddValue(name string, value Node)
+	AddValue(name string, value Node) ContainerBuilder
 	// AddValueAt adds Leaf value into this Container at given path.
 	// Child nodes are creates as needed.
-	AddValueAt(path string, value Node)
+	AddValueAt(path string, value Node) ContainerBuilder
 	// AddContainer adds child Container into this Container
 	AddContainer(name string) ContainerBuilder
 	// AddList adds child List into this Container
 	AddList(name string) ListBuilder
 	// Remove removes direct child Node.
-	Remove(name string)
+	Remove(name string) ContainerBuilder
 	// RemoveAt removes child Node at given path.
-	RemoveAt(path string)
+	RemoveAt(path string) ContainerBuilder
 	// Walk walks whole document tree, visiting every node
 	Walk(fn WalkFn)
 	// Merge creates new Container instance and merge current Container with other into it.
@@ -217,13 +217,13 @@ type Coordinates []Coordinate
 type ListBuilder interface {
 	List
 	// Clear sets items to empty slice
-	Clear()
+	Clear() ListBuilder
 	// Set sets item at given index. Items are allocated and set to nil Leaf as necessary.
-	Set(uint, Node)
+	Set(uint, Node) ListBuilder
 	// MustSet sets item at given index. Panics if index is out of bounds.
-	MustSet(uint, Node)
+	MustSet(uint, Node) ListBuilder
 	// Append adds new item at the end of slice
-	Append(Node)
+	Append(Node) ListBuilder
 }
 
 // MergeOption is function used to customize merger behavior

@@ -204,8 +204,9 @@ func (c *containerBuilderImpl) AddList(name string) ListBuilder {
 	return lb
 }
 
-func (c *containerBuilderImpl) Remove(name string) {
+func (c *containerBuilderImpl) Remove(name string) ContainerBuilder {
 	delete(c.children, name)
+	return c
 }
 
 func (c *containerBuilderImpl) AddContainer(name string) ContainerBuilder {
@@ -242,8 +243,9 @@ func (c *containerBuilderImpl) add(name string, child Node) {
 	}
 }
 
-func (c *containerBuilderImpl) AddValue(name string, value Node) {
+func (c *containerBuilderImpl) AddValue(name string, value Node) ContainerBuilder {
 	c.add(name, value)
+	return c
 }
 
 func (c *containerBuilderImpl) addChild(parent ContainerBuilder, name string) ContainerBuilder {
@@ -276,15 +278,17 @@ func (c *containerBuilderImpl) ancestorOf(path string, create bool) (ContainerBu
 	return node, cp[len(cp)-1]
 }
 
-func (c *containerBuilderImpl) AddValueAt(path string, value Node) {
+func (c *containerBuilderImpl) AddValueAt(path string, value Node) ContainerBuilder {
 	node, p := c.ancestorOf(path, true)
 	node.AddValue(p, value)
+	return c
 }
 
-func (c *containerBuilderImpl) RemoveAt(path string) {
+func (c *containerBuilderImpl) RemoveAt(path string) ContainerBuilder {
 	if node, p := c.ancestorOf(path, false); node != nil {
 		node.Remove(p)
 	}
+	return c
 }
 
 type containerFactory struct {
