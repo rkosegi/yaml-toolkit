@@ -7,6 +7,8 @@
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=rkosegi_yaml-toolkit&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=rkosegi_yaml-toolkit)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=rkosegi_yaml-toolkit&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=rkosegi_yaml-toolkit)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=rkosegi_yaml-toolkit&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=rkosegi_yaml-toolkit)
+[![Go Reference](https://pkg.go.dev/badge/github.com/rkosegi/yaml-toolkit.svg)](https://pkg.go.dev/github.com/rkosegi/yaml-toolkit)
+[![Apache 2.0 License](https://badgen.net/static/license/Apache2.0/blue)](https://github.com/rkosegi/yaml-toolkit/blob/main/LICENSE)
 
 Go library to deal with YAML documents embedded within k8s manifests (like Spring boot's application.yaml).
 
