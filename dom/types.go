@@ -198,10 +198,6 @@ type ContainerFactory interface {
 	FromMap(in map[string]interface{}) ContainerBuilder
 	// FromProperties is similar to FromMap except that keys are parsed into path before inserting into ContainerBuilder
 	FromProperties(in map[string]interface{}) ContainerBuilder
-	// FromAny creates ContainerBuilder from any object. Any error encountered in process will result in panic.
-	// This method uses YAML codec internally to perform translation between raw interface and map.
-	// Deprecated, do not use. Same can be simply achieved by various ways by caller himself.
-	FromAny(v interface{}) ContainerBuilder
 }
 
 // Coordinate is address of Node within OverlayDocument

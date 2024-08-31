@@ -19,7 +19,6 @@ package dom
 import (
 	"fmt"
 	"github.com/rkosegi/yaml-toolkit/utils"
-	"gopkg.in/yaml.v3"
 	"io"
 	"regexp"
 	"strconv"
@@ -292,18 +291,6 @@ func (c *containerBuilderImpl) RemoveAt(path string) ContainerBuilder {
 }
 
 type containerFactory struct {
-}
-
-func (f *containerFactory) FromAny(v interface{}) ContainerBuilder {
-	var buff strings.Builder
-	if err := utils.NewYamlEncoder(&buff).Encode(v); err != nil {
-		panic(err)
-	}
-	var m map[string]interface{}
-	if err := yaml.Unmarshal([]byte(buff.String()), &m); err != nil {
-		panic(err)
-	}
-	return f.FromMap(m)
 }
 
 func (f *containerFactory) FromMap(in map[string]interface{}) ContainerBuilder {
