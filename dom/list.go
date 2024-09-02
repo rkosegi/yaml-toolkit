@@ -34,7 +34,7 @@ func (l *listImpl) Items() []Node {
 }
 
 func (l *listImpl) AsSlice() []interface{} {
-	return encoderListFn(l)
+	return encodeListFn(l)
 }
 
 func (l *listImpl) Size() int {

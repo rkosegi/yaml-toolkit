@@ -22,13 +22,13 @@ func encodeLeafFn(n Leaf) interface{} {
 	return n.Value()
 }
 
-func encoderListFn(n List) []interface{} {
+func encodeListFn(n List) []interface{} {
 	res := make([]interface{}, n.Size())
 	for i, item := range n.Items() {
 		if item.IsContainer() {
 			res[i] = encodeContainerFn(item.(Container))
 		} else if item.IsList() {
-			res[i] = encoderListFn(item.(List))
+			res[i] = encodeListFn(item.(List))
 		} else {
 			res[i] = encodeLeafFn(item.(Leaf))
 		}
@@ -42,7 +42,7 @@ func encodeContainerFn(n Container) map[string]interface{} {
 		if v.IsContainer() {
 			res[k] = encodeContainerFn(v.(Container))
 		} else if v.IsList() {
-			res[k] = encoderListFn(v.(List))
+			res[k] = encodeListFn(v.(List))
 		} else {
 			res[k] = encodeLeafFn(v.(Leaf))
 		}
