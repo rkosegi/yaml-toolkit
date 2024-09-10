@@ -64,7 +64,9 @@ func decodeListFn(v []interface{}, l ListBuilder) {
 			list := &listBuilderImpl{}
 			decodeListFn(item.([]interface{}), list)
 			l.Append(list)
-		case reflect.Int, reflect.Float64, reflect.String, reflect.Bool:
+		case reflect.Float32, reflect.Float64, reflect.String, reflect.Bool,
+			reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			l.Append(decodeLeafFn(item))
 		}
 	}
@@ -82,7 +84,9 @@ func decodeContainerFn(current *map[string]interface{}, parent ContainerBuilder)
 				decodeContainerFn(&ref, parent.AddContainer(k))
 			case reflect.Slice, reflect.Array:
 				decodeListFn(v.([]interface{}), parent.AddList(k))
-			case reflect.Int, reflect.Float64, reflect.String, reflect.Bool:
+			case reflect.Float32, reflect.Float64, reflect.String, reflect.Bool,
+				reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+				reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 				parent.AddValue(k, decodeLeafFn(v))
 			}
 		}
