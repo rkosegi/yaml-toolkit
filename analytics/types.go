@@ -17,13 +17,11 @@ limitations under the License.
 package analytics
 
 import (
-	"github.com/rkosegi/yaml-toolkit/dom"
 	"io"
-)
 
-// FileDecoderProvider resolves dom.DecoderFunc for given file.
-// If file is not recognized, nil is returned.
-type FileDecoderProvider func(file string) dom.DecoderFunc
+	. "github.com/rkosegi/yaml-toolkit/common"
+	"github.com/rkosegi/yaml-toolkit/dom"
+)
 
 // AddLayerOpt returns function that can be used to customize document being added to set.
 type AddLayerOpt func(*documentSet, string, *docContext)

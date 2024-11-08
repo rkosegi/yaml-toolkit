@@ -17,14 +17,16 @@ limitations under the License.
 package pipeline
 
 import (
-	"github.com/rkosegi/yaml-toolkit/analytics"
-	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/props"
-	"github.com/rkosegi/yaml-toolkit/utils"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/rkosegi/yaml-toolkit/analytics"
+	"github.com/rkosegi/yaml-toolkit/common"
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/props"
+	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 func tplFunc(tmpl *template.Template) func(string, interface{}) (string, error) {
@@ -93,7 +95,7 @@ func globFunc(pattern string) ([]string, error) {
 func mergeFilesFunc(files []string) (dom.Container, error) {
 	ds := analytics.NewDocumentSet()
 	for _, f := range files {
-		err := ds.AddDocumentFromFile(f, analytics.DefaultFileDecoderProvider(f))
+		err := ds.AddDocumentFromFile(f, common.DefaultFileDecoderProvider(f))
 		if err != nil {
 			return nil, err
 		}
