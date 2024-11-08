@@ -18,17 +18,19 @@ package analytics
 
 import (
 	"fmt"
-	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/props"
 	"slices"
 	"strings"
+
+	"github.com/rkosegi/yaml-toolkit/common"
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/props"
 )
 
 type placeholderResolver struct {
 	onResolutionFailureFn      OnResolutionFailureFn
 	onPlaceholderEncounteredFn OnPlaceholderEncounteredFn
-	keyFilterFn                StringPredicateFn
-	placeholderMatcherFn       StringPredicateFn
+	keyFilterFn                common.StringPredicateFn
+	placeholderMatcherFn       common.StringPredicateFn
 }
 
 func (pr *placeholderResolver) Resolve(doc dom.OverlayDocument) *PlaceholderResolutionReport {
@@ -81,16 +83,16 @@ func NewPlaceholderResolverBuilder() PlaceholderResolverBuilder {
 type placeholderResolverBuilder struct {
 	onResolutionFailureFn      OnResolutionFailureFn
 	onPlaceholderEncounteredFn OnPlaceholderEncounteredFn
-	keyFilterFn                StringPredicateFn
-	placeholderMatcherFn       StringPredicateFn
+	keyFilterFn                common.StringPredicateFn
+	placeholderMatcherFn       common.StringPredicateFn
 }
 
-func (rb *placeholderResolverBuilder) WithPlaceholderMatcher(matcherFn StringPredicateFn) PlaceholderResolverBuilder {
+func (rb *placeholderResolverBuilder) WithPlaceholderMatcher(matcherFn common.StringPredicateFn) PlaceholderResolverBuilder {
 	rb.placeholderMatcherFn = matcherFn
 	return rb
 }
 
-func (rb *placeholderResolverBuilder) WithKeyFilter(filterFn StringPredicateFn) PlaceholderResolverBuilder {
+func (rb *placeholderResolverBuilder) WithKeyFilter(filterFn common.StringPredicateFn) PlaceholderResolverBuilder {
 	rb.keyFilterFn = filterFn
 	return rb
 }
