@@ -17,6 +17,7 @@ limitations under the License.
 package analytics
 
 import (
+	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
 )
 
@@ -26,7 +27,7 @@ type ImpactAnalysis interface {
 }
 
 type impactAnalysis struct {
-	keyFilterFn          StringPredicateFn
+	keyFilterFn          common.StringPredicateFn
 	placeholderMatcherFn func(string) dom.SearchValueFunc
 }
 
@@ -55,16 +56,16 @@ func (i *impactAnalysis) ResolveOverlayDocument(od dom.OverlayDocument, keys []s
 type ImpactAnalysisBuilder interface {
 	Build() ImpactAnalysis
 	// WithKeyFilter allows to override default key filter predicate
-	WithKeyFilter(StringPredicateFn) ImpactAnalysisBuilder
+	WithKeyFilter(common.StringPredicateFn) ImpactAnalysisBuilder
 }
 
 type impactAnalysisBuilder struct {
 	// method to override dom.SearchValueFunc which searches property value for presence of placeholder reference.
 	placeholderMatcherFn func(string) dom.SearchValueFunc
-	keyFilterFn          StringPredicateFn
+	keyFilterFn          common.StringPredicateFn
 }
 
-func (iab *impactAnalysisBuilder) WithKeyFilter(keyFilterFn StringPredicateFn) ImpactAnalysisBuilder {
+func (iab *impactAnalysisBuilder) WithKeyFilter(keyFilterFn common.StringPredicateFn) ImpactAnalysisBuilder {
 	iab.keyFilterFn = keyFilterFn
 	return iab
 }

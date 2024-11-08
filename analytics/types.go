@@ -19,7 +19,7 @@ package analytics
 import (
 	"io"
 
-	. "github.com/rkosegi/yaml-toolkit/common"
+	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
 )
 
@@ -54,21 +54,18 @@ type DocumentSet interface {
 	AddPropertiesFromManifest(file string, opts ...AddLayerOpt) error
 
 	// AddDocumentsFromDirectory takes provided glob pattern and loads all matching files into this documentSet.
-	AddDocumentsFromDirectory(pattern string, decProvFn FileDecoderProvider, opts ...AddLayerOpt) error
+	AddDocumentsFromDirectory(pattern string, decProvFn common.FileDecoderProvider, opts ...AddLayerOpt) error
 
 	// AddDocumentsFromManifest parses K8s manifest data entries into dom.ContainerBuilder and adds them into documentSet.
 	// See k8s package for more details about manifest support details.
 	// Warning: invocation of this function is not atomic if error occurs mid-execution;
 	// some manifest items might be added to DocumentSet before error occurred, while rest of them not.
-	AddDocumentsFromManifest(manifest string, decProvFn FileDecoderProvider, opts ...AddLayerOpt) error
+	AddDocumentsFromManifest(manifest string, decProvFn common.FileDecoderProvider, opts ...AddLayerOpt) error
 }
 
 // OnPlaceholderEncounteredFn is invoked when property value that contains placeholder
 // is encountered during resolution process.
 type OnPlaceholderEncounteredFn func(key, ph string)
-
-// StringPredicateFn is predicate to match string value.
-type StringPredicateFn func(string) bool
 
 // OnResolutionFailureFn is callback function invoked when placeholder can't be resolved to actual value
 type OnResolutionFailureFn func(key, value string, coordinates dom.Coordinates)
@@ -92,9 +89,9 @@ type PlaceholderResolver interface {
 type PlaceholderResolverBuilder interface {
 	// WithPlaceholderMatcher allows to override default predicate to match presence of placeholder in property value.
 	// Normally you don't need to override it.
-	WithPlaceholderMatcher(StringPredicateFn) PlaceholderResolverBuilder
+	WithPlaceholderMatcher(common.StringPredicateFn) PlaceholderResolverBuilder
 	// WithKeyFilter allows to set filter to narrow down resolution only to keys matching provided predicate
-	WithKeyFilter(StringPredicateFn) PlaceholderResolverBuilder
+	WithKeyFilter(common.StringPredicateFn) PlaceholderResolverBuilder
 
 	OnPlaceholderEncountered(OnPlaceholderEncounteredFn) PlaceholderResolverBuilder
 

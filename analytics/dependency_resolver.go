@@ -18,10 +18,12 @@ package analytics
 
 import (
 	"fmt"
-	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/utils"
 	"slices"
 	"strings"
+
+	"github.com/rkosegi/yaml-toolkit/common"
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 func matchAll(string) bool {
@@ -40,7 +42,7 @@ func hasPlaceholderFunc(ph string) dom.SearchValueFunc {
 
 type dependencyResolverBuilder struct {
 	// predicate to filter out keys to search
-	keyFilterFn StringPredicateFn
+	keyFilterFn common.StringPredicateFn
 	// callback function that is invoked when placeholder is found in property
 	onPlaceholderEncounteredFn func(string, dom.Coordinates)
 	// factory method to provide dom.SearchValueFunc which searches property value for presence of placeholder reference.
@@ -69,7 +71,7 @@ type dependencyResolver struct {
 	// placeholderMatcherFn       SearchPlaceholderFunc
 	onPlaceholderEncounteredFn func(string, dom.Coordinates)
 	placeholderMatcherFn       func(string) dom.SearchValueFunc
-	keyFilterFn                StringPredicateFn
+	keyFilterFn                common.StringPredicateFn
 }
 
 func subtract(from []string, what []string) []string {

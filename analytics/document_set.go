@@ -25,7 +25,7 @@ import (
 	"slices"
 	"strings"
 
-	. "github.com/rkosegi/yaml-toolkit/common"
+	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/k8s"
 	"github.com/rkosegi/yaml-toolkit/utils"
@@ -162,7 +162,7 @@ func (ds *documentSet) AddDocumentFromFile(file string, dec dom.DecoderFunc, opt
 	return ds.AddDocumentFromReader(file, f, dec, opts...)
 }
 
-func (ds *documentSet) AddDocumentsFromDirectory(pattern string, decProv FileDecoderProvider, opts ...AddLayerOpt) error {
+func (ds *documentSet) AddDocumentsFromDirectory(pattern string, decProv common.FileDecoderProvider, opts ...AddLayerOpt) error {
 	files, err := filepath.Glob(pattern)
 	if err != nil {
 		return err
@@ -176,7 +176,7 @@ func (ds *documentSet) AddDocumentsFromDirectory(pattern string, decProv FileDec
 	return nil
 }
 
-func (ds *documentSet) AddDocumentsFromManifest(manifest string, decProv FileDecoderProvider, opts ...AddLayerOpt) error {
+func (ds *documentSet) AddDocumentsFromManifest(manifest string, decProv common.FileDecoderProvider, opts ...AddLayerOpt) error {
 	m, err := k8s.ManifestFromFile(manifest)
 	if err != nil {
 		return err

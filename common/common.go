@@ -56,3 +56,5 @@ func DefaultFileDecoderProvider(file string) dom.DecoderFunc {
 		return nil
 	}
 }
+
+type StringPredicateFn func(string) bool
