@@ -17,19 +17,13 @@ limitations under the License.
 package analytics
 
 import (
+	"testing"
+
+	. "github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
-
-func TestDefaultFileDecoderProvider(t *testing.T) {
-	assert.Nil(t, DefaultFileDecoderProvider("file.unknown"))
-	assert.NotNil(t, DefaultFileDecoderProvider("file.yaml"))
-	assert.NotNil(t, DefaultFileDecoderProvider("file.yml"))
-	assert.NotNil(t, DefaultFileDecoderProvider("file.json"))
-	assert.NotNil(t, DefaultFileDecoderProvider("file.properties"))
-}
 
 func TestDocumentSetAdd(t *testing.T) {
 	ds := NewDocumentSet()

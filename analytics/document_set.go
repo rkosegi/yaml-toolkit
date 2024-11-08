@@ -19,15 +19,16 @@ package analytics
 import (
 	"errors"
 	"fmt"
-	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/k8s"
-	"github.com/rkosegi/yaml-toolkit/props"
-	"github.com/rkosegi/yaml-toolkit/utils"
 	"io"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
+
+	. "github.com/rkosegi/yaml-toolkit/common"
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/k8s"
+	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 const (
@@ -69,20 +70,6 @@ type docContext struct {
 	tags []string
 	// function used to merge 2 contexts
 	mergeFn func(ctx *docContext, doc dom.ContainerBuilder) error
-}
-
-// DefaultFileDecoderProvider is FileDecoderProvider that uses file suffix to choose dom.DecoderFunc
-func DefaultFileDecoderProvider(file string) dom.DecoderFunc {
-	switch filepath.Ext(file) {
-	case ".yaml", ".yml":
-		return dom.DefaultYamlDecoder
-	case ".json":
-		return dom.DefaultJsonDecoder
-	case ".properties":
-		return props.DecoderFn
-	default:
-		return nil
-	}
 }
 
 func WithTags(tag ...string) AddLayerOpt {

@@ -15,6 +15,44 @@ Go library to deal with YAML documents embedded within k8s manifests (like Sprin
 
 ## Usage
 
+### Loading configuration file with defaults
+
+`config.yaml`
+```yaml
+---
+listen_address: 0.0.0.0:8080
+read_timeout: 15s
+```
+
+```go
+package main
+
+import (
+	"time"
+
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/fluent"
+)
+
+type Config struct {
+	Address     string        `yaml:"listen_address"`
+	ReadTimeout time.Duration `yaml:"read_timeout"`
+}
+
+var defConfig = &Config{
+	Address: "0.0.0.0:8081",
+}
+
+func main() {
+	cfg := fluent.NewConfigHelper[Config]().
+		Add(defConfig).
+		Load("config").
+	    Result()
+
+	// ... use cfg
+}
+```
+
 ### Opening embedded YAML
 
 `example.yaml`
