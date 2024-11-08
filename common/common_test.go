@@ -17,6 +17,7 @@ limitations under the License.
 package common
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -36,4 +37,27 @@ func TestDefaultFileDecoderProvider(t *testing.T) {
 		assert.NotNil(t, DefaultFileDecoderProvider(ext))
 	}
 	assert.Nil(t, DefaultFileDecoderProvider(".unknown"))
+}
+
+func filterStrSlice(in []string, fn StringPredicateFn) []string {
+	result := make([]string, 0)
+	for _, e := range in {
+		if fn(e) {
+			result = append(result, e)
+		}
+	}
+	return result
+}
+
+func TestStringMatchFunc(t *testing.T) {
+	in := []string{"a", "b", "c"}
+	var res []string
+	res = filterStrSlice(in, MatchAny())
+	assert.Equal(t, in, res)
+	res = filterStrSlice(in, MatchNone())
+	assert.Equal(t, 0, len(res))
+	res = filterStrSlice(in, MatchRe(regexp.MustCompile(`a`)))
+	assert.Equal(t, 1, len(res))
+	res = filterStrSlice(in, MatchRe(regexp.MustCompile(`[ac]`)))
+	assert.Equal(t, 2, len(res))
 }
