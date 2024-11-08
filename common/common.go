@@ -18,6 +18,7 @@ package common
 
 import (
 	"path/filepath"
+	"regexp"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/props"
@@ -58,3 +59,21 @@ func DefaultFileDecoderProvider(file string) dom.DecoderFunc {
 }
 
 type StringPredicateFn func(string) bool
+
+var (
+	MatchAny = func() StringPredicateFn {
+		return func(s string) bool {
+			return true
+		}
+	}
+	MatchNone = func() StringPredicateFn {
+		return func(s string) bool {
+			return false
+		}
+	}
+	MatchRe = func(re *regexp.Regexp) StringPredicateFn {
+		return func(s string) bool {
+			return re.MatchString(s)
+		}
+	}
+)

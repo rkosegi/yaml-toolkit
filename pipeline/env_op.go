@@ -18,34 +18,14 @@ package pipeline
 
 import (
 	"fmt"
-	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/utils"
 	"os"
 	"regexp"
 	"strings"
-)
 
-// TODO : move these predicates to common place, maybe utils package
-var (
-	MatchAny = func() StringPredicateFn {
-		return func(s string) bool {
-			return true
-		}
-	}
-	MatchNone = func() StringPredicateFn {
-		return func(s string) bool {
-			return false
-		}
-	}
-	MatchRe = func(re *regexp.Regexp) StringPredicateFn {
-		return func(s string) bool {
-			return re.MatchString(s)
-		}
-	}
+	"github.com/rkosegi/yaml-toolkit/common"
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/utils"
 )
-
-// TODO: merge with same thing from analytics package and move it to common place
-type StringPredicateFn func(string) bool
 
 // EnvOp is used to import OS environment variables into data
 type EnvOp struct {
@@ -66,21 +46,21 @@ type EnvOp struct {
 
 func (eo *EnvOp) Do(ctx ActionContext) error {
 	var (
-		inclFn StringPredicateFn
-		exclFn StringPredicateFn
+		inclFn common.StringPredicateFn
+		exclFn common.StringPredicateFn
 		getter func() []string
 	)
 	getter = os.Environ
 	if eo.envGetter != nil {
 		getter = eo.envGetter
 	}
-	inclFn = MatchAny()
-	exclFn = MatchNone()
+	inclFn = common.MatchAny()
+	exclFn = common.MatchNone()
 	if eo.Include != nil {
-		inclFn = MatchRe(eo.Include)
+		inclFn = common.MatchRe(eo.Include)
 	}
 	if eo.Exclude != nil {
-		exclFn = MatchRe(eo.Exclude)
+		exclFn = common.MatchRe(eo.Exclude)
 	}
 	for _, env := range getter() {
 		parts := strings.SplitN(env, "=", 2)

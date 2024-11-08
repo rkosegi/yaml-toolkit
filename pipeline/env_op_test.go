@@ -17,10 +17,11 @@ limitations under the License.
 package pipeline
 
 import (
-	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/stretchr/testify/assert"
 	"regexp"
 	"testing"
+
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/stretchr/testify/assert"
 )
 
 func createRePtr(in string) *regexp.Regexp {
@@ -57,27 +58,4 @@ func TestEnvOpCloneWith(t *testing.T) {
 	d.AddValue("NewPath", dom.LeafNode("root"))
 	eo = eo.CloneWith(mockActCtx(d)).(*EnvOp)
 	assert.Equal(t, "root", eo.Path)
-}
-
-func filterStrSlice(in []string, fn StringPredicateFn) []string {
-	result := make([]string, 0)
-	for _, e := range in {
-		if fn(e) {
-			result = append(result, e)
-		}
-	}
-	return result
-}
-
-func TestStringMatchFunc(t *testing.T) {
-	in := []string{"a", "b", "c"}
-	var res []string
-	res = filterStrSlice(in, MatchAny())
-	assert.Equal(t, in, res)
-	res = filterStrSlice(in, MatchNone())
-	assert.Equal(t, 0, len(res))
-	res = filterStrSlice(in, MatchRe(regexp.MustCompile(`a`)))
-	assert.Equal(t, 1, len(res))
-	res = filterStrSlice(in, MatchRe(regexp.MustCompile(`[ac]`)))
-	assert.Equal(t, 2, len(res))
 }
