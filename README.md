@@ -10,12 +10,14 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/rkosegi/yaml-toolkit.svg)](https://pkg.go.dev/github.com/rkosegi/yaml-toolkit)
 [![Apache 2.0 License](https://badgen.net/static/license/Apache2.0/blue)](https://github.com/rkosegi/yaml-toolkit/blob/main/LICENSE)
 
-Go library to deal with YAML documents embedded within k8s manifests (like Spring boot's application.yaml).
+Go library to deal with (not only) YAML documents.
 
 
 ## Usage
 
 ### Loading configuration file with defaults
+
+given configuration file
 
 `config.yaml`
 ```yaml
@@ -45,9 +47,9 @@ var defConfig = &Config{
 
 func main() {
 	cfg := fluent.NewConfigHelper[Config]().
-		Add(defConfig).
-		Load("config").
-	    Result()
+		Add(defConfig).         // add defaults
+		Load("config.yaml").    // override with values loaded from YAML document
+		Result()                // get merged results
 
 	// ... use cfg
 }
@@ -135,11 +137,12 @@ package main
 import (
 	"fmt"
 	yta "github.com/rkosegi/yaml-toolkit/analytics"
+	ytc "github.com/rkosegi/yaml-toolkit/common"
 	ydiff "github.com/rkosegi/yaml-toolkit/diff"
 )
 
 func main() {
-	dp := yta.DefaultFileDecoderProvider(".yaml")
+	dp := ytc.DefaultFileDecoderProvider(".yaml")
 	ds := yta.NewDocumentSet()
 	err := ds.AddDocumentFromFile("left.yaml", dp, yta.WithTags("left"))
 	if err != nil {
