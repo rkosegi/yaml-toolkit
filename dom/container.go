@@ -18,16 +18,18 @@ package dom
 
 import (
 	"fmt"
-	"github.com/rkosegi/yaml-toolkit/utils"
 	"io"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 var (
 	listPathRe = regexp.MustCompile("\\[\\d+]$")
 	nilLeaf    = LeafNode(nil)
+	b          = &containerFactory{}
 )
 
 type containerImpl struct {
@@ -319,7 +321,7 @@ func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBui
 }
 
 func Builder() ContainerFactory {
-	return &containerFactory{}
+	return b
 }
 
 var _ ContainerBuilder = &containerBuilderImpl{}

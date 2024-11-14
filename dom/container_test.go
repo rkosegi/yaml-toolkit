@@ -18,15 +18,12 @@ package dom
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"slices"
 	"strings"
 	"testing"
-)
 
-var (
-	b = Builder()
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBuilderFromYamlString(t *testing.T) {
