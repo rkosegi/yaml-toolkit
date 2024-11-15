@@ -18,12 +18,13 @@ package diff
 
 import (
 	"bytes"
+	"strings"
+	"testing"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
-	"strings"
-	"testing"
 )
 
 func leavesEqual(l1, l2 interface{}) bool {
@@ -276,4 +277,61 @@ root:
   list1:
     - item1`)
 	assert.Equal(t, 0, len(*res))
+}
+
+func TestDiffOverlayDocuments(t *testing.T) {
+	var (
+		cb dom.ContainerBuilder
+	)
+	left := dom.NewOverlayDocument()
+	cb = dom.Builder().Container()
+	cb.AddValueAt("a.b.c", dom.LeafNode(1))
+	left.Add("layer1", cb)
+	cb = dom.Builder().Container()
+	cb.AddValueAt("a.b.d", dom.LeafNode("xyz"))
+	left.Add("layer2", cb)
+	cb = dom.Builder().Container()
+	cb.AddValue("something", dom.LeafNode("A"))
+	left.Add("layer3", cb)
+
+	right := dom.NewOverlayDocument()
+	cb = dom.Builder().Container()
+	cb.AddValueAt("a.b.c", dom.LeafNode(2))
+	right.Add("layer1", cb)
+	cb = dom.Builder().Container()
+	cb.AddValue("hello", dom.LeafNode("Hi!"))
+	right.Add("layer2", cb)
+	cb = dom.Builder().Container()
+	cb.AddValue("hello", dom.LeafNode("Aloha!"))
+	right.Add("layer4", cb)
+
+	res := OverlayDocs(left, right)
+	for k, v := range res {
+		t.Logf("%s: %v", k, v)
+	}
+
+	assert.Equal(t, 4, len(res))
+	assertHasChange(t, Modification{
+		Type:     ModChange,
+		Path:     "a.b.c",
+		OldValue: 1,
+		Value:    2,
+	}, res["layer1"])
+
+	assertHasChange(t, Modification{
+		Type:  ModAdd,
+		Path:  "a.b.d",
+		Value: "xyz",
+	}, res["layer2"])
+
+	assertHasChange(t, Modification{
+		Type: ModDelete,
+		Path: "hello",
+	}, res["layer2"])
+
+	assertHasChange(t, Modification{
+		Type:  ModAdd,
+		Path:  "something",
+		Value: "A",
+	}, res["layer3"])
 }
