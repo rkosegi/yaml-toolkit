@@ -18,10 +18,11 @@ package diff
 
 import (
 	"fmt"
+	"sort"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/utils"
-	"sort"
 )
 
 type ModificationType string
@@ -152,4 +153,26 @@ func Diff(left, right dom.Container) *[]Modification {
 	// make order of modifications deterministic
 	sortMods(mods)
 	return &mods
+}
+
+// OverlayDocs computes semantic difference between 2 Overlay documents
+func OverlayDocs(left, right dom.OverlayDocument) map[string]*[]Modification {
+	res := make(map[string]*[]Modification)
+	lmap := left.Layers()
+	rmap := right.Layers()
+	for ln, ll := range lmap {
+		if rl, ok := rmap[ln]; ok {
+			res[ln] = Diff(ll, rl)
+		} else {
+			res[ln] = Diff(ll, dom.Builder().Container())
+		}
+	}
+	for rn, rl := range rmap {
+		if ll, ok := lmap[rn]; ok {
+			res[rn] = Diff(ll, rl)
+		} else {
+			res[rn] = Diff(dom.Builder().Container(), rl)
+		}
+	}
+	return res
 }
