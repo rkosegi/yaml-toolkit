@@ -18,8 +18,9 @@ package props
 
 import (
 	"fmt"
-	"github.com/rkosegi/yaml-toolkit/utils"
 	"strings"
+
+	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 type PathSegment struct {

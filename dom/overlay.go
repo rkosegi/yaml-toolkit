@@ -18,10 +18,11 @@ package dom
 
 import (
 	"fmt"
-	"github.com/rkosegi/yaml-toolkit/utils"
 	"io"
 	"slices"
 	"strings"
+
+	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 type coordinate struct {

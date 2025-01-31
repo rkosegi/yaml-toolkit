@@ -20,10 +20,11 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"github.com/rkosegi/yaml-toolkit/utils"
-	"gopkg.in/yaml.v3"
 	"io"
 	"os"
+
+	"github.com/rkosegi/yaml-toolkit/utils"
+	"gopkg.in/yaml.v3"
 )
 
 const (

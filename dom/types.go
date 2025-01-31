@@ -18,10 +18,11 @@ package dom
 
 import (
 	"encoding/json"
+	"io"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"gopkg.in/yaml.v3"
-	"io"
 )
 
 // SearchValueFunc is used to search for value within document

@@ -17,11 +17,12 @@ limitations under the License.
 package pipeline
 
 import (
-	"github.com/rkosegi/yaml-toolkit/dom"
 	"os"
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/rkosegi/yaml-toolkit/dom"
 )
 
 func strTruncIfNeeded(in string, size int) string {

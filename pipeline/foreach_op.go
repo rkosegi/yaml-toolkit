@@ -18,8 +18,9 @@ package pipeline
 
 import (
 	"fmt"
-	"github.com/rkosegi/yaml-toolkit/dom"
 	"path/filepath"
+
+	"github.com/rkosegi/yaml-toolkit/dom"
 )
 
 type ForEachOp struct {

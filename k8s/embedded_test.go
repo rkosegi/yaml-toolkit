@@ -18,11 +18,12 @@ package k8s
 
 import (
 	"errors"
-	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"os"
 	"testing"
+
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/stretchr/testify/assert"
 )
 
 var (

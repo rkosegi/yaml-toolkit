@@ -18,12 +18,13 @@ package k8s
 
 import (
 	"bytes"
-	"github.com/rkosegi/yaml-toolkit/utils"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/rkosegi/yaml-toolkit/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 func getTestFileAsReader(file string) (io.Reader, error) {

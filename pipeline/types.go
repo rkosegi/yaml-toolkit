@@ -19,6 +19,7 @@ package pipeline
 import (
 	"errors"
 	"fmt"
+
 	"github.com/rkosegi/yaml-toolkit/dom"
 )
 

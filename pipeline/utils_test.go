@@ -17,11 +17,12 @@ limitations under the License.
 package pipeline
 
 import (
-	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"regexp"
 	"testing"
+
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/stretchr/testify/assert"
 )
 
 func strPointer(str string) *string {

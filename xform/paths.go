@@ -18,9 +18,10 @@ package xform
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/rkosegi/yaml-toolkit/patch"
 	"github.com/rkosegi/yaml-toolkit/props"
-	"strings"
 )
 
 func PropPath2Pointer(in props.Path) patch.Path {

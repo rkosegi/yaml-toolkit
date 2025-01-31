@@ -17,13 +17,14 @@ limitations under the License.
 package pipeline
 
 import (
+	"strings"
+	"testing"
+
 	sprig "github.com/go-task/slim-sprig/v3"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/patch"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
-	"strings"
-	"testing"
 )
 
 var dummyExec = New().(*exec)

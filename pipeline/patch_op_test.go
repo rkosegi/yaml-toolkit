@@ -17,10 +17,11 @@ limitations under the License.
 package pipeline
 
 import (
+	"testing"
+
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/patch"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestExecutePatchOp(t *testing.T) {

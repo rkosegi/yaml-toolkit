@@ -18,10 +18,11 @@ package diff
 
 import (
 	"bytes"
-	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestApply(t *testing.T) {

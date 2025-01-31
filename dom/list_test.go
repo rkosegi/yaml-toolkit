@@ -17,9 +17,10 @@ limitations under the License.
 package dom
 
 import (
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var d = `
