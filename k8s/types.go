@@ -17,8 +17,9 @@ limitations under the License.
 package k8s
 
 import (
-	"github.com/rkosegi/yaml-toolkit/dom"
 	"io"
+
+	"github.com/rkosegi/yaml-toolkit/dom"
 )
 
 // StringData allows to manipulate content of string data items in k8s manifest

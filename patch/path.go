@@ -18,9 +18,10 @@ package patch
 
 import (
 	"fmt"
-	"github.com/rkosegi/yaml-toolkit/dom"
 	"strconv"
 	"strings"
+
+	"github.com/rkosegi/yaml-toolkit/dom"
 )
 
 type PathSegment string

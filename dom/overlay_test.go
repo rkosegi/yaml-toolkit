@@ -19,10 +19,11 @@ package dom
 import (
 	"bytes"
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v3"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 )
 
 func TestPutAndLookup(t *testing.T) {

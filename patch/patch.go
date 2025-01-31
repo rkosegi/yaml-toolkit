@@ -19,6 +19,7 @@ package patch
 import (
 	"errors"
 	"fmt"
+
 	"github.com/rkosegi/yaml-toolkit/dom"
 )
 

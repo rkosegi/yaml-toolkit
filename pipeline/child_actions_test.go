@@ -17,9 +17,10 @@ limitations under the License.
 package pipeline
 
 import (
+	"testing"
+
 	sprig "github.com/go-task/slim-sprig/v3"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestSortActionNames(t *testing.T) {

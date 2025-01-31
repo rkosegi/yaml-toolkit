@@ -17,8 +17,9 @@ limitations under the License.
 package pipeline
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestOpSpecCloneWith(t *testing.T) {

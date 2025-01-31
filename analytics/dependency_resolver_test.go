@@ -17,10 +17,11 @@ limitations under the License.
 package analytics
 
 import (
-	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDefaultDependencyResolver(t *testing.T) {

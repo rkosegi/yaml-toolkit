@@ -18,11 +18,12 @@ package props
 
 import (
 	"bytes"
+	"strings"
+	"testing"
+
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"github.com/stretchr/testify/assert"
-	"strings"
-	"testing"
 )
 
 func TestEncoderFn(t *testing.T) {

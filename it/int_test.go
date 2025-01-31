@@ -17,11 +17,12 @@ limitations under the License.
 package it
 
 import (
+	"os"
+	"testing"
+
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/k8s"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 func TestLoadListOverlay(t *testing.T) {

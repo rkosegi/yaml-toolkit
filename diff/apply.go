@@ -17,9 +17,10 @@ limitations under the License.
 package diff
 
 import (
+	"strings"
+
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/utils"
-	"strings"
 )
 
 func applyList(l dom.ListBuilder, idxes []int) dom.ContainerBuilder {

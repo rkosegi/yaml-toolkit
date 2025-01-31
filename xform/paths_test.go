@@ -17,9 +17,10 @@ limitations under the License.
 package xform
 
 import (
+	"testing"
+
 	"github.com/rkosegi/yaml-toolkit/props"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestPropPath2Pointer(t *testing.T) {

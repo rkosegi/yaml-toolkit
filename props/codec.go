@@ -18,10 +18,11 @@ package props
 
 import (
 	"fmt"
+	"io"
+
 	"github.com/magiconair/properties"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/utils"
-	"io"
 )
 
 func encodeKv(k string, v interface{}, w io.Writer) error {

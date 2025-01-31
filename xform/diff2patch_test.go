@@ -17,11 +17,12 @@ limitations under the License.
 package xform
 
 import (
+	"testing"
+
 	"github.com/rkosegi/yaml-toolkit/diff"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/patch"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestDiffMod2PatchOpAdd(t *testing.T) {

@@ -18,10 +18,11 @@ package pipeline
 
 import (
 	"fmt"
-	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/props"
 	"io"
 	"os"
+
+	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/props"
 )
 
 type OutputFormat string

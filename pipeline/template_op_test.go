@@ -17,9 +17,10 @@ limitations under the License.
 package pipeline
 
 import (
+	"testing"
+
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestExecuteTemplateOp(t *testing.T) {

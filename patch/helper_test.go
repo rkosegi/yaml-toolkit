@@ -17,8 +17,9 @@ limitations under the License.
 package patch
 
 import (
-	"github.com/rkosegi/yaml-toolkit/dom"
 	"strings"
+
+	"github.com/rkosegi/yaml-toolkit/dom"
 )
 
 var (

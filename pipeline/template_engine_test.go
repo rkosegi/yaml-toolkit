@@ -17,10 +17,11 @@ limitations under the License.
 package pipeline
 
 import (
-	sprig "github.com/go-task/slim-sprig/v3"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	sprig "github.com/go-task/slim-sprig/v3"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPossiblyTemplate(t *testing.T) {
