@@ -56,8 +56,12 @@ func TestExecOpDo(t *testing.T) {
 		Program:        "sh",
 		Args:           &[]string{"-c", "exit 3"},
 		ValidExitCodes: &[]int{3},
+		SaveExitCodeTo: strPointer("Res"),
 	}
-	assert.NoError(t, eo.Do(mockEmptyActCtx()))
+	d := b.Container()
+	ctx := mockActCtx(d)
+	assert.NoError(t, eo.Do(ctx))
+	assert.Equal(t, 3, d.Lookup("Res").(dom.Leaf).Value())
 	eo = &ExecOp{
 		Program:        "sh",
 		Args:           &[]string{"-c", "exit 4"},
