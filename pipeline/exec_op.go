@@ -24,6 +24,8 @@ import (
 	osx "os/exec"
 	"slices"
 	"strings"
+
+	"github.com/rkosegi/yaml-toolkit/dom"
 )
 
 type ExecOp struct {
@@ -39,6 +41,8 @@ type ExecOp struct {
 	// Path to file where program's stderr will be written upon completion
 	// Any error occurred during write will result in panic.
 	Stderr *string
+	// Path within the global data where to set exit code.
+	SaveExitCodeTo *string `yaml:"saveExitCodeTo,omitempty"`
 }
 
 func (e *ExecOp) String() string {
@@ -91,6 +95,9 @@ func (e *ExecOp) Do(ctx ActionContext) error {
 	err := cmd.Run()
 	var exitErr *osx.ExitError
 	if errors.As(err, &exitErr) {
+		if e.SaveExitCodeTo != nil {
+			ctx.Data().AddValueAt(*e.SaveExitCodeTo, dom.LeafNode(exitErr.ExitCode()))
+		}
 		if !slices.Contains(*e.ValidExitCodes, exitErr.ExitCode()) {
 			return err
 		}
