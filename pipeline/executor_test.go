@@ -313,11 +313,13 @@ func TestExecuteForEachFileGlob(t *testing.T) {
 	ex = newTestExec(gd)
 	fe := &ForEachOp{
 		Glob: strPointer("../testdata/doc?.yaml"),
-		Action: OpSpec{
-			Import: &ImportOp{
-				File: "{{ .forEach }}",
-				Path: "import.files.{{ b64enc (osBase .forEach) }}",
-				Mode: ParseFileModeYaml,
+		Action: ActionSpec{
+			Operations: OpSpec{
+				Import: &ImportOp{
+					File: "{{ .forEach }}",
+					Path: "import.files.{{ b64enc (osBase .forEach) }}",
+					Mode: ParseFileModeYaml,
+				},
 			},
 		},
 	}

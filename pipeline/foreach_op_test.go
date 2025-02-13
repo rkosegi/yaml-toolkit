@@ -25,8 +25,10 @@ import (
 
 func TestForeachCloneWith(t *testing.T) {
 	op := ForEachOp{
-		Item:   &([]string{"a", "b", "c"}),
-		Action: OpSpec{},
+		Item: &([]string{"a", "b", "c"}),
+		Action: ActionSpec{
+			Operations: OpSpec{},
+		},
 	}
 	a := op.CloneWith(mockEmptyActCtx()).(*ForEachOp)
 	assert.NotNil(t, a)
@@ -36,24 +38,26 @@ func TestForeachCloneWith(t *testing.T) {
 func TestForeachStringItem(t *testing.T) {
 	op := ForEachOp{
 		Item: &([]string{"a", "b", "c"}),
-		Action: OpSpec{
-			Set: &SetOp{
-				Path: "{{ .forEach }}",
-				Data: map[string]interface{}{
-					"X": "abc",
+		Action: ActionSpec{
+			Operations: OpSpec{
+				Set: &SetOp{
+					Path: "{{ .forEach }}",
+					Data: map[string]interface{}{
+						"X": "abc",
+					},
 				},
-			},
-			Env: &EnvOp{},
-			Export: &ExportOp{
-				File:   "/tmp/a-{{ .forEach }}.yaml",
-				Format: OutputFormatYaml,
-			},
-			Exec: &ExecOp{
-				Program: "sh",
-				Args:    &[]string{"-c", "rm /tmp/a-{{ .forEach }}.yaml"},
-			},
-			Log: &LogOp{
-				Message: "Hi {{ .forEach }}",
+				Env: &EnvOp{},
+				Export: &ExportOp{
+					File:   "/tmp/a-{{ .forEach }}.yaml",
+					Format: OutputFormatYaml,
+				},
+				Exec: &ExecOp{
+					Program: "sh",
+					Args:    &[]string{"-c", "rm /tmp/a-{{ .forEach }}.yaml"},
+				},
+				Log: &LogOp{
+					Message: "Hi {{ .forEach }}",
+				},
 			},
 		},
 	}
@@ -68,9 +72,11 @@ func TestForeachStringItem(t *testing.T) {
 func TestForeachStringItemChildError(t *testing.T) {
 	op := ForEachOp{
 		Item: &([]string{"a", "b", "c"}),
-		Action: OpSpec{
-			Set: &SetOp{
-				Path: "{{ .forEach }}",
+		Action: ActionSpec{
+			Operations: OpSpec{
+				Set: &SetOp{
+					Path: "{{ .forEach }}",
+				},
 			},
 		},
 	}
@@ -82,11 +88,13 @@ func TestForeachStringItemChildError(t *testing.T) {
 func TestForeachGlob(t *testing.T) {
 	op := ForEachOp{
 		Glob: strPointer("../testdata/doc?.yaml"),
-		Action: OpSpec{
-			Import: &ImportOp{
-				File: "{{ .forEach }}",
-				Path: "import.files.{{ b64enc (osBase .forEach) }}",
-				Mode: ParseFileModeYaml,
+		Action: ActionSpec{
+			Operations: OpSpec{
+				Import: &ImportOp{
+					File: "{{ .forEach }}",
+					Path: "import.files.{{ b64enc (osBase .forEach) }}",
+					Mode: ParseFileModeYaml,
+				},
 			},
 		},
 	}
@@ -99,9 +107,11 @@ func TestForeachGlob(t *testing.T) {
 func TestForeachGlobChildError(t *testing.T) {
 	op := ForEachOp{
 		Glob: strPointer("../testdata/doc?.yaml"),
-		Action: OpSpec{
-			Set: &SetOp{
-				Path: "{{ .forEach }}",
+		Action: ActionSpec{
+			Operations: OpSpec{
+				Set: &SetOp{
+					Path: "{{ .forEach }}",
+				},
 			},
 		},
 	}
@@ -113,11 +123,13 @@ func TestForeachGlobChildError(t *testing.T) {
 func TestForeachGlobInvalid(t *testing.T) {
 	op := ForEachOp{
 		Glob: strPointer("[]]"),
-		Action: OpSpec{
-			Import: &ImportOp{
-				File: "{{ .forEach }}",
-				Path: "import.files.{{ b64enc (osBase .forEach) }}",
-				Mode: ParseFileModeYaml,
+		Action: ActionSpec{
+			Operations: OpSpec{
+				Import: &ImportOp{
+					File: "{{ .forEach }}",
+					Path: "import.files.{{ b64enc (osBase .forEach) }}",
+					Mode: ParseFileModeYaml,
+				},
 			},
 		},
 	}
