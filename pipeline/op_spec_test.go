@@ -34,8 +34,10 @@ func TestOpSpecCloneWith(t *testing.T) {
 			Path: "{{ .Path3 }}",
 		},
 		ForEach: &ForEachOp{
-			Item:   &([]string{"left", "right"}),
-			Action: OpSpec{},
+			Item: &([]string{"left", "right"}),
+			Action: ActionSpec{
+				Operations: OpSpec{},
+			},
 		},
 		Template: &TemplateOp{
 			Path: "{{ .Path }}",

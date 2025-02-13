@@ -27,7 +27,7 @@ type ForEachOp struct {
 	Glob *string   `yaml:"glob,omitempty"`
 	Item *[]string `yaml:"item,omitempty"`
 	// Action to perform for every item
-	Action OpSpec `yaml:"action"`
+	Action ActionSpec `yaml:"action"`
 }
 
 func (fea *ForEachOp) Do(ctx ActionContext) error {
@@ -57,7 +57,7 @@ func (fea *ForEachOp) performWithItem(ctx ActionContext, item string) (err error
 	ctx.Data().AddValue("forEach", dom.LeafNode(item))
 	defer ctx.Data().Remove("forEach")
 
-	for _, act := range fea.Action.toList() {
+	for _, act := range fea.Action.Operations.toList() {
 		act = act.CloneWith(ctx)
 		err = ctx.Executor().Execute(act)
 		if err != nil {
@@ -75,6 +75,6 @@ func (fea *ForEachOp) CloneWith(ctx ActionContext) Action {
 	cp := new(ForEachOp)
 	cp.Glob = fea.Glob
 	cp.Item = fea.Item
-	cp.Action = OpSpec{}.CloneWith(ctx).(OpSpec)
+	cp.Action = ActionSpec{}.CloneWith(ctx).(ActionSpec)
 	return cp
 }
