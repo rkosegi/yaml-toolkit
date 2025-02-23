@@ -49,6 +49,9 @@ type OpSpec struct {
 	// Log logs arbitrary message to logger
 	Log *LogOp `yaml:"log,omitempty"`
 
+	// Loop allows for execution to be done in a loop
+	Loop *LoopOp `yaml:"loop,omitempty"`
+
 	// Abort is able to signal error, so that pipeline can abort execution
 	Abort *AbortOp `yaml:"abort,omitempty"`
 }
@@ -81,6 +84,9 @@ func (as OpSpec) toList() []Action {
 	}
 	if as.Log != nil {
 		actions = append(actions, as.Log)
+	}
+	if as.Loop != nil {
+		actions = append(actions, as.Loop)
 	}
 	if as.Abort != nil {
 		actions = append(actions, as.Abort)
@@ -127,6 +133,9 @@ func (as OpSpec) CloneWith(ctx ActionContext) Action {
 	if as.Log != nil {
 		r.Log = as.Log.CloneWith(ctx).(*LogOp)
 	}
+	if as.Loop != nil {
+		r.Loop = as.Loop.CloneWith(ctx).(*LoopOp)
+	}
 	if as.Abort != nil {
 		r.Abort = as.Abort.CloneWith(ctx).(*AbortOp)
 	}
@@ -157,6 +166,9 @@ func (as OpSpec) String() string {
 	}
 	if as.Log != nil {
 		parts = append(parts, fmt.Sprintf("Log=%v", as.Log.String()))
+	}
+	if as.Loop != nil {
+		parts = append(parts, fmt.Sprintf("Loop=%v", as.Loop.String()))
 	}
 	if as.Patch != nil {
 		parts = append(parts, fmt.Sprintf("Patch=%v", as.Patch.String()))
