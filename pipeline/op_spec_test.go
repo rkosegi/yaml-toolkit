@@ -60,6 +60,14 @@ func TestOpSpecCloneWith(t *testing.T) {
 		Log: &LogOp{
 			Message: "Path: {{ .Path }}",
 		},
+		Loop: &LoopOp{
+			Test: "false",
+			Action: ActionSpec{
+				Operations: OpSpec{Log: &LogOp{
+					Message: "Ola!",
+				}},
+			},
+		},
 		Abort: &AbortOp{
 			Message: "abort",
 		},

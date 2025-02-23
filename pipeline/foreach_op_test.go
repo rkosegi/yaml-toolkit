@@ -58,6 +58,14 @@ func TestForeachStringItem(t *testing.T) {
 				Log: &LogOp{
 					Message: "Hi {{ .forEach }}",
 				},
+				Loop: &LoopOp{
+					Test: "false",
+					Action: ActionSpec{
+						Operations: OpSpec{Log: &LogOp{
+							Message: "Ola!",
+						}},
+					},
+				},
 			},
 		},
 	}

@@ -118,3 +118,7 @@ func safeRenderStrSlice(args *[]string, te TemplateEngine, data map[string]inter
 	}
 	return &r
 }
+
+func ptr[T any](v T) *T {
+	return &v
+}
