@@ -37,6 +37,10 @@ func mockActCtx(data dom.ContainerBuilder) ActionContext {
 	return New(WithData(data)).(*exec).newCtx(nil)
 }
 
+func mockActCtxExt(data dom.ContainerBuilder, ea map[string]Action) ActionContext {
+	return New(WithData(data), WithExtActions(ea)).(*exec).newCtx(nil)
+}
+
 func removeFilesLater(t *testing.T, files ...*os.File) {
 	t.Cleanup(func() {
 		for _, f := range files {

@@ -43,6 +43,10 @@ type OpSpec struct {
 
 	// Export exports data document into file
 	Export *ExportOp `yaml:"export,omitempty"`
+
+	// Ext allows runtime-registered extension action to be executed
+	Ext *ExtOp `yaml:"ext,omitempty"`
+
 	// ForEach execute same operation in a loop for every configured item
 	ForEach *ForEachOp `yaml:"forEach,omitempty"`
 
@@ -72,6 +76,9 @@ func (as OpSpec) toList() []Action {
 	}
 	if as.Export != nil {
 		actions = append(actions, as.Export)
+	}
+	if as.Ext != nil {
+		actions = append(actions, as.Ext)
 	}
 	if as.Env != nil {
 		actions = append(actions, as.Env)
@@ -124,6 +131,9 @@ func (as OpSpec) CloneWith(ctx ActionContext) Action {
 	if as.Export != nil {
 		r.Export = as.Export.CloneWith(ctx).(*ExportOp)
 	}
+	if as.Ext != nil {
+		r.Ext = as.Ext.CloneWith(ctx).(*ExtOp)
+	}
 	if as.Env != nil {
 		r.Env = as.Env.CloneWith(ctx).(*EnvOp)
 	}
@@ -154,6 +164,9 @@ func (as OpSpec) String() string {
 	}
 	if as.Export != nil {
 		parts = append(parts, fmt.Sprintf("Export=%v", as.Export.String()))
+	}
+	if as.Ext != nil {
+		parts = append(parts, fmt.Sprintf("Ext=%v", as.Ext.String()))
 	}
 	if as.Exec != nil {
 		parts = append(parts, fmt.Sprintf("Exec=%v", as.Exec.String()))

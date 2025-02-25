@@ -320,6 +320,9 @@ func TestExecuteForEachFileGlob(t *testing.T) {
 					Path: "import.files.{{ b64enc (osBase .forEach) }}",
 					Mode: ParseFileModeYaml,
 				},
+				Ext: &ExtOp{
+					Function: "noop",
+				},
 			},
 		},
 	}
@@ -331,6 +334,9 @@ func TestExecuteForEachFileGlob(t *testing.T) {
 		Operations: OpSpec{
 			ForEach: fe,
 		},
+	}
+	ex.ea = map[string]Action{
+		"noop": &noopOp{},
 	}
 	assert.NoError(t, ex.Execute(ss))
 	assert.Equal(t, 2, len(gd.Lookup("import.files").(dom.Container).Children()))
