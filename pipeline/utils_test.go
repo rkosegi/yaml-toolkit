@@ -19,11 +19,34 @@ package pipeline
 import (
 	"os"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/stretchr/testify/assert"
 )
+
+type testingLogger struct {
+	t      *testing.T
+	indent int
+}
+
+func (l *testingLogger) OnLog(_ ActionContext, v ...interface{}) {
+	l.t.Logf("%s[LOG] %v\n", strings.Repeat(" ", l.indent), v)
+}
+
+func (l *testingLogger) OnBefore(ctx ActionContext) {
+	l.t.Logf("%s[START] %v\n", strings.Repeat(" ", l.indent), ctx.Action().String())
+	l.indent++
+}
+
+func (l *testingLogger) OnAfter(ctx ActionContext, err error) {
+	l.indent--
+	l.t.Logf("%s[END] %v\n", strings.Repeat(" ", l.indent), ctx.Action().String())
+	if err != nil {
+		l.t.Logf("%s[ERROR] %v\n", strings.Repeat(" ", l.indent), err)
+	}
+}
 
 func strPointer(str string) *string {
 	return &str
@@ -35,6 +58,10 @@ func mockEmptyActCtx() ActionContext {
 
 func mockActCtx(data dom.ContainerBuilder) ActionContext {
 	return New(WithData(data)).(*exec).newCtx(nil)
+}
+
+func mockActCtxLog(t *testing.T) ActionContext {
+	return New(WithData(b.Container()), WithListener(&testingLogger{t: t})).(*exec).newCtx(nil)
 }
 
 func mockActCtxExt(data dom.ContainerBuilder, ea map[string]Action) ActionContext {
