@@ -52,6 +52,9 @@ func TestOpSpecCloneWith(t *testing.T) {
 		Exec: &ExecOp{
 			Program: "{{ .Shell }}",
 		},
+		Ext: &ExtOp{
+			Function: "noop",
+		},
 		Export: &ExportOp{
 			File:   "/tmp/file.yaml",
 			Path:   "{{ .Path }}",

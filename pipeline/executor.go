@@ -29,15 +29,17 @@ type exec struct {
 	gd dom.ContainerBuilder
 	l  Listener
 	t  TemplateEngine
+	ea map[string]Action
 }
 
 type actContext struct {
-	c Action
-	d dom.ContainerBuilder
-	e Executor
-	f dom.ContainerFactory
-	t TemplateEngine
-	l *listenerLoggerAdapter
+	c  Action
+	d  dom.ContainerBuilder
+	e  Executor
+	f  dom.ContainerFactory
+	t  TemplateEngine
+	l  *listenerLoggerAdapter
+	ea map[string]Action
 }
 
 func (ac actContext) Action() Action                 { return ac.c }
@@ -49,15 +51,17 @@ func (ac actContext) Logger() Logger                 { return ac.l }
 func (ac actContext) Snapshot() map[string]interface{} {
 	return dom.DefaultNodeEncoderFn(ac.Data()).(map[string]interface{})
 }
+func (ac actContext) ExtActions() map[string]Action { return ac.ea }
 
 func (p *exec) newCtx(a Action) *actContext {
 	ctx := &actContext{
-		c: a,
-		d: p.gd,
-		e: p,
-		f: b,
-		t: p.t,
-		l: &listenerLoggerAdapter{l: p.l},
+		c:  a,
+		d:  p.gd,
+		e:  p,
+		f:  b,
+		t:  p.t,
+		l:  &listenerLoggerAdapter{l: p.l},
+		ea: p.ea,
 	}
 	ctx.l.c = ctx
 	return ctx
@@ -106,12 +110,19 @@ func WithTemplateEngine(t TemplateEngine) Opt {
 	}
 }
 
+func WithExtActions(m map[string]Action) Opt {
+	return func(p *exec) {
+		p.ea = mergeMaps(p.ea, m)
+	}
+}
+
 var defOpts = []Opt{
 	WithListener(&noopListener{}),
 	WithData(b.Container()),
 	WithTemplateEngine(&templateEngine{
 		fm: sprig.TxtFuncMap(),
 	}),
+	WithExtActions(make(map[string]Action)),
 }
 
 func New(opts ...Opt) Executor {

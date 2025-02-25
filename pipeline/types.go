@@ -78,6 +78,8 @@ type ActionContext interface {
 	Action() Action
 	// Logger gets reference to Logger interface
 	Logger() Logger
+	// ExtActions is maps of extension actions, which are functions that could be called by name, populated at runtime.
+	ExtActions() map[string]Action
 }
 
 // Action is implemented by actions within ActionSpec
