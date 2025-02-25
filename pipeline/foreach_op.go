@@ -64,7 +64,7 @@ func (fea *ForEachOp) performWithItem(ctx ActionContext, item string) (err error
 			return err
 		}
 	}
-	return nil
+	return ctx.Executor().Execute(fea.Action.Children)
 }
 
 func (fea *ForEachOp) String() string {

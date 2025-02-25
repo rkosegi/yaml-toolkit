@@ -112,6 +112,50 @@ func TestForeachGlob(t *testing.T) {
 	assert.Equal(t, 2, len(d.Lookup("import.files").(dom.Container).Children()))
 }
 
+func TestForeachActionSpec(t *testing.T) {
+	var (
+		err error
+		op  *ForEachOp
+	)
+	op = &ForEachOp{
+		Item: &([]string{"a", "b", "c"}),
+		Action: ActionSpec{
+			Children: map[string]ActionSpec{
+				"sub": {
+					Operations: OpSpec{
+						Log: &LogOp{
+							Message: "Hi {{ .forEach }}",
+						},
+					},
+				},
+			},
+		},
+	}
+	err = op.Do(mockActCtxLog(t))
+	assert.NoError(t, err)
+
+	op = &ForEachOp{
+		Item: &([]string{"a", "b", "c"}),
+		Action: ActionSpec{
+			Children: map[string]ActionSpec{
+				"sub": {
+					Operations: OpSpec{
+						Template: &TemplateOp{
+							Path:     "X",
+							Template: "{{ add .X 1 }}",
+						},
+					},
+				},
+			},
+		},
+	}
+	d := b.Container()
+	d.AddValue("X", dom.LeafNode(100))
+	err = op.Do(mockActCtx(d))
+	assert.NoError(t, err)
+	assert.Equal(t, "103", d.Lookup("X").(dom.Leaf).Value())
+}
+
 func TestForeachGlobChildError(t *testing.T) {
 	op := ForEachOp{
 		Glob: strPointer("../testdata/doc?.yaml"),
@@ -123,8 +167,7 @@ func TestForeachGlobChildError(t *testing.T) {
 			},
 		},
 	}
-	d := b.Container()
-	err := op.Do(mockActCtx(d))
+	err := op.Do(mockActCtxLog(t))
 	assert.Error(t, err)
 }
 
