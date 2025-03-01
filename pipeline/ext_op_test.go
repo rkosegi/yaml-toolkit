@@ -31,7 +31,7 @@ func (n *noopOp) Do(_ ActionContext) error         { return nil }
 func (n *noopOp) CloneWith(_ ActionContext) Action { return &noopOp{} }
 
 func TestExtOpDo(t *testing.T) {
-	var ext *ExtOp
+	var ex *ExtOp
 	d := b.Container()
 	ctx := mockActCtxExt(d, map[string]Action{
 		"dummyfn": &SetOp{
@@ -40,14 +40,14 @@ func TestExtOpDo(t *testing.T) {
 			},
 		},
 	})
-	ext = &ExtOp{
+	ex = &ExtOp{
 		Function: "dummyfn",
 	}
-	assert.NoError(t, ext.Do(ctx))
+	assert.NoError(t, ex.Do(ctx))
 	assert.Equal(t, 123, d.Lookup("X").(dom.Leaf).Value())
-	ext = &ExtOp{
+	ex = &ExtOp{
 		Function: "non-existent",
 	}
-	assert.Error(t, ext.Do(ctx))
+	assert.Error(t, ex.Do(ctx))
 
 }

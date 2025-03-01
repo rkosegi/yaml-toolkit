@@ -25,17 +25,47 @@ var (
 	b = dom.Builder()
 )
 
-type exec struct {
-	d  dom.ContainerBuilder
-	l  Listener
-	t  TemplateEngine
+type ext struct {
 	ea map[string]Action
+	cm map[string]ActionSpec
+}
+
+func (e *ext) Define(name string, spec ActionSpec) {
+	e.cm[name] = spec
+}
+
+func (e *ext) Get(name string) (ActionSpec, bool) {
+	r, ok := e.cm[name]
+	return r, ok
+}
+
+func (e *ext) AddAction(name string, action Action) {
+	e.ea[name] = action
+}
+
+func (e *ext) GetAction(name string) (Action, bool) {
+	r, ok := e.ea[name]
+	return r, ok
+}
+
+type exec struct {
+	*ext
+	d dom.ContainerBuilder
+	l Listener
+	t TemplateEngine
 }
 
 type actContext struct {
 	*exec
 	c  Action
 	la *listenerLoggerAdapter
+}
+
+type ExtInterface interface {
+	Define(string, ActionSpec)
+	Get(string) (ActionSpec, bool)
+	AddAction(string, Action)
+	GetAction(string) (Action, bool)
 }
 
 func (ac actContext) Action() Action                 { return ac.c }
@@ -47,8 +77,7 @@ func (ac actContext) Logger() Logger                 { return ac.la }
 func (ac actContext) Snapshot() map[string]interface{} {
 	return dom.DefaultNodeEncoderFn(ac.Data()).(map[string]interface{})
 }
-func (ac actContext) ExtActions() map[string]Action { return ac.ea }
-
+func (ac actContext) Ext() ExtInterface { return ac.ext }
 func (p *exec) newCtx(a Action) *actContext {
 	ctx := &actContext{
 		c:    a,
@@ -104,7 +133,9 @@ func WithTemplateEngine(t TemplateEngine) Opt {
 
 func WithExtActions(m map[string]Action) Opt {
 	return func(p *exec) {
-		p.ea = mergeMaps(p.ea, m)
+		for k, v := range m {
+			p.AddAction(k, v)
+		}
 	}
 }
 
@@ -118,7 +149,12 @@ var defOpts = []Opt{
 }
 
 func New(opts ...Opt) Executor {
-	p := &exec{}
+	p := &exec{
+		ext: &ext{
+			ea: make(map[string]Action),
+			cm: make(map[string]ActionSpec),
+		},
+	}
 	for _, opt := range defOpts {
 		opt(p)
 	}

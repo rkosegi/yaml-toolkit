@@ -1,5 +1,5 @@
 /*
-Copyright 2024 Richard Kosegi
+Copyright 2025 Richard Kosegi
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,24 +16,14 @@ limitations under the License.
 
 package pipeline
 
-import "fmt"
+import (
+	"testing"
 
-type ExtOp struct {
-	// Function is name of function that was registered with Executor
-	Function string `yaml:"func"`
-}
+	"github.com/stretchr/testify/assert"
+)
 
-func (e *ExtOp) String() string {
-	return fmt.Sprintf("Ext[func=%s]", e.Function)
-}
-
-func (e *ExtOp) Do(ctx ActionContext) error {
-	if fn, ok := ctx.Ext().GetAction(e.Function); ok {
-		return ctx.Executor().Execute(fn)
-	}
-	return fmt.Errorf("no such function: %s", e.Function)
-}
-
-func (e *ExtOp) CloneWith(_ ActionContext) Action {
-	return &ExtOp{Function: e.Function}
+func TestCallUnregistered(t *testing.T) {
+	assert.Error(t, mockEmptyActCtx().Executor().Execute(&CallOp{
+		Name: "invalid",
+	}))
 }
