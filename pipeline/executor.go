@@ -35,15 +35,13 @@ type exec struct {
 type actContext struct {
 	*exec
 	c  Action
-	e  Executor
-	f  dom.ContainerFactory
 	la *listenerLoggerAdapter
 }
 
 func (ac actContext) Action() Action                 { return ac.c }
 func (ac actContext) Data() dom.ContainerBuilder     { return ac.d }
-func (ac actContext) Factory() dom.ContainerFactory  { return ac.f }
-func (ac actContext) Executor() Executor             { return ac.e }
+func (ac actContext) Factory() dom.ContainerFactory  { return b }
+func (ac actContext) Executor() Executor             { return ac.exec }
 func (ac actContext) TemplateEngine() TemplateEngine { return ac.t }
 func (ac actContext) Logger() Logger                 { return ac.la }
 func (ac actContext) Snapshot() map[string]interface{} {
@@ -55,8 +53,6 @@ func (p *exec) newCtx(a Action) *actContext {
 	ctx := &actContext{
 		c:    a,
 		exec: p,
-		e:    p,
-		f:    b,
 		la:   &listenerLoggerAdapter{l: p.l},
 	}
 	ctx.la.c = ctx
