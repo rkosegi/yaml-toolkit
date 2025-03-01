@@ -53,11 +53,15 @@ func TestChildActionsCloneWith(t *testing.T) {
 				},
 			},
 		},
-	}.CloneWith(&actContext{d: b.FromMap(map[string]interface{}{
-		"sub1": map[string]interface{}{
-			"leaf1": "root.sub2",
+	}.CloneWith(&actContext{
+		exec: &exec{
+			d: b.FromMap(map[string]interface{}{
+				"sub1": map[string]interface{}{
+					"leaf1": "root.sub2",
+				},
+			}), t: &templateEngine{fm: sprig.TxtFuncMap()},
 		},
-	}), t: &templateEngine{fm: sprig.TxtFuncMap()}})
+	})
 	assert.NotNil(t, a)
 	assert.Equal(t, "root.sub2", a.(ChildActions)["step1"].Operations.Set.Path)
 }

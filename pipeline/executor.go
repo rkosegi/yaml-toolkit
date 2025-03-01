@@ -26,20 +26,18 @@ var (
 )
 
 type exec struct {
-	gd dom.ContainerBuilder
+	d  dom.ContainerBuilder
 	l  Listener
 	t  TemplateEngine
 	ea map[string]Action
 }
 
 type actContext struct {
+	*exec
 	c  Action
-	d  dom.ContainerBuilder
 	e  Executor
 	f  dom.ContainerFactory
-	t  TemplateEngine
-	l  *listenerLoggerAdapter
-	ea map[string]Action
+	la *listenerLoggerAdapter
 }
 
 func (ac actContext) Action() Action                 { return ac.c }
@@ -47,7 +45,7 @@ func (ac actContext) Data() dom.ContainerBuilder     { return ac.d }
 func (ac actContext) Factory() dom.ContainerFactory  { return ac.f }
 func (ac actContext) Executor() Executor             { return ac.e }
 func (ac actContext) TemplateEngine() TemplateEngine { return ac.t }
-func (ac actContext) Logger() Logger                 { return ac.l }
+func (ac actContext) Logger() Logger                 { return ac.la }
 func (ac actContext) Snapshot() map[string]interface{} {
 	return dom.DefaultNodeEncoderFn(ac.Data()).(map[string]interface{})
 }
@@ -55,15 +53,13 @@ func (ac actContext) ExtActions() map[string]Action { return ac.ea }
 
 func (p *exec) newCtx(a Action) *actContext {
 	ctx := &actContext{
-		c:  a,
-		d:  p.gd,
-		e:  p,
-		f:  b,
-		t:  p.t,
-		l:  &listenerLoggerAdapter{l: p.l},
-		ea: p.ea,
+		c:    a,
+		exec: p,
+		e:    p,
+		f:    b,
+		la:   &listenerLoggerAdapter{l: p.l},
 	}
-	ctx.l.c = ctx
+	ctx.la.c = ctx
 	return ctx
 }
 
@@ -100,7 +96,7 @@ func WithListener(l Listener) Opt {
 
 func WithData(gd dom.ContainerBuilder) Opt {
 	return func(p *exec) {
-		p.gd = gd
+		p.d = gd
 	}
 }
 
