@@ -46,6 +46,19 @@ func TestOpSpecCloneWith(t *testing.T) {
 			Path: "{{ .Path }}",
 			Mode: ParseFileModeYaml,
 		},
+		Call: &CallOp{
+			Name: "invalid",
+		},
+		Define: &DefineOp{
+			Name: "def1",
+			Action: ActionSpec{
+				Operations: OpSpec{
+					Log: &LogOp{
+						Message: "hello",
+					},
+				},
+			},
+		},
 		Env: &EnvOp{
 			Path: "{{ .Path }}",
 		},
@@ -89,4 +102,6 @@ func TestOpSpecCloneWith(t *testing.T) {
 	assert.Equal(t, "root.sub2", a.Export.Path)
 	assert.Equal(t, "root.sub2", a.Env.Path)
 	assert.Equal(t, "/bin/bash", a.Exec.Program)
+	assert.Equal(t, "hello", a.Define.Action.Operations.Log.Message)
+	assert.Equal(t, "invalid", a.Call.Name)
 }

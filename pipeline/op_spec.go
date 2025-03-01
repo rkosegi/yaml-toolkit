@@ -35,6 +35,12 @@ type OpSpec struct {
 	// Template allows to render value at runtime
 	Template *TemplateOp `yaml:"template,omitempty"`
 
+	// Call calls previously defined callable
+	Call *CallOp `yaml:"call,omitempty"`
+
+	// Define defines callable ActionSpec
+	Define *DefineOp `yaml:"define,omitempty"`
+
 	// Env adds OS environment variables into data document
 	Env *EnvOp `yaml:"env,omitempty"`
 
@@ -73,6 +79,12 @@ func (as OpSpec) toList() []Action {
 	}
 	if as.Template != nil {
 		actions = append(actions, as.Template)
+	}
+	if as.Call != nil {
+		actions = append(actions, as.Call)
+	}
+	if as.Define != nil {
+		actions = append(actions, as.Define)
 	}
 	if as.Export != nil {
 		actions = append(actions, as.Export)
@@ -128,6 +140,12 @@ func (as OpSpec) CloneWith(ctx ActionContext) Action {
 	if as.Template != nil {
 		r.Template = as.Template.CloneWith(ctx).(*TemplateOp)
 	}
+	if as.Call != nil {
+		r.Call = as.Call.CloneWith(ctx).(*CallOp)
+	}
+	if as.Define != nil {
+		r.Define = as.Define.CloneWith(ctx).(*DefineOp)
+	}
 	if as.Export != nil {
 		r.Export = as.Export.CloneWith(ctx).(*ExportOp)
 	}
@@ -158,6 +176,12 @@ func (as OpSpec) String() string {
 	sb.WriteString("OpSpec[")
 	if as.Abort != nil {
 		parts = append(parts, fmt.Sprintf("Abort=%v", as.Abort.String()))
+	}
+	if as.Call != nil {
+		parts = append(parts, fmt.Sprintf("Call=%v", as.Call.String()))
+	}
+	if as.Define != nil {
+		parts = append(parts, fmt.Sprintf("Define=%v", as.Define.String()))
 	}
 	if as.Env != nil {
 		parts = append(parts, fmt.Sprintf("Env=%v", as.Env.String()))

@@ -122,13 +122,3 @@ func safeRenderStrSlice(args *[]string, te TemplateEngine, data map[string]inter
 func ptr[T any](v T) *T {
 	return &v
 }
-
-func mergeMaps[T any](in ...map[string]T) map[string]T {
-	res := make(map[string]T)
-	for _, m := range in {
-		for k, v := range m {
-			res[k] = v
-		}
-	}
-	return res
-}
