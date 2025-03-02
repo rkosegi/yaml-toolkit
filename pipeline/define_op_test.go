@@ -35,7 +35,7 @@ func TestForDefCall(t *testing.T) {
 						Action: ActionSpec{
 							Operations: OpSpec{
 								Log: &LogOp{
-									Message: "{{ .forEach }}",
+									Message: "{{ .myargs.msg }}",
 								},
 							},
 						},
@@ -53,6 +53,10 @@ func TestForDefCall(t *testing.T) {
 							Operations: OpSpec{
 								Call: &CallOp{
 									Name: "dummy",
+									Args: map[string]interface{}{
+										"msg": "{{ .forEach }}",
+									},
+									ArgsPath: ptr("myargs"),
 								},
 							},
 						},
