@@ -23,7 +23,16 @@ import (
 )
 
 type CallOp struct {
+	// Name is name of callable previously registered using DefineOp.
+	// Attempt to use name that was not registered will result in error
 	Name string
+	// ArgsPath is optional path within the global data where arguments are stored prior to execution.
+	// When omitted, then default value of "args" is assumed. Note that passing arguments to nested callable
+	// is only possible if path is different, otherwise inner's arguments will overwrite outer's one.
+	// Template is accepted as possible value.
+	ArgsPath *string `yaml:"argsPath,omitempty"`
+	// Arguments to be passed to callable.
+	// Leaf values are recursively templated just before call is executed.
 	Args map[string]interface{}
 }
 
@@ -32,18 +41,27 @@ func (c *CallOp) String() string {
 }
 
 func (c *CallOp) Do(ctx ActionContext) error {
+	snap := ctx.Snapshot()
+	ap := "args"
+	if c.ArgsPath != nil {
+		ap = *c.ArgsPath
+	}
+	ap = ctx.TemplateEngine().RenderLenient(ap, snap)
 	if spec, exists := ctx.Ext().Get(c.Name); !exists {
 		return fmt.Errorf("callable '%s' is not registered", c.Name)
 	} else {
-		ctx.Data().AddValue("args", dom.DefaultNodeDecoderFn(c.Args))
-		defer ctx.Data().Remove("args")
+		ctx.Data().AddValueAt(ap, dom.DefaultNodeDecoderFn(
+			ctx.TemplateEngine().RenderMapLenient(c.Args, snap)),
+		)
+		defer ctx.Data().Remove(ap)
 		return ctx.Executor().Execute(spec)
 	}
 }
 
-func (c *CallOp) CloneWith(_ ActionContext) Action {
+func (c *CallOp) CloneWith(ctx ActionContext) Action {
 	return &CallOp{
-		Name: c.Name,
-		Args: c.Args,
+		Name:     c.Name,
+		Args:     c.Args,
+		ArgsPath: c.ArgsPath,
 	}
 }
