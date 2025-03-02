@@ -64,6 +64,21 @@ func TestRenderTemplate(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestTemplateEngineRenderMapLenient(t *testing.T) {
+	te := &templateEngine{}
+	ret := te.RenderMapLenient(map[string]interface{}{
+		"sub": map[string]interface{}{
+			"leaf": "{{ .Y }}",
+		},
+		"int_leaf": 1,
+	}, map[string]interface{}{
+		"X": 123,
+		"Y": "abc",
+	})
+	assert.Equal(t, "abc", ret["sub"].(map[string]interface{})["leaf"])
+	assert.Equal(t, 1, ret["int_leaf"])
+}
+
 func TestTemplateEngineRenderTpl(t *testing.T) {
 	var (
 		out string

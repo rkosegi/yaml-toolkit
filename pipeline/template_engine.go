@@ -78,6 +78,22 @@ func (te templateEngine) RenderLenient(tmpl string, data map[string]interface{})
 	return renderLenientTemplate(tmpl, data, te.fm)
 }
 
+func (te templateEngine) RenderMapLenient(input map[string]interface{}, data map[string]interface{}) map[string]interface{} {
+	ret := make(map[string]interface{})
+	for k, v := range input {
+		if s, ok := v.(string); ok {
+			ret[k] = te.RenderLenient(s, data)
+			continue
+		}
+		if m, ok := v.(map[string]interface{}); ok {
+			ret[k] = te.RenderMapLenient(m, data)
+			continue
+		}
+		ret[k] = v
+	}
+	return ret
+}
+
 func (te templateEngine) Render(tmpl string, data map[string]interface{}) (string, error) {
 	return renderTemplate(tmpl, data, te.fm)
 }
