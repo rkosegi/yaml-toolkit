@@ -24,6 +24,7 @@ import (
 
 	"github.com/rkosegi/yaml-toolkit/analytics"
 	"github.com/rkosegi/yaml-toolkit/common"
+	"github.com/rkosegi/yaml-toolkit/diff"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/props"
 	"github.com/rkosegi/yaml-toolkit/utils"
@@ -119,4 +120,13 @@ func dom2jsonFunc(c dom.Container) (string, error) {
 
 func dom2propertiesFunc(c dom.Container) (string, error) {
 	return dom2str(c, props.EncoderFn)
+}
+
+// domDiffFunc computes difference between 2 container nodes.
+// Both of nodes must be of dom.Conatiner type, otherwise result is empty slice
+func domDiffFunc(left, right dom.Node) ([]diff.Modification, error) {
+	if left != nil && left.IsContainer() && left.SameAs(right) {
+		return *diff.Diff(left.(dom.Container), right.(dom.Container)), nil
+	}
+	return []diff.Modification{}, nil
 }

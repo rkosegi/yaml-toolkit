@@ -41,6 +41,7 @@ func renderTemplate(tmplStr string, data interface{}, fm template.FuncMap) (stri
 		"dom2yaml":       dom2yamlFunc,
 		"dom2json":       dom2jsonFunc,
 		"dom2properties": dom2propertiesFunc,
+		"domdiff":        domDiffFunc,
 	})
 	_, err := tmpl.Parse(tmplStr)
 	if err != nil {

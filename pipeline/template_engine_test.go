@@ -247,3 +247,37 @@ func TestTemplateFuncDom2Yaml(t *testing.T) {
 	}
 	removeFilesLater(t, f1, f2)
 }
+
+func TestTemplateFuncDomDiff(t *testing.T) {
+	d := b.FromMap(map[string]interface{}{
+		"a": map[string]interface{}{
+			"b": map[string]interface{}{
+				"c": 1,
+			},
+			"d": map[string]interface{}{
+				"h": "hello",
+			},
+		},
+	})
+	type testCase struct {
+		leftPath  string
+		rightPath string
+		diffLen   int
+	}
+	for _, testcase := range []testCase{
+		{
+			leftPath:  "a.b",
+			rightPath: "a.d",
+			diffLen:   2,
+		},
+		{
+			leftPath:  "a.b",
+			rightPath: "a.d.x.z",
+			diffLen:   0,
+		},
+	} {
+		x, err := domDiffFunc(d.Lookup(testcase.leftPath), d.Lookup(testcase.rightPath))
+		assert.NoError(t, err)
+		assert.Equal(t, testcase.diffLen, len(x))
+	}
+}
