@@ -1,0 +1,421 @@
+{
+  "$defs": {
+    "abortOpSpec": {
+      "description": "AbortOp can be used to abort execution",
+      "properties": {
+        "message": {
+          "description": "The reason of abort",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "actionMeta": {
+      "properties": {
+        "name": {
+          "description": "Name of this step, should be unique within the current scope",
+          "type": "string"
+        },
+        "order": {
+          "description": "Optional ordinal number that controls order of execution within parent step",
+          "type": "integer"
+        },
+        "when": {
+          "description": "Optional expression to make execution of this action conditional",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "actionSpec": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/actionMeta",
+          "description": "Common action metadata"
+        },
+        {
+          "$ref": "#/$defs/opSpec",
+          "description": "Operations to perform"
+        }
+      ],
+      "properties": {
+        "steps": {
+          "additionalProperties": {
+            "$ref": "#/$defs/actionSpec"
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "callOpSpec": {
+      "properties": {
+        "args": {
+          "additionalProperties": true,
+          "description": "Arguments to be passed to callable.\nLeaf values are recursively templated just before call is executed.",
+          "type": "object"
+        },
+        "argsPath": {
+          "description": "ArgsPath is optional path within the global data where arguments are stored prior to execution.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name is name of callable previously registered using DefineOp.\nAttempt to use name that was not registered will result in error",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "defineOpSpec": {
+      "additionalProperties": false,
+      "description": "DefineOp can be used to define the ActionSpec and later recall it by name via CallOp.\nAttempt to define name that was defined before will result in an error.",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/actionSpec"
+        },
+        "name": {
+          "description": "Name that will be used for registration",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "action"
+      ],
+      "type": "object"
+    },
+    "envOpSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "exclude": {
+          "description": "Optional regexp which defines what to exclude.\nOnly item names NOT matching this regexp are added into data document.\nExclusion is considered after inclusion regexp is processed.",
+          "format": "regex",
+          "type": "string"
+        },
+        "include": {
+          "description": "Optional regexp which defines what to include.\nOnly item names matching this regexp are added into data document.",
+          "format": "regex",
+          "type": "string"
+        },
+        "path": {
+          "description": "Optional path within data tree under which \"Env\" container will be put. When omitted, then \"Env\" goes to root of data.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "execOpSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "description": "Optional arguments for program",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "program": {
+          "description": "Program to execute",
+          "type": "string"
+        },
+        "saveExitCodeTo": {
+          "description": "Path within the global data where to set exit code.",
+          "type": "string"
+        },
+        "stderr": {
+          "description": "Path to file where program's stderr will be written upon completion.\nAny error occurred during write will result in panic.",
+          "type": "string"
+        },
+        "stdout": {
+          "description": "Path to file where program's stdout will be written upon completion.\nAny error occurred during write will result in panic.",
+          "type": "string"
+        },
+        "validExitCodes": {
+          "description": "List of exit codes that are assumed to be valid",
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "program"
+      ],
+      "type": "object"
+    },
+    "exportOpSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "description": "File to export data onto",
+          "type": "string"
+        },
+        "format": {
+          "$ref": "#/$defs/outputFormat",
+          "description": "Format of output file"
+        },
+        "path": {
+          "description": "Path within data tree pointing to dom.Node to export.\nEmpty path denotes whole document. If path does not resolve, then empty document will be exported. If output format is \"text\" then path must point to leaf. Any other output format must point to dom.Container.\nIf neither of these conditions are met, then it is considered as if path does not resolve at all.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "format"
+      ],
+      "type": "object"
+    },
+    "extOpSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "func": {
+          "description": "Name of the function that was registered with the Executor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "func"
+      ],
+      "type": "object"
+    },
+    "forEachOpSpec": {
+      "additionalProperties": false,
+      "description": "ForEachOp can be used to repeat actions over list of items.\nThose items could be files specified by globbing pattern\nresult of query from data tree (leaf values)\nspecified strings",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/actionSpec",
+          "description": "Action to perform for every item"
+        },
+        "glob": {
+          "description": "Glob is pattern that will be used to match files on file system.\nMatched files will be used as iteration items.",
+          "type": "string"
+        },
+        "item": {
+          "description": "Item is list of specified strings to iterate over",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "query": {
+          "description": "Query is path within the data tree that will be attempted",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "type": "object"
+    },
+    "importOpSpec": {
+      "properties": {
+        "file": {
+          "description": "File to read data from",
+          "type": "string"
+        },
+        "mode": {
+          "description": "How to parse file",
+          "type": "string"
+        },
+        "path": {
+          "description": "Path at which to import data.\nIf omitted, then data are merged into root of document",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "logOpSpec": {
+      "description": "LogOp just logs message to logger",
+      "properties": {
+        "messages": {
+          "description": "Message to log",
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "type": "object"
+    },
+    "loopOpSpec": {
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/actionSpec",
+          "description": "Action is action that is executed every loop iteration"
+        },
+        "init": {
+          "$ref": "#/$defs/actionSpec",
+          "description": "Init is called just before any loop execution takes place"
+        },
+        "postAction": {
+          "$ref": "#/$defs/actionSpec",
+          "description": "PostAction is action that is executed after every loop iteration.\nThis is right place to modify loop variables, such as incrementing counter"
+        },
+        "test": {
+          "description": "Test is condition that is tested before each iteration.\nWhen evaluated to true, execution will proceed with next iteration, false terminates loop immediately",
+          "type": "string"
+        }
+      },
+      "required": [
+        "test",
+        "action"
+      ],
+      "type": "object"
+    },
+    "opSpec": {
+      "properties": {
+        "abort": {
+          "$ref": "#/$defs/abortOpSpec",
+          "description": "Abort is able to signal error, so that pipeline can abort execution"
+        },
+        "call": {
+          "$ref": "#/$defs/callOpSpec",
+          "description": "Call calls previously defined callable"
+        },
+        "define": {
+          "$ref": "#/$defs/defineOpSpec",
+          "description": "Define defines callable ActionSpec"
+        },
+        "env": {
+          "$ref": "#/$defs/envOpSpec",
+          "description": "Env adds OS environment variables into data document"
+        },
+        "exec": {
+          "$ref": "#/$defs/execOpSpec",
+          "description": "Exec executes program"
+        },
+        "export": {
+          "$ref": "#/$defs/exportOpSpec",
+          "description": "Export exports data document into file"
+        },
+        "ext": {
+          "$ref": "#/$defs/extOpSpec",
+          "description": "Ext allows runtime-registered extension action to be executed"
+        },
+        "forEach": {
+          "$ref": "#/$defs/forEachOpSpec",
+          "description": "ForEach execute same operation in a loop for every configured item"
+        },
+        "import": {
+          "$ref": "#/$defs/importOpSpec",
+          "description": "Import loads content of file into data document."
+        },
+        "log": {
+          "$ref": "#/$defs/logOpSpec",
+          "description": "Log logs arbitrary message to logger"
+        },
+        "loop": {
+          "$ref": "#/$defs/loopOpSpec",
+          "description": "Loop allows for execution to be done in a loop"
+        },
+        "patch": {
+          "$ref": "#/$defs/patchOpSpec",
+          "description": "Patch performs RFC6902-style patch on data document."
+        },
+        "set": {
+          "$ref": "#/$defs/setOpSpec",
+          "description": "Set sets data in data document."
+        },
+        "template": {
+          "$ref": "#/$defs/templateOpSpec",
+          "description": "Template allows to render value at runtime"
+        }
+      },
+      "type": "object"
+    },
+    "outputFormat": {
+      "description": "Format of output file",
+      "enum": [
+        "yaml",
+        "json",
+        "properties",
+        "text"
+      ],
+      "type": "string"
+    },
+    "parseFileMode": {
+      "description": "ParseFileMode defines how the file is parsed before is put into data tree",
+      "enum": [
+        "binary",
+        "text",
+        "yaml",
+        "json",
+        "properties"
+      ],
+      "type": "string"
+    },
+    "patchOpSpec": {
+      "description": "PatchOp performs RFC6902-style patch on global data document.",
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "op": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "value": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "setOpSpec": {
+      "additionalProperties": true,
+      "properties": {
+        "data": {
+          "additionalProperties": true,
+          "description": "Arbitrary data to put into data tree",
+          "type": "object"
+        },
+        "path": {
+          "description": "Path at which to put data.\nIf omitted, then data are merged into root of document",
+          "type": "string"
+        },
+        "strategy": {
+          "$ref": "#/$defs/setStrategy",
+          "description": "Strategy defines how that are handled when conflict during set/add of data occur."
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "type": "object"
+    },
+    "setStrategy": {
+      "enum": [
+        "replace",
+        "merge"
+      ],
+      "type": "string"
+    },
+    "templateOpSpec": {
+      "properties": {
+        "path": {
+          "description": "Path within global data tree where to set result at",
+          "type": "string"
+        },
+        "template": {
+          "description": "Template to render",
+          "type": "string"
+        },
+        "trim": {
+          "description": "When true, whitespace is trimmed off the value",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "template",
+        "path"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/rkosegi/yaml-toolkit/schemas/pipeline",
+  "$ref": "#/$defs/actionSpec",
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "type": "object"
+}
