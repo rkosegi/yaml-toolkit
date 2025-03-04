@@ -23,8 +23,18 @@ import (
 	"github.com/rkosegi/yaml-toolkit/dom"
 )
 
+// ForEachOp can be used to repeat actions over list of items.
+// Those items could be
+//  1. files specified by globbing pattern
+//  2. result of query from data tree (leaf values)
+//  3. specified strings
 type ForEachOp struct {
-	Glob *string   `yaml:"glob,omitempty"`
+	// Glob is pattern that will be used to match files on file system.
+	// Matched files will be used as iteration items.
+	Glob *string `yaml:"glob,omitempty"`
+	// Query is path within the data tree that will be attempted
+	Query *string `yaml:"ref,omitempty"`
+	// Item is list of specified strings to iterate over
 	Item *[]string `yaml:"item,omitempty"`
 	// Action to perform for every item
 	Action ActionSpec `yaml:"action"`
@@ -39,6 +49,16 @@ func (fea *ForEachOp) Do(ctx ActionContext) error {
 				err = fea.performWithItem(ctx, match)
 				if err != nil {
 					return err
+				}
+			}
+		}
+	} else if nonEmpty(fea.Query) {
+		if n := ctx.Data().Lookup(*fea.Query); n != nil && n.IsList() {
+			for _, item := range n.(dom.List).Items() {
+				if x, ok := item.(dom.Leaf).Value().(string); ok {
+					if err := fea.performWithItem(ctx, x); err != nil {
+						return err
+					}
 				}
 			}
 		}

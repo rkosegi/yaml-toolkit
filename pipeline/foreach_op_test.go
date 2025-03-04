@@ -93,6 +93,40 @@ func TestForeachStringItemChildError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestForeachQuery(t *testing.T) {
+	var (
+		err error
+		op  *ForEachOp
+	)
+	d := b.FromMap(map[string]interface{}{
+		"items": []interface{}{"a", "b", "c"},
+	})
+	op = &ForEachOp{
+		Query: ptr("items"),
+		Action: ActionSpec{
+			Operations: OpSpec{
+				Template: &TemplateOp{
+					Template: "{{ .forEach }}",
+					Path:     "Result.{{ .forEach }}",
+				},
+			},
+		},
+	}
+	err = op.Do(mockActCtx(d))
+	assert.Equal(t, 3, len(d.Lookup("Result").(dom.Container).Children()))
+	assert.NoError(t, err)
+	op = &ForEachOp{
+		Query: ptr("items"),
+		Action: ActionSpec{
+			Operations: OpSpec{
+				Abort: &AbortOp{},
+			},
+		},
+	}
+	err = op.Do(mockActCtx(d))
+	assert.Error(t, err)
+}
+
 func TestForeachGlob(t *testing.T) {
 	op := ForEachOp{
 		Glob: strPointer("../testdata/doc?.yaml"),
