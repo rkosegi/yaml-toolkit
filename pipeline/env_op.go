@@ -27,6 +27,11 @@ import (
 	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
+// for mock purposes only. this could be used to override os.Environ() to arbitrary func
+var (
+	envGetter = os.Environ
+)
+
 // EnvOp is used to import OS environment variables into data
 type EnvOp struct {
 	// Optional regexp which defines what to include. Only item names matching this regexp are added into data document.
@@ -39,21 +44,13 @@ type EnvOp struct {
 	// Optional path within data tree under which "Env" container will be put.
 	// When omitted, then "Env" goes to root of data.
 	Path string `yaml:"path,omitempty"`
-
-	// for mock purposes only. this could be used to override os.Environ() to arbitrary func
-	envGetter func() []string
 }
 
 func (eo *EnvOp) Do(ctx ActionContext) error {
 	var (
 		inclFn common.StringPredicateFn
 		exclFn common.StringPredicateFn
-		getter func() []string
 	)
-	getter = os.Environ
-	if eo.envGetter != nil {
-		getter = eo.envGetter
-	}
 	inclFn = common.MatchAny()
 	exclFn = common.MatchNone()
 	if eo.Include != nil {
@@ -62,7 +59,7 @@ func (eo *EnvOp) Do(ctx ActionContext) error {
 	if eo.Exclude != nil {
 		exclFn = common.MatchRe(eo.Exclude)
 	}
-	for _, env := range getter() {
+	for _, env := range envGetter() {
 		parts := strings.SplitN(env, "=", 2)
 		if inclFn(parts[0]) && !exclFn(parts[0]) {
 			k := utils.ToPath(eo.Path, fmt.Sprintf("Env.%s", parts[0]))

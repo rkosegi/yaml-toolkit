@@ -30,14 +30,15 @@ func createRePtr(in string) *regexp.Regexp {
 }
 
 func TestEnvOpDo(t *testing.T) {
+	envGetter = func() []string {
+		return []string{
+			"MOCK1=val1",
+			"MOCK2=val2",
+			"XYZ=123",
+		}
+	}
+
 	eo := EnvOp{
-		envGetter: func() []string {
-			return []string{
-				"MOCK1=val1",
-				"MOCK2=val2",
-				"XYZ=123",
-			}
-		},
 		Path:    "Sub",
 		Include: createRePtr(`MOCK\d+`),
 		Exclude: createRePtr("XYZ"),

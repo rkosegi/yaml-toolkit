@@ -18,6 +18,10 @@ repos:
     hooks:
       - id: trailing-whitespace
       - id: check-merge-conflict
+      - id: pretty-format-json
+        args:
+          - --autofix
+          - --indent=2
   - repo: https://github.com/golangci/golangci-lint
     rev: v1.64.5
     hooks:

@@ -33,7 +33,7 @@ type LoopOp struct {
 
 	// PostAction is action that is executed after every loop iteration.
 	// This is right place to modify loop variables, such as incrementing counter
-	PostAction *ActionSpec `yaml:"post_action,omitempty"`
+	PostAction *ActionSpec `yaml:"postAction,omitempty"`
 }
 
 func (l *LoopOp) String() string {
