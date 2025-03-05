@@ -35,6 +35,7 @@ func TestExecuteTemplateOp(t *testing.T) {
 	ts = TemplateOp{
 		Template: `{{ (mul .root.leaf1 2) | quote }}`,
 		Path:     "result.x1",
+		Trim:     ptr(true),
 	}
 	assert.NoError(t, New(WithData(gd)).Execute(&ts))
 	assert.Equal(t, "\"246912\"", gd.Lookup("result.x1").(dom.Leaf).Value())

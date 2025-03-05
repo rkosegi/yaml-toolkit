@@ -119,6 +119,13 @@ func safeRenderStrSlice(args *[]string, te TemplateEngine, data map[string]inter
 	return &r
 }
 
+func safeBoolDeref(in *bool) bool {
+	if in == nil {
+		return false
+	}
+	return *in
+}
+
 func ptr[T any](v T) *T {
 	return &v
 }

@@ -18,6 +18,7 @@ package pipeline
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
 )
@@ -29,6 +30,8 @@ type TemplateOp struct {
 	Template string `yaml:"template"`
 	// path within global data tree where to set result at
 	Path string `yaml:"path"`
+	// Trim when true, whitespace is trimmed off the value
+	Trim *bool `yaml:"trim,omitempty"`
 }
 
 func (ts *TemplateOp) String() string {
@@ -42,8 +45,12 @@ func (ts *TemplateOp) Do(ctx ActionContext) error {
 	if len(ts.Path) == 0 {
 		return ErrPathEmpty
 	}
-	val, err := ctx.TemplateEngine().Render(ts.Template, ctx.Snapshot())
-	ctx.Data().AddValueAt(ts.Path, dom.LeafNode(val))
+	ss := ctx.Snapshot()
+	val, err := ctx.TemplateEngine().Render(ts.Template, ss)
+	if safeBoolDeref(ts.Trim) {
+		val = strings.TrimSpace(val)
+	}
+	ctx.Data().AddValueAt(ctx.TemplateEngine().RenderLenient(ts.Path, ss), dom.LeafNode(val))
 	return err
 }
 
