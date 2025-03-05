@@ -138,3 +138,8 @@ func TestSafeCopyIntSlice(t *testing.T) {
 	x = safeCopyIntSlice(&a)
 	assert.Equal(t, 3, len(*x))
 }
+
+func TestSafeBoolDeref(t *testing.T) {
+	assert.False(t, safeBoolDeref(nil))
+	assert.True(t, safeBoolDeref(ptr(true)))
+}
