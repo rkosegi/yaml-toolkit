@@ -33,7 +33,7 @@ type ForEachOp struct {
 	// Matched files will be used as iteration items.
 	Glob *string `yaml:"glob,omitempty"`
 	// Query is path within the data tree that will be attempted
-	Query *string `yaml:"ref,omitempty"`
+	Query *string `yaml:"query,omitempty"`
 	// Item is list of specified strings to iterate over
 	Item *[]string `yaml:"item,omitempty"`
 	// Action to perform for every item
@@ -88,13 +88,15 @@ func (fea *ForEachOp) performWithItem(ctx ActionContext, item string) (err error
 }
 
 func (fea *ForEachOp) String() string {
-	return fmt.Sprintf("ForEach[Glob=%s,Items=%d]", safeStrDeref(fea.Glob), safeStrListSize(fea.Item))
+	return fmt.Sprintf("ForEach[Glob=%s,Items=%d,Query=%s]", safeStrDeref(fea.Glob),
+		safeStrListSize(fea.Item), safeStrDeref(fea.Query))
 }
 
 func (fea *ForEachOp) CloneWith(ctx ActionContext) Action {
 	cp := new(ForEachOp)
 	cp.Glob = fea.Glob
 	cp.Item = fea.Item
+	cp.Query = fea.Query
 	cp.Action = ActionSpec{}.CloneWith(ctx).(ActionSpec)
 	return cp
 }
