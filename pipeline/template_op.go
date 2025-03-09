@@ -29,7 +29,7 @@ type TemplateOp struct {
 	// template to render
 	Template string `yaml:"template"`
 	// path within global data tree where to set result at
-	Path string `yaml:"path"`
+	Path string `yaml:"path" clone:"template"`
 	// Trim when true, whitespace is trimmed off the value
 	Trim *bool `yaml:"trim,omitempty"`
 }
@@ -57,6 +57,7 @@ func (ts *TemplateOp) Do(ctx ActionContext) error {
 func (ts *TemplateOp) CloneWith(ctx ActionContext) Action {
 	return &TemplateOp{
 		Template: ts.Template,
+		Trim:     ts.Trim,
 		Path:     ctx.TemplateEngine().RenderLenient(ts.Path, ctx.Snapshot()),
 	}
 }

@@ -73,7 +73,7 @@ type SetOp struct {
 
 	// Path at which to put data.
 	// If omitted, then data are merged into root of document
-	Path string `yaml:"path,omitempty"`
+	Path string `yaml:"path,omitempty" clone:"template"`
 
 	// Strategy defines how that are handled when conflict during set/add of data occur.
 	Strategy *SetStrategy `yaml:"strategy,omitempty"`
@@ -102,7 +102,8 @@ func (sa *SetOp) Do(ctx ActionContext) error {
 
 func (sa *SetOp) CloneWith(ctx ActionContext) Action {
 	return &SetOp{
-		Data: sa.Data,
-		Path: ctx.TemplateEngine().RenderLenient(sa.Path, ctx.Snapshot()),
+		Data:     sa.Data,
+		Path:     ctx.TemplateEngine().RenderLenient(sa.Path, ctx.Snapshot()),
+		Strategy: sa.Strategy,
 	}
 }

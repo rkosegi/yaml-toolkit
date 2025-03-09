@@ -30,7 +30,7 @@ import (
 
 type ExecOp struct {
 	// Program to execute
-	Program string `yaml:"program,omitempty"`
+	Program string `yaml:"program,omitempty" clone:"template"`
 	// Optional arguments for program
 	Args *[]string `yaml:"args,omitempty"`
 	// List of exit codes that are assumed to be valid

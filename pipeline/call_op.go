@@ -58,7 +58,7 @@ func (c *CallOp) Do(ctx ActionContext) error {
 	}
 }
 
-func (c *CallOp) CloneWith(ctx ActionContext) Action {
+func (c *CallOp) CloneWith(_ ActionContext) Action {
 	return &CallOp{
 		Name:     c.Name,
 		Args:     c.Args,

@@ -37,15 +37,15 @@ const (
 // ExportOp allows to export data into file
 type ExportOp struct {
 	// File to export data onto
-	File string
+	File string `clone:"template"`
 	// Path within data tree pointing to dom.Node to export. Empty path denotes whole document.
 	// If path does not resolve, then empty document will be exported.
 	// If output format is "text" then path must point to leaf.
 	// Any other output format must point to dom.Container.
 	// If neither of these conditions are met, then it is considered as if path does not resolve at all.
-	Path string
+	Path string `clone:"template"`
 	// Format of output file.
-	Format OutputFormat
+	Format OutputFormat `clone:"template"`
 }
 
 func (e *ExportOp) String() string {
