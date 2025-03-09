@@ -22,7 +22,7 @@ import (
 
 // LogOp just logs message to logger
 type LogOp struct {
-	Message string `yaml:"message"`
+	Message string `yaml:"message" clone:"template"`
 }
 
 func (lo *LogOp) Do(ctx ActionContext) error {

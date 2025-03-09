@@ -26,8 +26,8 @@ import (
 // Check patch package for more details
 type PatchOp struct {
 	Op    patch.Op               `yaml:"op"`
-	From  string                 `yaml:"from,omitempty"`
-	Path  string                 `yaml:"path"`
+	From  string                 `yaml:"from,omitempty" clone:"template"`
+	Path  string                 `yaml:"path" clone:"template"`
 	Value map[string]interface{} `yaml:"value,omitempty"`
 }
 

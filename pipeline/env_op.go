@@ -43,7 +43,7 @@ type EnvOp struct {
 
 	// Optional path within data tree under which "Env" container will be put.
 	// When omitted, then "Env" goes to root of data.
-	Path string `yaml:"path,omitempty"`
+	Path string `yaml:"path,omitempty" clone:"template"`
 }
 
 func (eo *EnvOp) Do(ctx ActionContext) error {

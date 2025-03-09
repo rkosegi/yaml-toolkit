@@ -90,6 +90,11 @@ type Action interface {
 	// Do will perform this action.
 	// This function is invoked by Executor implementation and as such it's not meant to be called by end user directly.
 	Do(ctx ActionContext) error
+	Cloneable
+}
+
+// Cloneable interface allows to customize default clone behavior by providing implementation of CloneWith function.
+type Cloneable interface {
 	// CloneWith creates fresh clone of this Action with values of its fields templated.
 	// Data for template can be obtained by calling Snapshot() on provided context.
 	CloneWith(ctx ActionContext) Action

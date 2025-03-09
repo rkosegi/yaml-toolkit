@@ -48,11 +48,11 @@ const (
 // ImportOp reads content of file into data tree at given path
 type ImportOp struct {
 	// File to read
-	File string `yaml:"file"`
+	File string `yaml:"file" clone:"template"`
 
 	// Path at which to import data.
 	// If omitted, then data are merged into root of document
-	Path string `yaml:"path"`
+	Path string `yaml:"path" clone:"template"`
 
 	// How to parse file
 	Mode ParseFileMode `yaml:"mode,omitempty"`

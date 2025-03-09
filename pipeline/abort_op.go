@@ -22,7 +22,7 @@ import (
 )
 
 type AbortOp struct {
-	Message string `yaml:"message"`
+	Message string `yaml:"message" clone:"template"`
 }
 
 func (ao *AbortOp) Do(_ ActionContext) error {
