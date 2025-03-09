@@ -26,7 +26,7 @@ import (
 // ForEachOp can be used to repeat actions over list of items.
 // Those items could be
 //  1. files specified by globbing pattern
-//  2. result of query from data tree (leaf values)
+//  2. result of query from data tree (list values)
 //  3. specified strings
 type ForEachOp struct {
 	// Glob is pattern that will be used to match files on file system.
@@ -38,6 +38,9 @@ type ForEachOp struct {
 	Item *[]string `yaml:"item,omitempty"`
 	// Action to perform for every item
 	Action ActionSpec `yaml:"action"`
+	// Variable is name of variable to hold current iteration item.
+	// When omitted, default value of "forEach" will be used
+	Variable *string `yaml:"var,omitempty"`
 }
 
 func (fea *ForEachOp) Do(ctx ActionContext) error {
@@ -46,7 +49,7 @@ func (fea *ForEachOp) Do(ctx ActionContext) error {
 			return err
 		} else {
 			for _, match := range matches {
-				err = fea.performWithItem(ctx, match)
+				err = fea.performWithItem(ctx, dom.LeafNode(match))
 				if err != nil {
 					return err
 				}
@@ -55,7 +58,7 @@ func (fea *ForEachOp) Do(ctx ActionContext) error {
 	} else if nonEmpty(fea.Query) {
 		if n := ctx.Data().Lookup(*fea.Query); n != nil && n.IsList() {
 			for _, item := range n.(dom.List).Items() {
-				if x, ok := item.(dom.Leaf).Value().(string); ok {
+				if x, ok := item.(dom.Leaf); ok {
 					if err := fea.performWithItem(ctx, x); err != nil {
 						return err
 					}
@@ -64,7 +67,7 @@ func (fea *ForEachOp) Do(ctx ActionContext) error {
 		}
 	} else if fea.Item != nil {
 		for _, item := range *fea.Item {
-			err := fea.performWithItem(ctx, item)
+			err := fea.performWithItem(ctx, dom.LeafNode(item))
 			if err != nil {
 				return err
 			}
@@ -73,9 +76,13 @@ func (fea *ForEachOp) Do(ctx ActionContext) error {
 	return nil
 }
 
-func (fea *ForEachOp) performWithItem(ctx ActionContext, item string) (err error) {
-	ctx.Data().AddValue("forEach", dom.LeafNode(item))
-	defer ctx.Data().Remove("forEach")
+func (fea *ForEachOp) performWithItem(ctx ActionContext, item dom.Node) (err error) {
+	vp := "forEach"
+	if fea.Variable != nil {
+		vp = *fea.Variable
+	}
+	ctx.Data().AddValue(vp, item)
+	defer ctx.Data().Remove(vp)
 
 	for _, act := range fea.Action.Operations.toList() {
 		act = act.CloneWith(ctx)
