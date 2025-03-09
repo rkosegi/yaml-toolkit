@@ -102,12 +102,13 @@ func TestForeachQuery(t *testing.T) {
 		"items": []interface{}{"a", "b", "c"},
 	})
 	op = &ForEachOp{
-		Query: ptr("items"),
+		Variable: ptr("XYZ"),
+		Query:    ptr("items"),
 		Action: ActionSpec{
 			Operations: OpSpec{
 				Template: &TemplateOp{
-					Template: "{{ .forEach }}",
-					Path:     "Result.{{ .forEach }}",
+					Template: "{{ .XYZ }}",
+					Path:     "Result.{{ .XYZ }}",
 				},
 			},
 		},
