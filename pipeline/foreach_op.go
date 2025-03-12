@@ -58,10 +58,8 @@ func (fea *ForEachOp) Do(ctx ActionContext) error {
 	} else if nonEmpty(fea.Query) {
 		if n := ctx.Data().Lookup(*fea.Query); n != nil && n.IsList() {
 			for _, item := range n.(dom.List).Items() {
-				if x, ok := item.(dom.Leaf); ok {
-					if err := fea.performWithItem(ctx, x); err != nil {
-						return err
-					}
+				if err := fea.performWithItem(ctx, item); err != nil {
+					return err
 				}
 			}
 		}
