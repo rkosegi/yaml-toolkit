@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
@@ -147,6 +148,57 @@ func (c *containerImpl) Children() map[string]Node {
 
 func (c *containerImpl) Serialize(writer io.Writer, mappingFunc NodeEncoderFunc, encFn EncoderFunc) error {
 	return encFn(writer, mappingFunc(c))
+}
+
+func (c *containerBuilderImpl) ancestorPath(path path.Path, create bool) (ContainerBuilder, string) {
+	c.ensureChildren()
+	var node ContainerBuilder
+	node = c
+	pc := path.Components()
+	for _, p := range pc[0 : len(pc)-1] {
+		x := node.Child(p.Value())
+		if x == nil || !x.IsContainer() {
+			if create {
+				node = c.addChild(node, p.Value())
+			} else {
+				return nil, ""
+			}
+		} else {
+			node = x.(ContainerBuilder)
+		}
+	}
+	return node, path.Last().Value()
+}
+
+func (c *containerBuilderImpl) Set(path path.Path, value Node) {
+	node, p := c.ancestorPath(path, true)
+	node.AddValue(p, value)
+}
+
+func (c *containerBuilderImpl) Delete(path path.Path) {
+	if node, p := c.ancestorPath(path, false); node != nil {
+		node.Remove(p)
+	}
+}
+
+func (c *containerImpl) Get(path path.Path) Node {
+	if path.IsEmpty() {
+		return nil
+	}
+	c.ensureChildren()
+	var current Container
+	current = c
+	pc := path.Components()
+	for _, p := range pc[0 : len(pc)-1] {
+		// TODO: this does not work for list items
+		x := current.Child(p.Value())
+		if x == nil || !x.IsContainer() {
+			return nil
+		} else {
+			current = x.(Container)
+		}
+	}
+	return current.Child(path.Last().Value())
 }
 
 func (c *containerImpl) Lookup(path string) Node {
@@ -300,11 +352,11 @@ func (f *containerFactory) FromMap(in map[string]interface{}) ContainerBuilder {
 }
 
 func (f *containerFactory) FromProperties(in map[string]interface{}) ContainerBuilder {
-	b := f.Container()
+	x := f.Container()
 	for k, v := range in {
-		b.AddValueAt(k, LeafNode(v))
+		x.AddValueAt(k, LeafNode(v))
 	}
-	return b
+	return x
 }
 
 func (f *containerFactory) Container() ContainerBuilder {
