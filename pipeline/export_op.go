@@ -72,7 +72,7 @@ func (e *ExportOp) Do(ctx ActionContext) (err error) {
 		enc = props.EncoderFn
 	case OutputFormatText:
 		enc = func(w io.Writer, v interface{}) error {
-			_, err := fmt.Fprintf(w, "%v", v)
+			_, err = fmt.Fprintf(w, "%v", v)
 			return err
 		}
 		defVal = dom.LeafNode("")
@@ -83,7 +83,9 @@ func (e *ExportOp) Do(ctx ActionContext) (err error) {
 	if d == nil {
 		d = defVal
 	}
-	f, err := os.OpenFile(e.File, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	fp := ctx.TemplateEngine().RenderLenient(e.File, ctx.Snapshot())
+	ctx.Logger().Log("opening file", fp)
+	f, err := os.OpenFile(fp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
 	}
