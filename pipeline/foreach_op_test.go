@@ -96,36 +96,80 @@ func TestForeachStringItemChildError(t *testing.T) {
 func TestForeachQuery(t *testing.T) {
 	var (
 		err error
-		op  *ForEachOp
 	)
-	d := b.FromMap(map[string]interface{}{
+
+	type testcase struct {
+		qry        string
+		tmpl       string
+		variable   string
+		path       string
+		validateFn func(data dom.ContainerBuilder)
+	}
+	data := b.FromMap(map[string]interface{}{
+		"leaf": "X",
+		"sub": map[string]interface{}{
+			"leaf1": "Y",
+		},
 		"items": []interface{}{"a", "b", "c"},
 	})
-	op = &ForEachOp{
-		Variable: ptr("XYZ"),
-		Query:    ptr("items"),
-		Action: ActionSpec{
-			Operations: OpSpec{
-				Template: &TemplateOp{
-					Template: "{{ .XYZ }}",
-					Path:     "Result.{{ .XYZ }}",
+	for _, qry := range []string{
+		"leaf", "sub", "items",
+	} {
+		op := &ForEachOp{
+			Query: &qry,
+			Action: ActionSpec{
+				Operations: OpSpec{
+					Abort: &AbortOp{},
 				},
 			},
-		},
+		}
+		assert.Error(t, op.Do(mockActCtx(data)))
 	}
-	err = op.Do(mockActCtx(d))
-	assert.Equal(t, 3, len(d.Lookup("Result").(dom.Container).Children()))
-	assert.NoError(t, err)
-	op = &ForEachOp{
-		Query: ptr("items"),
-		Action: ActionSpec{
-			Operations: OpSpec{
-				Abort: &AbortOp{},
+	for _, tc := range []testcase{
+		{
+			qry:      "leaf",
+			tmpl:     "{{ .forEach }}",
+			variable: "forEach",
+			path:     "Result",
+			validateFn: func(d dom.ContainerBuilder) {
+				assert.Equal(t, "X", d.Lookup("Result").(dom.Leaf).Value())
 			},
 		},
+		{
+			validateFn: func(d dom.ContainerBuilder) {
+				assert.Equal(t, "Y", d.Lookup("Result").(dom.Leaf).Value())
+			},
+			qry:      "sub",
+			tmpl:     "{{ get .sub .forEach }}",
+			variable: "forEach",
+			path:     "Result",
+		},
+		{
+			validateFn: func(d dom.ContainerBuilder) {
+				assert.Equal(t, 3, len(d.Lookup("Result").(dom.Container).Children()))
+			},
+			qry:      "items",
+			tmpl:     "{{ .XYZ }}",
+			variable: "XYZ",
+			path:     "Result.{{ .XYZ }}",
+		},
+	} {
+		op := &ForEachOp{
+			Variable: ptr(tc.variable),
+			Query:    ptr(tc.qry),
+			Action: ActionSpec{
+				Operations: OpSpec{
+					Template: &TemplateOp{
+						Template: tc.tmpl,
+						Path:     tc.path,
+					},
+				},
+			},
+		}
+		err = op.Do(mockActCtx(data))
+		assert.NoError(t, err)
+		tc.validateFn(data)
 	}
-	err = op.Do(mockActCtx(d))
-	assert.Error(t, err)
 }
 
 func TestForeachGlob(t *testing.T) {

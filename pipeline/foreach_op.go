@@ -56,9 +56,21 @@ func (fea *ForEachOp) Do(ctx ActionContext) error {
 			}
 		}
 	} else if nonEmpty(fea.Query) {
-		if n := ctx.Data().Lookup(*fea.Query); n != nil && n.IsList() {
-			for _, item := range n.(dom.List).Items() {
-				if err := fea.performWithItem(ctx, item); err != nil {
+		if n := ctx.Data().Lookup(*fea.Query); n != nil {
+			if n.IsList() {
+				for _, item := range n.(dom.List).Items() {
+					if err := fea.performWithItem(ctx, item); err != nil {
+						return err
+					}
+				}
+			} else if n.IsContainer() {
+				for item := range n.(dom.Container).Children() {
+					if err := fea.performWithItem(ctx, dom.LeafNode(item)); err != nil {
+						return err
+					}
+				}
+			} else {
+				if err := fea.performWithItem(ctx, n.(dom.Leaf)); err != nil {
 					return err
 				}
 			}
