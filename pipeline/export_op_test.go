@@ -44,7 +44,7 @@ func TestExportOpDo(t *testing.T) {
 	assert.Contains(t, eo.String(), f.Name())
 	d := b.Container()
 	d.AddValueAt("root.sub1.sub2", dom.LeafNode(123))
-	err = eo.Do(mockActCtx(d))
+	err = eo.Do(newMockActBuilder().data(d).build())
 	assert.NoError(t, err)
 	fi, err := os.Stat(f.Name())
 	assert.NotNil(t, fi)
@@ -55,7 +55,7 @@ func TestExportOpDo(t *testing.T) {
 		Path:   "root.sub1.sub2",
 		Format: OutputFormatText,
 	}
-	err = eo.Do(mockActCtx(d))
+	err = eo.Do(newMockActBuilder().data(d).build())
 	assert.NoError(t, err)
 
 	eo = &ExportOp{
@@ -63,7 +63,7 @@ func TestExportOpDo(t *testing.T) {
 		Path:   "root.sub1",
 		Format: OutputFormatText,
 	}
-	err = eo.Do(mockActCtx(d))
+	err = eo.Do(newMockActBuilder().data(d).build())
 	assert.Error(t, err)
 }
 
@@ -106,7 +106,7 @@ func TestExportOpCloneWith(t *testing.T) {
 	d := b.Container()
 	d.AddValueAt("Format", dom.LeafNode("yaml"))
 	d.AddValueAt("Sub", dom.LeafNode("sub20"))
-	eo = eo.CloneWith(mockActCtx(d)).(*ExportOp)
+	eo = eo.CloneWith(newMockActBuilder().data(d).build()).(*ExportOp)
 	assert.Equal(t, "root.sub10.sub20", eo.Path)
 	assert.Equal(t, OutputFormatYaml, eo.Format)
 	assert.Equal(t, "/tmp/out.yaml", eo.File)

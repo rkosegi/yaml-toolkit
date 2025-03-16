@@ -77,7 +77,7 @@ func TestLoopOpSimple(t *testing.T) {
 	}
 
 	d := b.Container()
-	ac := mockActCtx(d)
+	ac := newMockActBuilder().data(d).build()
 	err := op.Do(ac)
 	assert.NoError(t, err)
 	assert.Equal(t, "10", d.Lookup("i").(dom.Leaf).Value())

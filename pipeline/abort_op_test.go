@@ -36,7 +36,7 @@ func TestAbortOpCloneWith(t *testing.T) {
 	}
 	d := b.Container()
 	d.AddValue("Format", dom.LeafNode("toml"))
-	eo = eo.CloneWith(mockActCtx(d)).(*AbortOp)
+	eo = eo.CloneWith(newMockActBuilder().data(d).build()).(*AbortOp)
 	assert.Equal(t, "Unsupported format: toml", eo.Message)
 }
 

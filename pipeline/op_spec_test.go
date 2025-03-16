@@ -93,11 +93,11 @@ func TestOpSpecCloneWith(t *testing.T) {
 		},
 	}
 
-	a := o.CloneWith(mockActCtx(b.FromMap(map[string]interface{}{
+	a := o.CloneWith(newMockActBuilder().data(b.FromMap(map[string]interface{}{
 		"Path":  "root.sub2",
 		"Path3": "/root/sub3",
 		"Shell": "/bin/bash",
-	}))).(OpSpec)
+	})).build()).(OpSpec)
 	t.Log(a.String())
 	assert.Equal(t, "root.sub2", a.Set.Path)
 	assert.Equal(t, "root.sub2", a.Import.Path)
