@@ -66,7 +66,7 @@ func TestForDefCall(t *testing.T) {
 		},
 	}
 
-	ctx := mockActCtxLog(t)
+	ctx := newMockActBuilder().testLogger(t).build()
 	err := ctx.Executor().Execute(root)
 	assert.NoError(t, err)
 }

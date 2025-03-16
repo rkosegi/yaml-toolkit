@@ -85,21 +85,6 @@ func mockEmptyActCtx() ActionContext {
 	return newMockActBuilder().build()
 }
 
-// deprecated
-func mockActCtx(data dom.ContainerBuilder) ActionContext {
-	return newMockActBuilder().data(data).build()
-}
-
-// deprecated
-func mockActCtxLog(t *testing.T) ActionContext {
-	return newMockActBuilder().testLogger(t).build()
-}
-
-// deprecated
-func mockActCtxExt(data dom.ContainerBuilder, ea map[string]Action) ActionContext {
-	return newMockActBuilder().data(data).ext(ea).build()
-}
-
 func removeFilesLater(t *testing.T, files ...*os.File) {
 	t.Cleanup(func() {
 		for _, f := range files {
@@ -154,7 +139,7 @@ func TestSafeRenderStrPointer(t *testing.T) {
 	d := b.FromMap(map[string]interface{}{
 		"X": "abc",
 	})
-	c := mockActCtx(d)
+	c := newMockActBuilder().data(d).build()
 	assert.Equal(t, "abc", *safeRenderStrPointer(&s, c.TemplateEngine(), c.Snapshot()))
 }
 

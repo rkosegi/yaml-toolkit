@@ -59,7 +59,7 @@ func TestExecOpDo(t *testing.T) {
 		SaveExitCodeTo: strPointer("Res"),
 	}
 	d := b.Container()
-	ctx := mockActCtx(d)
+	ctx := newMockActBuilder().data(d).build()
 	assert.NoError(t, eo.Do(ctx))
 	assert.Equal(t, 3, d.Lookup("Res").(dom.Leaf).Value())
 	eo = &ExecOp{
@@ -78,6 +78,6 @@ func TestExecOpCloneWith(t *testing.T) {
 	}
 	d := b.Container()
 	d.AddValue("Shell", dom.LeafNode("/bin/bash"))
-	eo = eo.CloneWith(mockActCtx(d)).(*ExecOp)
+	eo = eo.CloneWith(newMockActBuilder().data(d).build()).(*ExecOp)
 	assert.Equal(t, "/bin/bash", eo.Program)
 }

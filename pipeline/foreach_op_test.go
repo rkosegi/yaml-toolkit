@@ -74,7 +74,7 @@ func TestForeachStringItem(t *testing.T) {
 		},
 	}
 	d := b.Container()
-	err := op.Do(mockActCtx(d))
+	err := op.Do(newMockActBuilder().data(d).build())
 	assert.NoError(t, err)
 	assert.Equal(t, "abc", d.Lookup("a.X").(dom.Leaf).Value())
 	assert.Equal(t, "abc", d.Lookup("b.X").(dom.Leaf).Value())
@@ -93,7 +93,7 @@ func TestForeachStringItemChildError(t *testing.T) {
 		},
 	}
 	d := b.Container()
-	err := op.Do(mockActCtx(d))
+	err := op.Do(newMockActBuilder().data(d).build())
 	assert.Error(t, err)
 }
 
@@ -127,7 +127,7 @@ func TestForeachQuery(t *testing.T) {
 				},
 			},
 		}
-		assert.Error(t, op.Do(mockActCtx(data)))
+		assert.Error(t, op.Do(newMockActBuilder().data(data).build()))
 	}
 	for _, tc := range []testcase{
 		{
@@ -170,7 +170,7 @@ func TestForeachQuery(t *testing.T) {
 				},
 			},
 		}
-		err = op.Do(mockActCtx(data))
+		err = op.Do(newMockActBuilder().data(data).build())
 		assert.NoError(t, err)
 		tc.validateFn(data)
 	}
@@ -190,7 +190,7 @@ func TestForeachGlob(t *testing.T) {
 		},
 	}
 	d := b.Container()
-	err := op.Do(mockActCtx(d))
+	err := op.Do(newMockActBuilder().data(d).build())
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(d.Lookup("import.files").(dom.Container).Children()))
 }
@@ -214,7 +214,7 @@ func TestForeachActionSpec(t *testing.T) {
 			},
 		},
 	}
-	err = op.Do(mockActCtxLog(t))
+	err = op.Do(newMockActBuilder().testLogger(t).build())
 	assert.NoError(t, err)
 
 	op = &ForEachOp{
@@ -234,7 +234,7 @@ func TestForeachActionSpec(t *testing.T) {
 	}
 	d := b.Container()
 	d.AddValue("X", dom.LeafNode(100))
-	err = op.Do(mockActCtx(d))
+	err = op.Do(newMockActBuilder().data(d).build())
 	assert.NoError(t, err)
 	assert.Equal(t, "103", d.Lookup("X").(dom.Leaf).Value())
 }
@@ -250,7 +250,7 @@ func TestForeachGlobChildError(t *testing.T) {
 			},
 		},
 	}
-	err := op.Do(mockActCtxLog(t))
+	err := op.Do(newMockActBuilder().testLogger(t).build())
 	assert.Error(t, err)
 }
 
@@ -268,6 +268,6 @@ func TestForeachGlobInvalid(t *testing.T) {
 		},
 	}
 	d := b.Container()
-	err := op.Do(mockActCtx(d))
+	err := op.Do(newMockActBuilder().data(d).build())
 	assert.Error(t, err)
 }
