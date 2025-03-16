@@ -14,7 +14,7 @@
 
 module github.com/rkosegi/yaml-toolkit
 
-go 1.21
+go 1.23.0
 
 require (
 	github.com/go-task/slim-sprig/v3 v3.0.0
