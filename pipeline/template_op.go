@@ -24,7 +24,6 @@ import (
 )
 
 // TemplateOp can be used to render value from data at runtime.
-// Global data tree is available under .Data
 type TemplateOp struct {
 	// template to render
 	Template string `yaml:"template"`

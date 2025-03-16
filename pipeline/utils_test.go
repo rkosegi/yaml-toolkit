@@ -52,20 +52,52 @@ func strPointer(str string) *string {
 	return &str
 }
 
+func newMockActBuilder() *mockActCtxBuilder {
+	return &mockActCtxBuilder{d: b.Container()}
+}
+
+type mockActCtxBuilder struct {
+	d    dom.ContainerBuilder
+	opts []Opt
+}
+
+func (mcb *mockActCtxBuilder) ext(ea map[string]Action) *mockActCtxBuilder {
+	mcb.opts = append(mcb.opts, WithExtActions(ea))
+	return mcb
+}
+
+func (mcb *mockActCtxBuilder) data(d dom.ContainerBuilder) *mockActCtxBuilder {
+	mcb.d = d
+	return mcb
+}
+
+func (mcb *mockActCtxBuilder) testLogger(t *testing.T) *mockActCtxBuilder {
+	mcb.opts = append(mcb.opts, WithListener(&testingLogger{t: t}))
+	return mcb
+}
+
+func (mcb *mockActCtxBuilder) build() ActionContext {
+	mcb.opts = append(mcb.opts, WithData(mcb.d))
+	return New(mcb.opts...).(*exec).newCtx(nil)
+}
+
 func mockEmptyActCtx() ActionContext {
-	return mockActCtx(b.Container())
+	return newMockActBuilder().build()
 }
 
+// deprecated
 func mockActCtx(data dom.ContainerBuilder) ActionContext {
-	return New(WithData(data)).(*exec).newCtx(nil)
+	return newMockActBuilder().data(data).build()
 }
 
+// deprecated
 func mockActCtxLog(t *testing.T) ActionContext {
-	return New(WithData(b.Container()), WithListener(&testingLogger{t: t})).(*exec).newCtx(nil)
+	return newMockActBuilder().testLogger(t).build()
 }
 
+// deprecated
 func mockActCtxExt(data dom.ContainerBuilder, ea map[string]Action) ActionContext {
-	return New(WithData(data), WithExtActions(ea)).(*exec).newCtx(nil)
+	return newMockActBuilder().data(data).ext(ea).build()
 }
 
 func removeFilesLater(t *testing.T, files ...*os.File) {

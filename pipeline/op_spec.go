@@ -35,6 +35,9 @@ type OpSpec struct {
 	// Template allows to render value at runtime
 	Template *TemplateOp `yaml:"template,omitempty"`
 
+	// TemplateFile can be used to render template file
+	TemplateFile *TemplateFileOp `yaml:"templateFile,omitempty"`
+
 	// Call calls previously defined callable
 	Call *CallOp `yaml:"call,omitempty"`
 
@@ -79,6 +82,9 @@ func (as OpSpec) toList() []Action {
 	}
 	if as.Template != nil {
 		actions = append(actions, as.Template)
+	}
+	if as.TemplateFile != nil {
+		actions = append(actions, as.TemplateFile)
 	}
 	if as.Call != nil {
 		actions = append(actions, as.Call)
@@ -139,6 +145,9 @@ func (as OpSpec) CloneWith(ctx ActionContext) Action {
 	}
 	if as.Template != nil {
 		r.Template = as.Template.CloneWith(ctx).(*TemplateOp)
+	}
+	if as.TemplateFile != nil {
+		r.TemplateFile = as.TemplateFile.CloneWith(ctx).(*TemplateFileOp)
 	}
 	if as.Call != nil {
 		r.Call = as.Call.CloneWith(ctx).(*CallOp)
@@ -215,6 +224,9 @@ func (as OpSpec) String() string {
 	}
 	if as.Template != nil {
 		parts = append(parts, fmt.Sprintf("Template=%v", as.Template.String()))
+	}
+	if as.TemplateFile != nil {
+		parts = append(parts, fmt.Sprintf("TemplateFile=%v", as.TemplateFile.String()))
 	}
 	sb.WriteString(strings.Join(parts, ","))
 	sb.WriteString("]")

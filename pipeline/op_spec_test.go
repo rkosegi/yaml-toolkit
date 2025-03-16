@@ -42,6 +42,10 @@ func TestOpSpecCloneWith(t *testing.T) {
 		Template: &TemplateOp{
 			Path: "{{ .Path }}",
 		},
+		TemplateFile: &TemplateFileOp{
+			File:   "{{ .Path }}",
+			Output: "{{ .Path3 }}",
+		},
 		Import: &ImportOp{
 			Path: "{{ .Path }}",
 			Mode: ParseFileModeYaml,

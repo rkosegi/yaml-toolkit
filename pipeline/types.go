@@ -27,6 +27,8 @@ var (
 	ErrNoDataToSet   = errors.New("no data to set")
 	ErrTemplateEmpty = errors.New("template cannot be empty")
 	ErrPathEmpty     = errors.New("path cannot be empty")
+	ErrFileEmpty     = errors.New("file cannot be empty")
+	ErrOutputEmpty   = errors.New("output cannot be empty")
 	ErrNotContainer  = errors.New("data element must be container when no path is provided")
 )
 
