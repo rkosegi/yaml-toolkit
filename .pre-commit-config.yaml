@@ -17,6 +17,7 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+      - id: end-of-file-fixer
       - id: check-merge-conflict
       - id: pretty-format-json
         args:
@@ -31,3 +32,10 @@ repos:
     hooks:
       - id: go-mod-tidy
       - id: go-fmt
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.29.0
+    hooks:
+      - id: yamllint
+        files: testdata/.*\.yaml
+        args:
+          - -c=.yamllint-config.yaml
