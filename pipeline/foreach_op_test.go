@@ -58,6 +58,10 @@ func TestForeachStringItem(t *testing.T) {
 				Log: &LogOp{
 					Message: "Hi {{ .forEach }}",
 				},
+				TemplateFile: &TemplateFileOp{
+					File:   "../testdata/simple.template",
+					Output: "/tmp/abc.out",
+				},
 				Loop: &LoopOp{
 					Test: "false",
 					Action: ActionSpec{
