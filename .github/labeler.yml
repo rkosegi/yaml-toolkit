@@ -12,36 +12,66 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
-feature:
-  - head-branch: ['^feature', 'feature']
-
+bug:
+  - head-branch:
+      - ^bug/
 docs:
   - changed-files:
       - any-glob-to-any-file:
-          - 'docs/**/*'
+          - docs/**
           - '**/*.md'
-
+          - '**/docs.go'
+enhancement:
+  - head-branch:
+      - ^feature/
 tests:
   - changed-files:
       - any-glob-to-any-file:
           - '**/*_test.go'
-
+          - testdata/**
 schemas:
   - changed-files:
       - any-glob-to-any-file:
-          - 'schemas/*.json'
-
-component:dom:
+          - schemas/*.json
+ci/config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .*.yaml
+          - .github/**
+component/analytics:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*_test.go'
+          - testdata/**
+component/dom:
   - changed-files:
       - any-glob-to-any-file:
           - dom/*
-
-component:path:
+component/diff:
+  - changed-files:
+      - any-glob-to-any-file:
+          - diff/*
+component/k8s:
+  - changed-files:
+      - any-glob-to-any-file:
+          - k8s/*
+component/patch:
+  - changed-files:
+      - any-glob-to-any-file:
+          - patch/*
+component/path:
   - changed-files:
       - any-glob-to-any-file:
           - path/*
-
-component:pipeline:
+component/pipeline:
   - changed-files:
       - any-glob-to-any-file:
           - pipeline/*
+component/props:
+  - changed-files:
+      - any-glob-to-any-file:
+          - props/*
+component/utils:
+  - changed-files:
+      - any-glob-to-any-file:
+          - utils/*
