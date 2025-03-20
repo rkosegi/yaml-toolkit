@@ -38,19 +38,29 @@ func (e *doc) Document() dom.ContainerBuilder {
 	return e.cb
 }
 
-func (e *doc) Save() (err error) {
-	if err = e.enc(e.m, e.cb); err != nil {
-		return err
-	}
-	if f, err := os.OpenFile(e.file, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
-		return err
-	} else {
-		_, err = e.m.WriteTo(f)
-		if err != nil {
+func (e *doc) Save() error {
+	var (
+		err error
+		f   *os.File
+	)
+	for _, fn := range []func() error{
+		func() error {
+			return e.enc(e.m, e.cb)
+		},
+		func() error {
+			f, err = os.OpenFile(e.file, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+			return err
+		},
+		func() error {
+			_, err = e.m.WriteTo(f)
+			return err
+		},
+	} {
+		if err = fn(); err != nil {
 			return err
 		}
-		return f.Close()
 	}
+	return f.Close()
 }
 
 // YamlDoc loads given k8s manifest file and open embedded YAML document for processing
@@ -161,10 +171,6 @@ func (b *builderImpl) Create(kind string, name string, opts ...CreateOption) (Do
 	for _, opt := range opts {
 		opt(b)
 	}
-	f, err := os.OpenFile(b.file, b.createFlags, b.fileMode)
-	if err != nil {
-		return nil, err
-	}
 	init := map[string]interface{}{
 		"kind":       kind,
 		"apiVersion": b.apiVersion,
@@ -177,11 +183,25 @@ func (b *builderImpl) Create(kind string, name string, opts ...CreateOption) (Do
 	if kind == "Secret" {
 		init["type"] = "Opaque"
 	}
-	if err = utils.NewYamlEncoder(f).Encode(init); err != nil {
-		return nil, err
-	}
-	if err = f.Close(); err != nil {
-		return nil, err
+	var (
+		err error
+		f   *os.File
+	)
+	for _, fn := range []func() error{
+		func() error {
+			f, err = os.OpenFile(b.file, b.createFlags, b.fileMode)
+			return err
+		},
+		func() error {
+			return utils.NewYamlEncoder(f).Encode(init)
+		},
+		func() error {
+			return f.Close()
+		},
+	} {
+		if err = fn(); err != nil {
+			return nil, err
+		}
 	}
 	return b.Open()
 }
