@@ -26,7 +26,7 @@ var (
 )
 
 type ext struct {
-	ea map[string]Action
+	ea map[string]ActionFactory
 	cm map[string]ActionSpec
 }
 
@@ -39,11 +39,11 @@ func (e *ext) Get(name string) (ActionSpec, bool) {
 	return r, ok
 }
 
-func (e *ext) AddAction(name string, action Action) {
+func (e *ext) AddAction(name string, action ActionFactory) {
 	e.ea[name] = action
 }
 
-func (e *ext) GetAction(name string) (Action, bool) {
+func (e *ext) GetAction(name string) (ActionFactory, bool) {
 	r, ok := e.ea[name]
 	return r, ok
 }
@@ -64,8 +64,8 @@ type actContext struct {
 type ExtInterface interface {
 	Define(string, ActionSpec)
 	Get(string) (ActionSpec, bool)
-	AddAction(string, Action)
-	GetAction(string) (Action, bool)
+	AddAction(string, ActionFactory)
+	GetAction(string) (ActionFactory, bool)
 }
 
 func (ac actContext) Action() Action                 { return ac.c }
@@ -131,7 +131,7 @@ func WithTemplateEngine(t TemplateEngine) Opt {
 	}
 }
 
-func WithExtActions(m map[string]Action) Opt {
+func WithExtActions(m map[string]ActionFactory) Opt {
 	return func(p *exec) {
 		for k, v := range m {
 			p.AddAction(k, v)
@@ -145,13 +145,13 @@ var defOpts = []Opt{
 	WithTemplateEngine(&templateEngine{
 		fm: sprig.TxtFuncMap(),
 	}),
-	WithExtActions(make(map[string]Action)),
+	WithExtActions(make(map[string]ActionFactory)),
 }
 
 func New(opts ...Opt) Executor {
 	p := &exec{
 		ext: &ext{
-			ea: make(map[string]Action),
+			ea: make(map[string]ActionFactory),
 			cm: make(map[string]ActionSpec),
 		},
 	}

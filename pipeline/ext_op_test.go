@@ -33,10 +33,12 @@ func (n *noopOp) CloneWith(_ ActionContext) Action { return &noopOp{} }
 func TestExtOpDo(t *testing.T) {
 	var ex *ExtOp
 	d := b.Container()
-	ctx := newMockActBuilder().ext(map[string]Action{
-		"dummyfn": &SetOp{
-			Data: map[string]interface{}{
-				"X": 123,
+	ctx := newMockActBuilder().ext(map[string]ActionFactory{
+		"dummyfn": &dummyActFactory{
+			act: &SetOp{
+				Data: map[string]interface{}{
+					"X": 123,
+				},
 			},
 		},
 	}).data(d).build()

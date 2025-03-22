@@ -21,6 +21,8 @@ import "fmt"
 type ExtOp struct {
 	// Function is name of function that was registered with Executor
 	Function string `yaml:"func"`
+	// Args holds arguments to be passed to function, if it implements ArgsSetter.
+	Args map[string]interface{} `yaml:"args"`
 }
 
 func (e *ExtOp) String() string {
@@ -29,7 +31,7 @@ func (e *ExtOp) String() string {
 
 func (e *ExtOp) Do(ctx ActionContext) error {
 	if fn, ok := ctx.Ext().GetAction(e.Function); ok {
-		return ctx.Executor().Execute(fn)
+		return ctx.Executor().Execute(fn.NewForArgs(e.Args))
 	}
 	return fmt.Errorf("no such function: %s", e.Function)
 }

@@ -102,5 +102,17 @@ type Cloneable interface {
 	CloneWith(ctx ActionContext) Action
 }
 
+// ActionFactory can be used to create instances of Action
+type ActionFactory interface {
+	// NewForArgs creates new instance of Action for given set of arguments.
+	NewForArgs(args map[string]interface{}) Action
+}
+
+// ArgsSetter is implemented by ext Action if it wishes to receive arguments.
+type ArgsSetter interface {
+	// SetArgs sets arguments from map
+	SetArgs(args map[string]interface{})
+}
+
 // ChildActions is map of named actions that are executed as a part of parent action
 type ChildActions map[string]ActionSpec
