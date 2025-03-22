@@ -27,6 +27,14 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type dummyActFactory struct {
+	act Action
+}
+
+func (d *dummyActFactory) NewForArgs(_ map[string]interface{}) Action {
+	return d.act
+}
+
 var dummyExec = New().(*exec)
 
 func newTestExec(d dom.ContainerBuilder) *exec {
@@ -335,8 +343,8 @@ func TestExecuteForEachFileGlob(t *testing.T) {
 			ForEach: fe,
 		},
 	}
-	ex.ea = map[string]Action{
-		"noop": &noopOp{},
+	ex.ea = map[string]ActionFactory{
+		"noop": &dummyActFactory{act: &noopOp{}},
 	}
 	assert.NoError(t, ex.Execute(ss))
 	assert.Equal(t, 2, len(gd.Lookup("import.files").(dom.Container).Children()))

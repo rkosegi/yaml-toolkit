@@ -61,7 +61,7 @@ type mockActCtxBuilder struct {
 	opts []Opt
 }
 
-func (mcb *mockActCtxBuilder) ext(ea map[string]Action) *mockActCtxBuilder {
+func (mcb *mockActCtxBuilder) ext(ea map[string]ActionFactory) *mockActCtxBuilder {
 	mcb.opts = append(mcb.opts, WithExtActions(ea))
 	return mcb
 }
