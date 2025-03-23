@@ -11,6 +11,7 @@
 [![Apache 2.0 License](https://badgen.net/static/license/Apache2.0/blue)](https://github.com/rkosegi/yaml-toolkit/blob/main/LICENSE)
 [![CodeQL Status](https://github.com/rkosegi/yaml-toolkit/actions/workflows/codeql.yaml/badge.svg)](https://github.com/rkosegi/yaml-toolkit/security/code-scanning)
 [![CI Status](https://github.com/rkosegi/yaml-toolkit/actions/workflows/ci.yaml/badge.svg)](https://github.com/rkosegi/yaml-toolkit/actions/workflows/ci.yaml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rkosegi/yaml-toolkit/badge)](https://scorecard.dev/viewer/?uri=github.com/rkosegi/yaml-toolkit)
 
 Go library to deal with (not only) YAML documents.
 
