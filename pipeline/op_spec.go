@@ -68,6 +68,9 @@ type OpSpec struct {
 
 	// Abort is able to signal error, so that pipeline can abort execution
 	Abort *AbortOp `yaml:"abort,omitempty"`
+
+	// Html2Dom can be used to process HTML source into DOM
+	Html2Dom *Html2DomOp `yaml:"html2DomOp,omitempty"`
 }
 
 func (as OpSpec) toList() []Action {
