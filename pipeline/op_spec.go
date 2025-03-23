@@ -72,50 +72,13 @@ type OpSpec struct {
 
 func (as OpSpec) toList() []Action {
 	actions := make([]Action, 0)
-	if as.Set != nil {
-		actions = append(actions, as.Set)
-	}
-	if as.Import != nil {
-		actions = append(actions, as.Import)
-	}
-	if as.Patch != nil {
-		actions = append(actions, as.Patch)
-	}
-	if as.Template != nil {
-		actions = append(actions, as.Template)
-	}
-	if as.TemplateFile != nil {
-		actions = append(actions, as.TemplateFile)
-	}
-	if as.Call != nil {
-		actions = append(actions, as.Call)
-	}
-	if as.Define != nil {
-		actions = append(actions, as.Define)
-	}
-	if as.Export != nil {
-		actions = append(actions, as.Export)
-	}
-	if as.Ext != nil {
-		actions = append(actions, as.Ext)
-	}
-	if as.Env != nil {
-		actions = append(actions, as.Env)
-	}
-	if as.Exec != nil {
-		actions = append(actions, as.Exec)
-	}
-	if as.ForEach != nil {
-		actions = append(actions, as.ForEach)
-	}
-	if as.Log != nil {
-		actions = append(actions, as.Log)
-	}
-	if as.Loop != nil {
-		actions = append(actions, as.Loop)
-	}
-	if as.Abort != nil {
-		actions = append(actions, as.Abort)
+	asv := reflect.ValueOf(as)
+	fields := reflect.VisibleFields(reflect.TypeOf(as))
+	for _, field := range fields {
+		x := asv.FieldByName(field.Name).Interface()
+		if !reflect.ValueOf(x).IsNil() {
+			actions = append(actions, x.(Action))
+		}
 	}
 	return actions
 }
