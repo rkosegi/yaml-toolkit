@@ -53,7 +53,7 @@ func TestForeachStringItem(t *testing.T) {
 				},
 				Exec: &ExecOp{
 					Program: "sh",
-					Args:    &[]string{"-c", "rm /tmp/a-{{ .forEach }}.yaml"},
+					Args:    &[]string{"-c", "rm -f /tmp/a-{{ .forEach }}.yaml"},
 				},
 				Log: &LogOp{
 					Message: "Hi {{ .forEach }}",
