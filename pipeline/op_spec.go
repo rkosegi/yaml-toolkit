@@ -18,6 +18,7 @@ package pipeline
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -183,51 +184,16 @@ func (as OpSpec) String() string {
 	var sb strings.Builder
 	parts := make([]string, 0)
 	sb.WriteString("OpSpec[")
-	if as.Abort != nil {
-		parts = append(parts, fmt.Sprintf("Abort=%v", as.Abort.String()))
+
+	asv := reflect.ValueOf(as)
+	fields := reflect.VisibleFields(reflect.TypeOf(as))
+	for _, field := range fields {
+		x := asv.FieldByName(field.Name).Interface()
+		if !reflect.ValueOf(x).IsNil() {
+			parts = append(parts, fmt.Sprintf("%s=%v", field.Name, x.(fmt.Stringer).String()))
+		}
 	}
-	if as.Call != nil {
-		parts = append(parts, fmt.Sprintf("Call=%v", as.Call.String()))
-	}
-	if as.Define != nil {
-		parts = append(parts, fmt.Sprintf("Define=%v", as.Define.String()))
-	}
-	if as.Env != nil {
-		parts = append(parts, fmt.Sprintf("Env=%v", as.Env.String()))
-	}
-	if as.Export != nil {
-		parts = append(parts, fmt.Sprintf("Export=%v", as.Export.String()))
-	}
-	if as.Ext != nil {
-		parts = append(parts, fmt.Sprintf("Ext=%v", as.Ext.String()))
-	}
-	if as.Exec != nil {
-		parts = append(parts, fmt.Sprintf("Exec=%v", as.Exec.String()))
-	}
-	if as.ForEach != nil {
-		parts = append(parts, fmt.Sprintf("ForEach=%v", as.ForEach.String()))
-	}
-	if as.Import != nil {
-		parts = append(parts, fmt.Sprintf("Import=%v", as.Import.String()))
-	}
-	if as.Log != nil {
-		parts = append(parts, fmt.Sprintf("Log=%v", as.Log.String()))
-	}
-	if as.Loop != nil {
-		parts = append(parts, fmt.Sprintf("Loop=%v", as.Loop.String()))
-	}
-	if as.Patch != nil {
-		parts = append(parts, fmt.Sprintf("Patch=%v", as.Patch.String()))
-	}
-	if as.Set != nil {
-		parts = append(parts, fmt.Sprintf("Set=%v", as.Set.String()))
-	}
-	if as.Template != nil {
-		parts = append(parts, fmt.Sprintf("Template=%v", as.Template.String()))
-	}
-	if as.TemplateFile != nil {
-		parts = append(parts, fmt.Sprintf("TemplateFile=%v", as.TemplateFile.String()))
-	}
+
 	sb.WriteString(strings.Join(parts, ","))
 	sb.WriteString("]")
 	return sb.String()
