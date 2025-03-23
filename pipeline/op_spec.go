@@ -94,53 +94,20 @@ func (as OpSpec) Do(ctx ActionContext) error {
 }
 
 func (as OpSpec) CloneWith(ctx ActionContext) Action {
-	r := OpSpec{}
-	if as.ForEach != nil {
-		r.ForEach = as.ForEach.CloneWith(ctx).(*ForEachOp)
+	ret := &OpSpec{}
+	opSpecType := reflect.TypeOf(as)
+	srcVal := reflect.ValueOf(as)
+	dstVal := reflect.ValueOf(ret)
+	fields := reflect.VisibleFields(opSpecType)
+	for _, field := range fields {
+		srcField := srcVal.FieldByIndex(field.Index)
+		if !reflect.ValueOf(srcField.Interface()).IsNil() {
+			cloned := srcField.Interface().(Action).CloneWith(ctx)
+			dstField := dstVal.Elem().FieldByName(field.Name)
+			dstField.Set(reflect.ValueOf(cloned))
+		}
 	}
-	if as.Import != nil {
-		r.Import = as.Import.CloneWith(ctx).(*ImportOp)
-	}
-	if as.Patch != nil {
-		r.Patch = as.Patch.CloneWith(ctx).(*PatchOp)
-	}
-	if as.Set != nil {
-		r.Set = as.Set.CloneWith(ctx).(*SetOp)
-	}
-	if as.Template != nil {
-		r.Template = as.Template.CloneWith(ctx).(*TemplateOp)
-	}
-	if as.TemplateFile != nil {
-		r.TemplateFile = as.TemplateFile.CloneWith(ctx).(*TemplateFileOp)
-	}
-	if as.Call != nil {
-		r.Call = as.Call.CloneWith(ctx).(*CallOp)
-	}
-	if as.Define != nil {
-		r.Define = as.Define.CloneWith(ctx).(*DefineOp)
-	}
-	if as.Export != nil {
-		r.Export = as.Export.CloneWith(ctx).(*ExportOp)
-	}
-	if as.Ext != nil {
-		r.Ext = as.Ext.CloneWith(ctx).(*ExtOp)
-	}
-	if as.Env != nil {
-		r.Env = as.Env.CloneWith(ctx).(*EnvOp)
-	}
-	if as.Exec != nil {
-		r.Exec = as.Exec.CloneWith(ctx).(*ExecOp)
-	}
-	if as.Log != nil {
-		r.Log = as.Log.CloneWith(ctx).(*LogOp)
-	}
-	if as.Loop != nil {
-		r.Loop = as.Loop.CloneWith(ctx).(*LoopOp)
-	}
-	if as.Abort != nil {
-		r.Abort = as.Abort.CloneWith(ctx).(*AbortOp)
-	}
-	return r
+	return *ret
 }
 
 func (as OpSpec) String() string {
