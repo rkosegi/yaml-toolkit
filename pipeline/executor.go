@@ -26,6 +26,7 @@ var (
 )
 
 type ext struct {
+	sr map[string]interface{}
 	ea map[string]ActionFactory
 	cm map[string]ActionSpec
 }
@@ -48,6 +49,15 @@ func (e *ext) GetAction(name string) (ActionFactory, bool) {
 	return r, ok
 }
 
+func (e *ext) RegisterService(name string, ref interface{}) {
+	e.sr[name] = ref
+}
+
+func (e *ext) GetService(name string) (interface{}, bool) {
+	r, ok := e.sr[name]
+	return r, ok
+}
+
 type exec struct {
 	*ext
 	d dom.ContainerBuilder
@@ -66,6 +76,8 @@ type ExtInterface interface {
 	Get(string) (ActionSpec, bool)
 	AddAction(string, ActionFactory)
 	GetAction(string) (ActionFactory, bool)
+	RegisterService(string, interface{})
+	GetService(string) (interface{}, bool)
 }
 
 func (ac actContext) Action() Action                 { return ac.c }
@@ -153,6 +165,7 @@ func New(opts ...Opt) Executor {
 		ext: &ext{
 			ea: make(map[string]ActionFactory),
 			cm: make(map[string]ActionSpec),
+			sr: make(map[string]interface{}),
 		},
 	}
 	for _, opt := range defOpts {
