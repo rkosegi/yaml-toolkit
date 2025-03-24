@@ -39,3 +39,7 @@ repos:
         files: testdata/.*\.yaml
         args:
           - -c=.yamllint-config.yaml
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.16.3
+    hooks:
+      - id: gitleaks
