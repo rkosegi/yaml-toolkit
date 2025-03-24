@@ -350,3 +350,15 @@ func TestExecuteForEachFileGlob(t *testing.T) {
 	assert.Equal(t, 2, len(gd.Lookup("import.files").(dom.Container).Children()))
 	assert.Contains(t, fe.String(), "doc?.yaml")
 }
+
+func TestServiceRefs(t *testing.T) {
+	e := newTestExec(b.Container())
+
+	x, found := e.GetService("bad")
+	assert.Nil(t, x)
+	assert.False(t, found)
+	e.RegisterService("good", struct{}{})
+	x, found = e.GetService("good")
+	assert.NotNil(t, x)
+	assert.True(t, found)
+}
