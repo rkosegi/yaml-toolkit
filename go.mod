@@ -16,13 +16,15 @@ module github.com/rkosegi/yaml-toolkit
 
 go 1.23.0
 
+toolchain go1.24.1
+
 require (
 	github.com/antchfx/htmlquery v1.3.4
 	github.com/go-task/slim-sprig/v3 v3.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/magiconair/properties v1.8.9
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/net v0.37.0
+	golang.org/x/net v0.38.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
