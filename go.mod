@@ -14,9 +14,7 @@
 
 module github.com/rkosegi/yaml-toolkit
 
-go 1.23.0
-
-toolchain go1.24.1
+go 1.24.1
 
 require (
 	github.com/antchfx/htmlquery v1.3.4
