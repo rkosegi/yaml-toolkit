@@ -34,7 +34,7 @@ type ExecOp struct {
 	// Optional arguments for program
 	Args *[]string `yaml:"args,omitempty"`
 	// Program's working directory
-	Dir string `yaml:"program" clone:"template"`
+	Dir string `yaml:"dir" clone:"template"`
 	// List of exit codes that are assumed to be valid
 	ValidExitCodes *[]int `yaml:"validExitCodes,omitempty"`
 	// Path to file where program's stdout will be written upon completion.
