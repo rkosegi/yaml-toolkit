@@ -33,6 +33,8 @@ type ExecOp struct {
 	Program string `yaml:"program,omitempty" clone:"template"`
 	// Optional arguments for program
 	Args *[]string `yaml:"args,omitempty"`
+	// Program's working directory
+	Dir string `yaml:"program" clone:"template"`
 	// List of exit codes that are assumed to be valid
 	ValidExitCodes *[]int `yaml:"validExitCodes,omitempty"`
 	// Path to file where program's stdout will be written upon completion.
@@ -61,6 +63,7 @@ func (e *ExecOp) Do(ctx ActionContext) error {
 	prog := ctx.TemplateEngine().RenderLenient(e.Program, snapshot)
 	args := *safeRenderStrSlice(e.Args, ctx.TemplateEngine(), snapshot)
 	cmd := osx.Command(prog, args...)
+	cmd.Dir = e.Dir
 	defer func() {
 		for _, closer := range closables {
 			_ = closer.Close()
@@ -112,6 +115,7 @@ func (e *ExecOp) CloneWith(ctx ActionContext) Action {
 	return &ExecOp{
 		Program:        ctx.TemplateEngine().RenderLenient(e.Program, ss),
 		Args:           safeRenderStrSlice(e.Args, ctx.TemplateEngine(), ss),
+		Dir:            ctx.TemplateEngine().RenderLenient(e.Dir, ss),
 		Stdout:         safeRenderStrPointer(e.Stdout, ctx.TemplateEngine(), ss),
 		Stderr:         safeRenderStrPointer(e.Stderr, ctx.TemplateEngine(), ss),
 		ValidExitCodes: safeCopyIntSlice(e.ValidExitCodes),
