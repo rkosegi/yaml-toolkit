@@ -18,6 +18,7 @@ package pipeline
 
 import (
 	"fmt"
+	"strings"
 )
 
 // ActionMeta holds action's metadata used by Executor
@@ -35,5 +36,5 @@ type ActionMeta struct {
 }
 
 func (am ActionMeta) String() string {
-	return fmt.Sprintf("[name=%s,order=%d,when=%s]", am.Name, am.Order, safeStrDeref(am.When))
+	return fmt.Sprintf("[name=%s,order=%d,when=%s]", am.Name, am.Order, strings.TrimSpace(safeStrDeref(am.When)))
 }
