@@ -48,7 +48,7 @@ type ExecOp struct {
 }
 
 func (e *ExecOp) String() string {
-	return fmt.Sprintf("Exec[Program=%s,Args=%d]", e.Program, safeStrListSize(e.Args))
+	return fmt.Sprintf("Exec[Program=%s,Dir=%s,Args=%d]", e.Program, e.Dir, safeStrListSize(e.Args))
 }
 
 func (e *ExecOp) Do(ctx ActionContext) error {
@@ -62,8 +62,9 @@ func (e *ExecOp) Do(ctx ActionContext) error {
 	snapshot := ctx.Snapshot()
 	prog := ctx.TemplateEngine().RenderLenient(e.Program, snapshot)
 	args := *safeRenderStrSlice(e.Args, ctx.TemplateEngine(), snapshot)
+	dir := ctx.TemplateEngine().RenderLenient(e.Dir, snapshot)
 	cmd := osx.Command(prog, args...)
-	cmd.Dir = e.Dir
+	cmd.Dir = dir
 	defer func() {
 		for _, closer := range closables {
 			_ = closer.Close()
@@ -94,7 +95,7 @@ func (e *ExecOp) Do(ctx ActionContext) error {
 			closables = append(closables, out)
 		}
 	}
-	ctx.Logger().Log(fmt.Sprintf("prog=%s,args=[%s]", prog, strings.Join(args, ",")))
+	ctx.Logger().Log(fmt.Sprintf("prog=%s,dir=%s,args=[%s]", prog, dir, strings.Join(args, " ")))
 	err := cmd.Run()
 	var exitErr *osx.ExitError
 	if errors.As(err, &exitErr) {
