@@ -17,6 +17,7 @@ limitations under the License.
 package pipeline
 
 import (
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -129,4 +130,9 @@ func domDiffFunc(left, right dom.Node) ([]diff.Modification, error) {
 		return *diff.Diff(left.(dom.Container), right.(dom.Container)), nil
 	}
 	return []diff.Modification{}, nil
+}
+
+// urlParseQuery just delegates call to url.ParseQuery
+func urlParseQuery(qry string) (url.Values, error) {
+	return url.ParseQuery(qry)
 }

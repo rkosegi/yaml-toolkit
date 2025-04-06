@@ -17,6 +17,7 @@ limitations under the License.
 package pipeline
 
 import (
+	"net/url"
 	"os"
 	"testing"
 
@@ -280,4 +281,16 @@ func TestTemplateFuncDomDiff(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, testcase.diffLen, len(x))
 	}
+}
+
+func TestTemplateFuncUrlParseQuery(t *testing.T) {
+	var (
+		err error
+		uv  url.Values
+	)
+	uv, err = urlParseQuery("a=1&b[]=W&b[]=X")
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(uv["b[]"]))
+	_, err = urlParseQuery(":invalid;./,/<>")
+	assert.Error(t, err)
 }
