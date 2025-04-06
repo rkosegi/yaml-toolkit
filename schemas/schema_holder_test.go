@@ -16,9 +16,12 @@ limitations under the License.
 
 package schemas
 
-import _ "embed"
+import (
+	"testing"
 
-var (
-	//go:embed pipeline.json
-	PipelineV1Schema []byte
+	"github.com/stretchr/testify/assert"
 )
+
+func TestVerifyEmbeddedPipelineV1(t *testing.T) {
+	assert.True(t, len(PipelineV1Schema) > 0)
+}
