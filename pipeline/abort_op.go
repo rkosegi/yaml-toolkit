@@ -25,8 +25,9 @@ type AbortOp struct {
 	Message string `yaml:"message" clone:"template"`
 }
 
-func (ao *AbortOp) Do(_ ActionContext) error {
-	return errors.New(ao.String())
+func (ao *AbortOp) Do(ctx ActionContext) error {
+	msg := ctx.TemplateEngine().RenderLenient(ao.Message, ctx.Snapshot())
+	return errors.New(fmt.Sprintf("abort: %s", msg))
 }
 
 func (ao *AbortOp) String() string {
