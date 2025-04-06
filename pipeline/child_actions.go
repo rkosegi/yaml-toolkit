@@ -20,6 +20,10 @@ import (
 	"fmt"
 )
 
+const (
+	childActionsEmpty = "ChildActions[]"
+)
+
 func (na ChildActions) Do(ctx ActionContext) error {
 	for _, name := range sortActionNames(na) {
 		err := ctx.Executor().Execute(na[name])
@@ -39,5 +43,8 @@ func (na ChildActions) CloneWith(ctx ActionContext) Action {
 }
 
 func (na ChildActions) String() string {
+	if len(na) == 0 {
+		return childActionsEmpty
+	}
 	return fmt.Sprintf("ChildActions[names=%s]", actionNames(na))
 }
