@@ -36,5 +36,22 @@ type ActionMeta struct {
 }
 
 func (am ActionMeta) String() string {
-	return fmt.Sprintf("[name=%s,order=%d,when=%s]", am.Name, am.Order, strings.TrimSpace(safeStrDeref(am.When)))
+	var (
+		sb    strings.Builder
+		parts []string
+	)
+	sb.WriteByte('[')
+	if len(am.Name) > 0 {
+		parts = append(parts, fmt.Sprintf("name=%s", am.Name))
+	}
+	if am.Order != 0 {
+		parts = append(parts, fmt.Sprintf("order=%d", am.Order))
+	}
+	when := strings.TrimSpace(safeStrDeref(am.When))
+	if len(when) > 0 {
+		parts = append(parts, fmt.Sprintf("when=%s", when))
+	}
+	sb.WriteString(strings.Join(parts, ","))
+	sb.WriteByte(']')
+	return sb.String()
 }
