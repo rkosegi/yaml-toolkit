@@ -40,7 +40,7 @@ repos:
         args:
           - -c=.yamllint-config.yaml
   - repo: https://github.com/santhosh-tekuri/jsonschema
-    rev: v6.0.1
+    rev: cmd/jv/v0.7.0
     hooks:
       - id: jsonschema-validate
         files: testdata/pipeline.*\.yaml
