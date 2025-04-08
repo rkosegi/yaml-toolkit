@@ -16,7 +16,11 @@ limitations under the License.
 
 package dom
 
-import "reflect"
+import (
+	"reflect"
+
+	"gopkg.in/yaml.v3"
+)
 
 func encodeLeafFn(n Leaf) interface{} {
 	return n.Value()
@@ -91,4 +95,31 @@ func decodeContainerFn(current *map[string]interface{}, parent ContainerBuilder)
 			}
 		}
 	}
+}
+
+func decodeYamlNode(n *yaml.Node) Node {
+	switch n.Kind {
+	case yaml.ScalarNode:
+		// TODO: leaf is always string unless more elaborate approach is taken, but good for now
+		// see e.g. gopkg.in/yaml.v3@v3.0.1/decode.go:565
+		return LeafNode(n.Value)
+	case yaml.SequenceNode:
+		lb := ListNode()
+		for _, x := range n.Content {
+			lb.Append(decodeYamlNode(x))
+		}
+		return lb
+	case yaml.DocumentNode:
+		if len(n.Content) == 1 {
+			return decodeYamlNode(n.Content[0])
+		}
+	case yaml.MappingNode:
+		cb := b.Container()
+		l := len(n.Content)
+		for i := 0; i < l; i += 2 {
+			cb.AddValue(n.Content[i].Value, decodeYamlNode(n.Content[i+1]))
+		}
+		return cb
+	}
+	return nil
 }
