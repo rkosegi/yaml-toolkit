@@ -84,6 +84,13 @@ func DefaultNodeDecoderFn(m map[string]interface{}) Container {
 	return &cb
 }
 
+// YamlNodeDecoder returns function that could be used to convert yaml.Node to Node.
+// There are few limitations with decoding nodes this way, e.g. leaf values are coerced to string in
+// current implementation
+func YamlNodeDecoder() func(n *yaml.Node) Node {
+	return decodeYamlNode
+}
+
 // Serializable interface allows to persist data into provided io.Writer
 type Serializable interface {
 	// Serialize writes content into given writer, while encoding using provided EncoderFunc
