@@ -41,9 +41,9 @@ func TestExecutePatchOp(t *testing.T) {
 	ps = PatchOp{
 		Op:   patch.OpReplace,
 		Path: "/root/sub1",
-		Value: map[string]interface{}{
+		Value: anyValFromMap(map[string]interface{}{
 			"leaf2": "xyz",
-		},
+		}),
 	}
 	assert.NoError(t, New(WithData(gd)).Execute(&ps))
 	assert.Equal(t, "xyz", gd.Lookup("root.sub1.leaf2").(dom.Leaf).Value())
@@ -67,4 +67,22 @@ func TestExecutePatchOp(t *testing.T) {
 		Path: "/root/sub2",
 	}
 	assert.Error(t, New(WithData(gd)).Execute(&ps))
+}
+
+func TestPatchOpAddValue(t *testing.T) {
+	var (
+		ps PatchOp
+		gd dom.ContainerBuilder
+	)
+	gd = b.Container()
+	gd.AddValueAt("root.sub.leaf1", dom.LeafNode("123"))
+	ps = PatchOp{
+		Op:    patch.OpAdd,
+		Path:  "/root/sub/leaf2",
+		Value: &AnyVal{v: dom.LeafNode(456)},
+	}
+	assert.NoError(t, New(WithData(gd)).Execute(&ps))
+	m := gd.AsMap()
+	assert.Equal(t, "123", m["root"].(map[string]interface{})["sub"].(map[string]interface{})["leaf1"].(string))
+	assert.Equal(t, 456, m["root"].(map[string]interface{})["sub"].(map[string]interface{})["leaf2"].(int))
 }

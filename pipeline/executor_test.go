@@ -209,7 +209,7 @@ func TestExecutePatch(t *testing.T) {
 			Patch: &PatchOp{
 				Op:    patch.OpAdd,
 				Path:  "/root",
-				Value: map[string]interface{}{"leaf": "abcd"},
+				Value: anyValFromMap(map[string]interface{}{"leaf": "abcd"}),
 			},
 		},
 	}))

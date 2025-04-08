@@ -25,10 +25,10 @@ import (
 // PatchOp performs RFC6902-style patch on global data document.
 // Check patch package for more details
 type PatchOp struct {
-	Op    patch.Op               `yaml:"op"`
-	From  string                 `yaml:"from,omitempty" clone:"template"`
-	Path  string                 `yaml:"path" clone:"template"`
-	Value map[string]interface{} `yaml:"value,omitempty"`
+	Op    patch.Op `yaml:"op"`
+	From  string   `yaml:"from,omitempty" clone:"template"`
+	Path  string   `yaml:"path" clone:"template"`
+	Value *AnyVal  `yaml:"value,omitempty"`
 }
 
 func (ps *PatchOp) String() string {
@@ -44,7 +44,9 @@ func (ps *PatchOp) Do(ctx ActionContext) error {
 		return err
 	}
 	oo.Path = path
-	oo.Value = b.FromMap(ps.Value)
+	if ps.Value != nil {
+		oo.Value = ps.Value.Value()
+	}
 	if len(ps.From) > 0 {
 		from, err := patch.ParsePath(ps.From)
 		if err != nil {

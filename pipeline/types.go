@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -112,6 +113,25 @@ type ActionFactory interface {
 type ArgsSetter interface {
 	// SetArgs sets arguments from map
 	SetArgs(args map[string]interface{})
+}
+
+// AnyVal can represent any DOM value (leaf, list, container)
+type AnyVal struct {
+	v dom.Node
+}
+
+func (pv *AnyVal) UnmarshalYAML(node *yaml.Node) error {
+	pv.v = dom.YamlNodeDecoder()(node)
+	return nil
+}
+
+// Value get actual value
+func (pv *AnyVal) Value() dom.Node {
+	return pv.v
+}
+
+func anyValFromMap(m map[string]interface{}) *AnyVal {
+	return &AnyVal{v: dom.DefaultNodeDecoderFn(m)}
 }
 
 // ChildActions is map of named actions that are executed as a part of parent action
