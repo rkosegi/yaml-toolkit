@@ -25,10 +25,14 @@ import (
 // PatchOp performs RFC6902-style patch on global data document.
 // Check patch package for more details
 type PatchOp struct {
-	Op    patch.Op `yaml:"op"`
-	From  string   `yaml:"from,omitempty" clone:"template"`
-	Path  string   `yaml:"path" clone:"template"`
-	Value *AnyVal  `yaml:"value,omitempty"`
+	Op   patch.Op `yaml:"op"`
+	From string   `yaml:"from,omitempty" clone:"template"`
+	Path string   `yaml:"path" clone:"template"`
+	// Value is value to be used for op. This takes precedence over ValueFrom.
+	Value *AnyVal `yaml:"value,omitempty"`
+	// ValueFrom allow value to be read from data tree at given path.
+	// Only considered when Value is nil.
+	ValueFrom *string `yaml:"valueFrom,omitempty" clone:"template"`
 }
 
 func (ps *PatchOp) String() string {
@@ -36,16 +40,19 @@ func (ps *PatchOp) String() string {
 }
 
 func (ps *PatchOp) Do(ctx ActionContext) error {
+	ss := ctx.Snapshot()
 	oo := &patch.OpObj{
 		Op: ps.Op,
 	}
-	path, err := patch.ParsePath(ps.Path)
+	path, err := patch.ParsePath(ctx.TemplateEngine().RenderLenient(ps.Path, ss))
 	if err != nil {
 		return err
 	}
 	oo.Path = path
 	if ps.Value != nil {
 		oo.Value = ps.Value.Value()
+	} else if ps.ValueFrom != nil {
+		oo.Value = ctx.Data().Lookup(ctx.TemplateEngine().RenderLenient(*ps.ValueFrom, ss))
 	}
 	if len(ps.From) > 0 {
 		from, err := patch.ParsePath(ps.From)
@@ -58,10 +65,12 @@ func (ps *PatchOp) Do(ctx ActionContext) error {
 }
 
 func (ps *PatchOp) CloneWith(ctx ActionContext) Action {
+	ss := ctx.Snapshot()
 	return &PatchOp{
-		Op:    ps.Op,
-		Value: ps.Value,
-		From:  ctx.TemplateEngine().RenderLenient(ps.From, ctx.Snapshot()),
-		Path:  ctx.TemplateEngine().RenderLenient(ps.Path, ctx.Snapshot()),
+		Op:        ps.Op,
+		Value:     ps.Value,
+		ValueFrom: safeRenderStrPointer(ps.ValueFrom, ctx.TemplateEngine(), ss),
+		From:      ctx.TemplateEngine().RenderLenient(ps.From, ss),
+		Path:      ctx.TemplateEngine().RenderLenient(ps.Path, ss),
 	}
 }
