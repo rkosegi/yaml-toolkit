@@ -80,7 +80,9 @@ func (ia *ImportOp) String() string {
 }
 
 func (ia *ImportOp) Do(ctx ActionContext) error {
-	val, err := parseFile(ctx.TemplateEngine().RenderLenient(ia.File, ctx.Snapshot()), ia.Mode)
+	file := ctx.TemplateEngine().RenderLenient(ia.File, ctx.Snapshot())
+	ctx.Logger().Log(fmt.Sprintf("Importing file %s using mode %s", file, ia.Mode))
+	val, err := parseFile(file, ia.Mode)
 	if err != nil {
 		return err
 	}
