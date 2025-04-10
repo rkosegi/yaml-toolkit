@@ -327,5 +327,3 @@ func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBui
 func Builder() ContainerFactory {
 	return b
 }
-
-var _ ContainerBuilder = &containerBuilderImpl{}
