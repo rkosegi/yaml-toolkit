@@ -20,7 +20,7 @@ require (
 	github.com/antchfx/htmlquery v1.3.4
 	github.com/go-task/slim-sprig/v3 v3.0.0
 	github.com/google/go-cmp v0.7.0
-	github.com/magiconair/properties v1.8.9
+	github.com/magiconair/properties v1.8.10
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/net v0.39.0
 	gopkg.in/yaml.v3 v3.0.1
