@@ -177,6 +177,8 @@ type ContainerBuilder interface {
 	Walk(fn WalkFn)
 	// Merge creates new Container instance and merge current Container with other into it.
 	Merge(other Container, opts ...MergeOption) ContainerBuilder
+	// Seal seals the builder so that returning object will be immutable
+	Seal() Container
 }
 
 type WalkFn func(path string, parent ContainerBuilder, node Node) bool
@@ -229,6 +231,8 @@ type ListBuilder interface {
 	MustSet(uint, Node) ListBuilder
 	// Append adds new item at the end of slice
 	Append(Node) ListBuilder
+	// Seal seals the builder so that returning object will be immutable
+	Seal() List
 }
 
 // MergeOption is function used to customize merger behavior
