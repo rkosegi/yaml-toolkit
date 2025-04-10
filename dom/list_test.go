@@ -108,3 +108,10 @@ func TestListAsSlice(t *testing.T) {
 	assert.Equal(t, 2, l2[1])
 	assert.Equal(t, 3, l2[2])
 }
+
+func TestListBuilderSeal(t *testing.T) {
+	a := ListNode()
+	c := a.Seal()
+	_, isType := c.(ListBuilder)
+	assert.False(t, isType)
+}
