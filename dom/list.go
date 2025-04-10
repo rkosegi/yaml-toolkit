@@ -101,6 +101,10 @@ func (l *listBuilderImpl) Append(item Node) ListBuilder {
 	return l
 }
 
+func (l *listBuilderImpl) Seal() List {
+	return &l.listImpl
+}
+
 func ListNode(items ...Node) ListBuilder {
 	l := &listBuilderImpl{}
 	for _, item := range items {

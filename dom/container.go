@@ -181,6 +181,10 @@ type containerBuilderImpl struct {
 	containerImpl
 }
 
+func (c *containerBuilderImpl) Seal() Container {
+	return &c.containerImpl
+}
+
 func (c *containerBuilderImpl) Walk(fn WalkFn) {
 	c.ensureChildren()
 	for k, v := range c.children {

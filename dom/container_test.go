@@ -327,3 +327,10 @@ func TestMergeContainers(t *testing.T) {
 	assert.Equal(t, 4, len(d.Lookup("l1").(Container).Children()))
 	assert.Equal(t, "abc", d.Lookup("l1.l2b").(Leaf).Value())
 }
+
+func TestContainerBuilderSeal(t *testing.T) {
+	a := b.Container()
+	c := a.Seal()
+	_, isType := c.(ContainerBuilder)
+	assert.False(t, isType)
+}
