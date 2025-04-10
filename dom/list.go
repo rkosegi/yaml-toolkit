@@ -112,5 +112,3 @@ func ListNode(items ...Node) ListBuilder {
 	}
 	return l
 }
-
-var _ ListBuilder = &listBuilderImpl{}
