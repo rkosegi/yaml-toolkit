@@ -37,19 +37,19 @@ const (
 // ExportOp allows to export data into file
 type ExportOp struct {
 	// File to export data onto
-	File string `clone:"template"`
+	File *ValOrRef `clone:"template"`
 	// Path within data tree pointing to dom.Node to export. Empty path denotes whole document.
 	// If path does not resolve, then empty document will be exported.
 	// If output format is "text" then path must point to leaf.
 	// Any other output format must point to dom.Container.
 	// If neither of these conditions are met, then it is considered as if path does not resolve at all.
-	Path string `clone:"template"`
+	Path *ValOrRef `clone:"template"`
 	// Format of output file.
 	Format OutputFormat `clone:"template"`
 }
 
 func (e *ExportOp) String() string {
-	return fmt.Sprintf("Export[file=%s,format=%s,path=%s]", e.File, e.Format, e.Path)
+	return fmt.Sprintf("Export[file=%s,format=%s,Path=%s]", e.File, e.Format, e.Path)
 }
 
 func (e *ExportOp) Do(ctx ActionContext) (err error) {
@@ -60,8 +60,8 @@ func (e *ExportOp) Do(ctx ActionContext) (err error) {
 	)
 	defVal = b.Container()
 	d = ctx.Data()
-	if len(e.Path) > 0 {
-		d = ctx.Data().Lookup(e.Path)
+	if e.Path != nil {
+		d = ctx.Data().Lookup(e.Path.Resolve(ctx))
 	}
 	switch e.Format {
 	case OutputFormatYaml:
@@ -83,7 +83,7 @@ func (e *ExportOp) Do(ctx ActionContext) (err error) {
 	if d == nil {
 		d = defVal
 	}
-	fp := ctx.TemplateEngine().RenderLenient(e.File, ctx.Snapshot())
+	fp := e.File.Resolve(ctx)
 	ctx.Logger().Log("opening file", fp)
 	f, err := os.OpenFile(fp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
@@ -104,8 +104,8 @@ func (e *ExportOp) Do(ctx ActionContext) (err error) {
 func (e *ExportOp) CloneWith(ctx ActionContext) Action {
 	ss := ctx.Snapshot()
 	return &ExportOp{
-		File:   ctx.TemplateEngine().RenderLenient(e.File, ss),
-		Path:   ctx.TemplateEngine().RenderLenient(e.Path, ss),
+		File:   safeCloneValOrRef(e.File, ctx),
+		Path:   safeCloneValOrRef(e.Path, ctx),
 		Format: OutputFormat(ctx.TemplateEngine().RenderLenient(string(e.Format), ss)),
 	}
 }

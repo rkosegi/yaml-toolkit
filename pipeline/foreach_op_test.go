@@ -25,7 +25,7 @@ import (
 
 func TestForeachCloneWith(t *testing.T) {
 	op := ForEachOp{
-		Item: &([]string{"a", "b", "c"}),
+		Item: &ValOrRefSlice{&ValOrRef{Val: "a"}, &ValOrRef{Val: "b"}, &ValOrRef{Val: "c"}},
 		Action: ActionSpec{
 			Operations: OpSpec{},
 		},
@@ -37,7 +37,7 @@ func TestForeachCloneWith(t *testing.T) {
 
 func TestForeachStringItem(t *testing.T) {
 	op := ForEachOp{
-		Item: &([]string{"a", "b", "c"}),
+		Item: &ValOrRefSlice{&ValOrRef{Val: "a"}, &ValOrRef{Val: "b"}, &ValOrRef{Val: "c"}},
 		Action: ActionSpec{
 			Operations: OpSpec{
 				Set: &SetOp{
@@ -48,7 +48,7 @@ func TestForeachStringItem(t *testing.T) {
 				},
 				Env: &EnvOp{},
 				Export: &ExportOp{
-					File:   "/tmp/a-{{ .forEach }}.yaml",
+					File:   &ValOrRef{Val: "/tmp/a-{{ .forEach }}.yaml"},
 					Format: OutputFormatYaml,
 				},
 				Exec: &ExecOp{
@@ -83,7 +83,7 @@ func TestForeachStringItem(t *testing.T) {
 
 func TestForeachStringItemChildError(t *testing.T) {
 	op := ForEachOp{
-		Item: &([]string{"a", "b", "c"}),
+		Item: &ValOrRefSlice{&ValOrRef{Val: "a"}, &ValOrRef{Val: "b"}, &ValOrRef{Val: "c"}},
 		Action: ActionSpec{
 			Operations: OpSpec{
 				Set: &SetOp{
@@ -120,7 +120,7 @@ func TestForeachQuery(t *testing.T) {
 		"leaf", "sub", "items",
 	} {
 		op := &ForEachOp{
-			Query: &qry,
+			Query: &ValOrRef{Val: qry},
 			Action: ActionSpec{
 				Operations: OpSpec{
 					Abort: &AbortOp{},
@@ -160,7 +160,7 @@ func TestForeachQuery(t *testing.T) {
 	} {
 		op := &ForEachOp{
 			Variable: ptr(tc.variable),
-			Query:    ptr(tc.qry),
+			Query:    &ValOrRef{Val: tc.qry},
 			Action: ActionSpec{
 				Operations: OpSpec{
 					Template: &TemplateOp{
@@ -172,13 +172,14 @@ func TestForeachQuery(t *testing.T) {
 		}
 		err = op.Do(newMockActBuilder().data(data).build())
 		assert.NoError(t, err)
+		assert.NotNil(t, op.String())
 		tc.validateFn(data)
 	}
 }
 
 func TestForeachGlob(t *testing.T) {
 	op := ForEachOp{
-		Glob: strPointer("../testdata/doc?.yaml"),
+		Glob: &ValOrRef{Val: "../testdata/doc?.yaml"},
 		Action: ActionSpec{
 			Operations: OpSpec{
 				Import: &ImportOp{
@@ -201,7 +202,7 @@ func TestForeachActionSpec(t *testing.T) {
 		op  *ForEachOp
 	)
 	op = &ForEachOp{
-		Item: &([]string{"a", "b", "c"}),
+		Item: &ValOrRefSlice{&ValOrRef{Val: "a"}, &ValOrRef{Val: "b"}, &ValOrRef{Val: "c"}},
 		Action: ActionSpec{
 			Children: map[string]ActionSpec{
 				"sub": {
@@ -218,7 +219,7 @@ func TestForeachActionSpec(t *testing.T) {
 	assert.NoError(t, err)
 
 	op = &ForEachOp{
-		Item: &([]string{"a", "b", "c"}),
+		Item: &ValOrRefSlice{&ValOrRef{Val: "a"}, &ValOrRef{Val: "b"}, &ValOrRef{Val: "c"}},
 		Action: ActionSpec{
 			Children: map[string]ActionSpec{
 				"sub": {
@@ -241,7 +242,7 @@ func TestForeachActionSpec(t *testing.T) {
 
 func TestForeachGlobChildError(t *testing.T) {
 	op := ForEachOp{
-		Glob: strPointer("../testdata/doc?.yaml"),
+		Glob: &ValOrRef{Val: "../testdata/doc?.yaml"},
 		Action: ActionSpec{
 			Operations: OpSpec{
 				Set: &SetOp{
@@ -256,7 +257,7 @@ func TestForeachGlobChildError(t *testing.T) {
 
 func TestForeachGlobInvalid(t *testing.T) {
 	op := ForEachOp{
-		Glob: strPointer("[]]"),
+		Glob: &ValOrRef{Val: "[]]"},
 		Action: ActionSpec{
 			Operations: OpSpec{
 				Import: &ImportOp{

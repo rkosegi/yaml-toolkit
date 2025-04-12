@@ -320,7 +320,7 @@ func TestExecuteForEachFileGlob(t *testing.T) {
 	gd = b.Container()
 	ex = newTestExec(gd)
 	fe := &ForEachOp{
-		Glob: strPointer("../testdata/doc?.yaml"),
+		Glob: &ValOrRef{Val: "../testdata/doc?.yaml"},
 		Action: ActionSpec{
 			Operations: OpSpec{
 				Import: &ImportOp{

@@ -53,7 +53,7 @@ func TestTemplateFileOp(t *testing.T) {
 	tfo = &TemplateFileOp{
 		File:   "../testdata/simple.template",
 		Output: f.Name(),
-		Path:   ptr("invalid-path"),
+		Path:   ptr("invalid-Path"),
 	}
 	assert.Error(t, tfo.Do(ctx))
 

@@ -48,7 +48,7 @@ func TestForDefCall(t *testing.T) {
 				},
 				Operations: OpSpec{
 					ForEach: &ForEachOp{
-						Item: &([]string{"a", "b"}),
+						Item: &(ValOrRefSlice{&ValOrRef{Val: "a"}, &ValOrRef{Val: "b"}}),
 						Action: ActionSpec{
 							Operations: OpSpec{
 								Call: &CallOp{

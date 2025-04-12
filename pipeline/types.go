@@ -19,6 +19,7 @@ package pipeline
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"gopkg.in/yaml.v3"
@@ -128,6 +129,72 @@ func (pv *AnyVal) UnmarshalYAML(node *yaml.Node) error {
 // Value get actual value
 func (pv *AnyVal) Value() dom.Node {
 	return pv.v
+}
+
+// ValOrRef is either immediate leaf value or reference to a dom.Leaf in data tree at given path.
+// If Path references non-existent node, or node pointed to is not a dom.Leaf, empty value is returned
+type ValOrRef struct {
+	isRef bool
+	// Ref is resolved reference, is any
+	Ref string
+	// Val is value of dom.Leaf pointed to by ref after Resolve(ctx) has been called, or immediate value
+	// if Ref is empty
+	Val string
+}
+
+func (pv *ValOrRef) CloneWith(ctx ActionContext) *ValOrRef {
+	return &ValOrRef{
+		isRef: pv.isRef,
+		Ref:   ctx.TemplateEngine().RenderLenient(pv.Ref, ctx.Snapshot()),
+		Val:   ctx.TemplateEngine().RenderLenient(pv.Val, ctx.Snapshot()),
+	}
+}
+
+func (pv *ValOrRef) UnmarshalYAML(node *yaml.Node) error {
+	switch node.Kind {
+	case yaml.MappingNode:
+		m := make(map[string]interface{})
+		_ = node.Decode(&m)
+		if x, ok := m["ref"]; !ok {
+			return errors.New("missing 'ref' field")
+		} else {
+			pv.isRef = true
+			pv.Ref = x.(string)
+		}
+		return nil
+
+	case yaml.ScalarNode:
+		pv.Val = node.Value
+		return nil
+	}
+	return fmt.Errorf("invalid value: '%v'", node)
+}
+
+func (pv *ValOrRef) Resolve(ctx ActionContext) string {
+	ss := ctx.Snapshot()
+	if pv.isRef {
+		if n := ctx.Data().Lookup(pv.Ref); n != nil && n.IsLeaf() {
+			v := fmt.Sprintf("%v", n.(dom.Leaf).Value())
+			return ctx.TemplateEngine().RenderLenient(v, ss)
+		}
+		return ""
+	} else {
+		return ctx.TemplateEngine().RenderLenient(pv.Val, ss)
+	}
+}
+
+func (pv *ValOrRef) String() string {
+	return fmt.Sprintf("[Ref=%v,Val=%v]", pv.Ref, pv.Val)
+}
+
+type ValOrRefSlice []*ValOrRef
+
+func (pv *ValOrRefSlice) String() string {
+	var strs []string
+	for _, val := range *pv {
+		strs = append(strs, val.String())
+	}
+	return "[" + strings.Join(strs, ",") + "]"
 }
 
 func anyValFromMap(m map[string]interface{}) *AnyVal {
