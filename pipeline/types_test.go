@@ -46,3 +46,55 @@ v:
 	assert.NoError(t, err)
 	assert.Equal(t, "123", ts.V.Value().(dom.Container).Child("a").(dom.Leaf).Value())
 }
+
+func TestValOrRef(t *testing.T) {
+	type testStruct struct {
+		V *ValOrRef `yaml:"v,omitempty"`
+	}
+	var (
+		ts  testStruct
+		err error
+	)
+	d1 := `
+v: aaa
+`
+	err = yaml.Unmarshal([]byte(d1), &ts)
+	assert.NoError(t, err)
+	assert.Equal(t, "aaa", ts.V.Val)
+
+	d2 := `
+v:
+  ref: a.b.c
+`
+	d := b.Container()
+	d.AddValueAt("a.b.c", dom.LeafNode("X"))
+	ts.V.Val = ""
+	err = yaml.Unmarshal([]byte(d2), &ts)
+	assert.NoError(t, err)
+	assert.Equal(t, "X", ts.V.Resolve(newMockActBuilder().data(d).build()))
+
+	d3 := `
+v:
+  not-a-ref: 8798
+`
+	ts.V.Val = ""
+	err = yaml.Unmarshal([]byte(d3), &ts)
+	assert.Error(t, err)
+
+	d4 := `
+v: []`
+	ts.V.Val = ""
+	err = yaml.Unmarshal([]byte(d4), &ts)
+	assert.Error(t, err)
+
+	d5 := `
+v:
+  ref: a.b.c
+`
+	d = b.Container()
+	d.AddValueAt("a.b.c", dom.ListNode(dom.LeafNode("X")))
+	ts.V.Val = ""
+	err = yaml.Unmarshal([]byte(d5), &ts)
+	assert.NoError(t, err)
+	assert.Equal(t, "", ts.V.Resolve(newMockActBuilder().data(d).build()))
+}

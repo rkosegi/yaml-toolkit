@@ -19,6 +19,7 @@ package pipeline
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
 )
@@ -31,11 +32,11 @@ import (
 type ForEachOp struct {
 	// Glob is pattern that will be used to match files on file system.
 	// Matched files will be used as iteration items.
-	Glob *string `yaml:"glob,omitempty"`
+	Glob *ValOrRef `yaml:"glob,omitempty"`
 	// Query is path within the data tree that will be attempted
-	Query *string `yaml:"query,omitempty"`
+	Query *ValOrRef `yaml:"query,omitempty"`
 	// Item is list of specified strings to iterate over
-	Item *[]string `yaml:"item,omitempty"`
+	Item *ValOrRefSlice `yaml:"item,omitempty"`
 	// Action to perform for every item
 	Action ActionSpec `yaml:"action"`
 	// Variable is name of variable to hold current iteration item.
@@ -44,8 +45,8 @@ type ForEachOp struct {
 }
 
 func (fea *ForEachOp) Do(ctx ActionContext) error {
-	if nonEmpty(fea.Glob) {
-		if matches, err := filepath.Glob(*fea.Glob); err != nil {
+	if fea.Glob != nil {
+		if matches, err := filepath.Glob(fea.Glob.Resolve(ctx)); err != nil {
 			return err
 		} else {
 			for _, match := range matches {
@@ -55,8 +56,8 @@ func (fea *ForEachOp) Do(ctx ActionContext) error {
 				}
 			}
 		}
-	} else if nonEmpty(fea.Query) {
-		if n := ctx.Data().Lookup(*fea.Query); n != nil {
+	} else if fea.Query != nil {
+		if n := ctx.Data().Lookup(fea.Query.Resolve(ctx)); n != nil {
 			if n.IsList() {
 				for _, item := range n.(dom.List).Items() {
 					if err := fea.performWithItem(ctx, item); err != nil {
@@ -77,7 +78,7 @@ func (fea *ForEachOp) Do(ctx ActionContext) error {
 		}
 	} else if fea.Item != nil {
 		for _, item := range *fea.Item {
-			err := fea.performWithItem(ctx, dom.LeafNode(item))
+			err := fea.performWithItem(ctx, dom.LeafNode(item.Resolve(ctx)))
 			if err != nil {
 				return err
 			}
@@ -105,8 +106,23 @@ func (fea *ForEachOp) performWithItem(ctx ActionContext, item dom.Node) (err err
 }
 
 func (fea *ForEachOp) String() string {
-	return fmt.Sprintf("ForEach[Glob=%s,Items=%d,Query=%s]", safeStrDeref(fea.Glob),
-		safeStrListSize(fea.Item), safeStrDeref(fea.Query))
+	var (
+		sb    strings.Builder
+		parts []string
+	)
+	sb.WriteString("ForEach[")
+	if fea.Glob != nil {
+		parts = append(parts, fmt.Sprintf("Glob=%v", *fea.Glob))
+	}
+	if fea.Item != nil {
+		parts = append(parts, fmt.Sprintf("Items=%v", fea.Item))
+	}
+	if fea.Query != nil {
+		parts = append(parts, fmt.Sprintf("Query=%v", *fea.Query))
+	}
+	sb.WriteString(strings.Join(parts, ","))
+	sb.WriteString("]")
+	return sb.String()
 }
 
 func (fea *ForEachOp) CloneWith(ctx ActionContext) Action {

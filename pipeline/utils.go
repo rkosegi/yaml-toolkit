@@ -47,6 +47,13 @@ func parseFile(path string, mode ParseFileMode) (dom.Node, error) {
 	return val, nil
 }
 
+func safeCloneValOrRef(v *ValOrRef, ctx ActionContext) *ValOrRef {
+	if v == nil {
+		return nil
+	}
+	return v.CloneWith(ctx)
+}
+
 func safeStrDeref(in *string) string {
 	if in == nil {
 		return ""

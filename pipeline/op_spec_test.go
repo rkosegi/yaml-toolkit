@@ -34,7 +34,7 @@ func TestOpSpecCloneWith(t *testing.T) {
 			Path: "{{ .Path3 }}",
 		},
 		ForEach: &ForEachOp{
-			Item: &([]string{"left", "right"}),
+			Item: &ValOrRefSlice{&ValOrRef{Val: "left"}, &ValOrRef{Val: "right"}},
 			Action: ActionSpec{
 				Operations: OpSpec{},
 			},
@@ -73,8 +73,8 @@ func TestOpSpecCloneWith(t *testing.T) {
 			Function: "noop",
 		},
 		Export: &ExportOp{
-			File:   "/tmp/file.yaml",
-			Path:   "{{ .Path }}",
+			File:   &ValOrRef{Val: "/tmp/file.yaml"},
+			Path:   &ValOrRef{Val: "{{ .Path }}"},
 			Format: OutputFormatYaml,
 		},
 		Log: &LogOp{
@@ -103,7 +103,7 @@ func TestOpSpecCloneWith(t *testing.T) {
 	assert.Equal(t, "root.sub2", a.Import.Path)
 	assert.Equal(t, "/root/sub3", a.Patch.Path)
 	assert.Equal(t, "root.sub2", a.Template.Path)
-	assert.Equal(t, "root.sub2", a.Export.Path)
+	assert.Equal(t, "root.sub2", a.Export.Path.Val)
 	assert.Equal(t, "root.sub2", a.Env.Path)
 	assert.Equal(t, "/bin/bash", a.Exec.Program)
 	assert.Equal(t, "hello", a.Define.Action.Operations.Log.Message)

@@ -70,7 +70,7 @@ func (eo *EnvOp) Do(ctx ActionContext) error {
 }
 
 func (eo *EnvOp) String() string {
-	return fmt.Sprintf("Env[path=%s,incl=%s,excl=%s]", eo.Path,
+	return fmt.Sprintf("Env[Path=%s,incl=%s,excl=%s]", eo.Path,
 		safeRegexpDeref(eo.Include), safeRegexpDeref(eo.Exclude))
 }
 
