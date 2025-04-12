@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/props"
@@ -49,7 +50,21 @@ type ExportOp struct {
 }
 
 func (e *ExportOp) String() string {
-	return fmt.Sprintf("Export[file=%s,format=%s,Path=%s]", e.File, e.Format, e.Path)
+	var (
+		sb    strings.Builder
+		parts []string
+	)
+	sb.WriteString("Export[")
+	if e.File != nil {
+		parts = append(parts, fmt.Sprintf("file=%v", e.File))
+	}
+	parts = append(parts, fmt.Sprintf("format=%v", e.Format))
+	if e.Path != nil {
+		parts = append(parts, fmt.Sprintf("path=%v", e.Path))
+	}
+	sb.WriteString(strings.Join(parts, ","))
+	sb.WriteByte(']')
+	return sb.String()
 }
 
 func (e *ExportOp) Do(ctx ActionContext) (err error) {

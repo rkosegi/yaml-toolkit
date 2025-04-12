@@ -98,3 +98,9 @@ v:
 	assert.NoError(t, err)
 	assert.Equal(t, "", ts.V.Resolve(newMockActBuilder().data(d).build()))
 }
+
+func TestValOrRefString(t *testing.T) {
+	assert.Equal(t, "[Val=A]", (&ValOrRef{Val: "A"}).String())
+	assert.Equal(t, "[Ref=a.b]", (&ValOrRef{Ref: "a.b"}).String())
+	assert.Equal(t, "[Ref=x.y,Val=X]", (&ValOrRef{Val: "X", Ref: "x.y"}).String())
+}
