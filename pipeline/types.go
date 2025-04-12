@@ -184,7 +184,20 @@ func (pv *ValOrRef) Resolve(ctx ActionContext) string {
 }
 
 func (pv *ValOrRef) String() string {
-	return fmt.Sprintf("[Ref=%v,Val=%v]", pv.Ref, pv.Val)
+	var (
+		sb    strings.Builder
+		parts []string
+	)
+	sb.WriteByte('[')
+	if len(pv.Ref) > 0 {
+		parts = append(parts, fmt.Sprintf("Ref=%v", pv.Ref))
+	}
+	if len(pv.Val) > 0 {
+		parts = append(parts, fmt.Sprintf("Val=%v", pv.Val))
+	}
+	sb.WriteString(strings.Join(parts, ","))
+	sb.WriteByte(']')
+	return sb.String()
 }
 
 type ValOrRefSlice []*ValOrRef
