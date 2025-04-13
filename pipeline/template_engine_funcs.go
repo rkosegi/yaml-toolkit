@@ -136,3 +136,8 @@ func domDiffFunc(left, right dom.Node) ([]diff.Modification, error) {
 func urlParseQuery(qry string) (url.Values, error) {
 	return url.ParseQuery(qry)
 }
+
+// fileGlobFunc just delegates call to filepath.Glob
+func fileGlobFunc(pattern string) ([]string, error) {
+	return filepath.Glob(pattern)
+}

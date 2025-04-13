@@ -294,3 +294,17 @@ func TestTemplateFuncUrlParseQuery(t *testing.T) {
 	_, err = urlParseQuery(":invalid;./,/<>")
 	assert.Error(t, err)
 }
+
+func TestTemplateFuncFileGlob(t *testing.T) {
+	var (
+		files []string
+		err   error
+	)
+	files, err = fileGlobFunc("../testdata")
+	assert.NoError(t, err)
+	assert.True(t, len(files) > 0)
+
+	files, err = fileGlobFunc("../non-existent")
+	assert.NoError(t, err)
+	assert.Equal(t, 0, len(files))
+}
