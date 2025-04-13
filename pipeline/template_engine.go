@@ -43,6 +43,7 @@ func renderTemplate(tmplStr string, data interface{}, fm template.FuncMap) (stri
 		"dom2properties": dom2propertiesFunc,
 		"domdiff":        domDiffFunc,
 		"urlParseQuery":  urlParseQuery,
+		"fileGlob":       fileGlobFunc,
 	})
 	_, err := tmpl.Parse(tmplStr)
 	if err != nil {
