@@ -67,3 +67,58 @@ func TestExecuteTemplateOp(t *testing.T) {
 	}
 	assert.Error(t, New(WithData(gd)).Execute(&ts))
 }
+
+func TestExecuteTemplateOpAsYaml(t *testing.T) {
+	var (
+		err error
+		ts  TemplateOp
+		gd  dom.ContainerBuilder
+	)
+
+	// 1, render yaml source manually
+	gd = b.Container()
+	ts = TemplateOp{
+		Template: `
+items:
+{{- range (split "," "a,b,c") }}
+{{ printf "- %s" . }}
+{{- end }}`,
+		Path:    "Out",
+		ParseAs: ptr(ParseTextAsYaml),
+	}
+	err = New(WithData(gd)).Execute(&ts)
+	assert.NoError(t, err)
+	assert.Equal(t, 3, gd.Lookup("Out.items").(dom.List).Size())
+
+	// 2, render using template function
+	gd = b.Container()
+	ts = TemplateOp{
+		Template: `
+items:
+{{ (split "," "a,b,c") | list | toYaml }}
+`,
+		Path:    "Out",
+		ParseAs: ptr(ParseTextAsYaml),
+	}
+	err = New(WithData(gd)).Execute(&ts)
+	assert.NoError(t, err)
+	assert.Equal(t, 3, len(gd.Lookup("Out.items").(dom.List).Items()[0].(dom.Container).Children()))
+
+	// 3, render invalid
+	gd = b.Container()
+	ts = TemplateOp{
+		Template: `*** this is not a YAML ***`,
+		Path:     "Out",
+		ParseAs:  ptr(ParseTextAsYaml),
+	}
+	err = New(WithData(gd)).Execute(&ts)
+	assert.Error(t, err)
+}
+
+func TestExecuteTemplateOpAsInvalid(t *testing.T) {
+	assert.Error(t, New().Execute(&TemplateOp{
+		Template: `---\nOla: Hi`,
+		Path:     "Out",
+		ParseAs:  ptr(ParseTextAs("invalid")),
+	}))
+}
