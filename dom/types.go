@@ -112,6 +112,15 @@ type Node interface {
 	Equals(Node) bool
 	// Clone returns deep copy of this Node.
 	Clone() Node
+
+	// AsLeaf casts this Node to a Leaf, panics is this Node is not a Leaf.
+	AsLeaf() Leaf
+
+	// AsContainer casts this Node to a Container, panics if this Node is not a Container.
+	AsContainer() Container
+
+	// AsList casts this Node to a List, panics if this Node is not a List.
+	AsList() List
 }
 
 // Leaf represent Node of scalar value

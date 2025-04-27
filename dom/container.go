@@ -177,6 +177,10 @@ func (c *containerImpl) Clone() Node {
 	return c2
 }
 
+func (c *containerImpl) AsContainer() Container {
+	return c
+}
+
 type containerBuilderImpl struct {
 	containerImpl
 }
