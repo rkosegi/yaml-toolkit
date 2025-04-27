@@ -49,6 +49,10 @@ func (l *listImpl) Clone() Node {
 	return l2
 }
 
+func (l *listImpl) AsList() List {
+	return l
+}
+
 func (l *listImpl) Equals(node Node) bool {
 	if node == nil || !node.IsList() {
 		return false

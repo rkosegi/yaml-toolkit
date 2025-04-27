@@ -29,3 +29,15 @@ func (b *base) IsLeaf() bool {
 func (b *base) IsList() bool {
 	return false
 }
+
+func (b *base) AsLeaf() Leaf {
+	panic("not a leaf")
+}
+
+func (b *base) AsContainer() Container {
+	panic("not a container")
+}
+
+func (b *base) AsList() List {
+	panic("not a list")
+}

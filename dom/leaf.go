@@ -43,6 +43,10 @@ func (l *leaf) Value() interface{} {
 	return l.value
 }
 
+func (l *leaf) AsLeaf() Leaf {
+	return l
+}
+
 func LeafNode(val interface{}) Leaf {
 	return &leaf{value: val}
 }
