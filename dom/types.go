@@ -70,11 +70,6 @@ func DefaultJsonEncoder(w io.Writer, v interface{}) error {
 }
 
 func DefaultNodeEncoderFn(n Container) interface{} {
-	return DefaultNodeMappingFn(n)
-}
-
-// Deprecated. Use DefaultNodeEncoderFn
-func DefaultNodeMappingFn(n Container) interface{} {
 	return encodeContainerFn(n)
 }
 
