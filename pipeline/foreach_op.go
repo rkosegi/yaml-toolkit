@@ -93,7 +93,12 @@ func (fea *ForEachOp) performWithItem(ctx ActionContext, item dom.Node) (err err
 		vp = *fea.Variable
 	}
 	ctx.Data().AddValue(vp, item)
-	defer ctx.Data().Remove(vp)
+	ctx.InvalidateSnapshot()
+
+	defer func() {
+		ctx.Data().Remove(vp)
+		ctx.InvalidateSnapshot()
+	}()
 
 	for _, act := range fea.Action.Operations.toList() {
 		act = act.CloneWith(ctx)

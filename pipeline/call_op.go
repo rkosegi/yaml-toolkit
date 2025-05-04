@@ -53,7 +53,10 @@ func (c *CallOp) Do(ctx ActionContext) error {
 		ctx.Data().AddValueAt(ap, dom.DefaultNodeDecoderFn(
 			ctx.TemplateEngine().RenderMapLenient(c.Args, snap)),
 		)
-		defer ctx.Data().Remove(ap)
+		defer func() {
+			ctx.Data().Remove(ap)
+			ctx.InvalidateSnapshot()
+		}()
 		return ctx.Executor().Execute(spec)
 	}
 }

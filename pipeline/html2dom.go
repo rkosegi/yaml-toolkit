@@ -112,6 +112,7 @@ func (x *Html2DomOp) Do(ctx ActionContext) error {
 	cb := ctx.Factory().Container()
 	layoutFn(cb, srcNode)
 	ctx.Data().AddValueAt(to, cb)
+	ctx.InvalidateSnapshot()
 	return nil
 }
 

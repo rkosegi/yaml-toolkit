@@ -67,8 +67,10 @@ type exec struct {
 
 type actContext struct {
 	*exec
-	c  Action
-	la *listenerLoggerAdapter
+	c       Action
+	la      *listenerLoggerAdapter
+	ssDirty bool
+	ss      *map[string]interface{}
 }
 
 type ExtInterface interface {
@@ -80,16 +82,23 @@ type ExtInterface interface {
 	GetService(string) (interface{}, bool)
 }
 
-func (ac actContext) Action() Action                 { return ac.c }
-func (ac actContext) Data() dom.ContainerBuilder     { return ac.d }
-func (ac actContext) Factory() dom.ContainerFactory  { return b }
-func (ac actContext) Executor() Executor             { return ac.exec }
-func (ac actContext) TemplateEngine() TemplateEngine { return ac.t }
-func (ac actContext) Logger() Logger                 { return ac.la }
-func (ac actContext) Snapshot() map[string]interface{} {
-	return dom.DefaultNodeEncoderFn(ac.Data()).(map[string]interface{})
+func (ac *actContext) Action() Action                 { return ac.c }
+func (ac *actContext) Data() dom.ContainerBuilder     { return ac.d }
+func (ac *actContext) Factory() dom.ContainerFactory  { return b }
+func (ac *actContext) Executor() Executor             { return ac.exec }
+func (ac *actContext) TemplateEngine() TemplateEngine { return ac.t }
+func (ac *actContext) Logger() Logger                 { return ac.la }
+func (ac *actContext) Snapshot() map[string]interface{} {
+	if ac.ssDirty || ac.ss == nil {
+		ac.ss = ptr(dom.DefaultNodeEncoderFn(ac.Data()).(map[string]interface{}))
+		ac.ssDirty = false
+	}
+	return *ac.ss
 }
-func (ac actContext) Ext() ExtInterface { return ac.ext }
+func (ac *actContext) InvalidateSnapshot() {
+	ac.ssDirty = true
+}
+func (ac *actContext) Ext() ExtInterface { return ac.ext }
 func (p *exec) newCtx(a Action) *actContext {
 	ctx := &actContext{
 		c:    a,

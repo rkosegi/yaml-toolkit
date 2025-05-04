@@ -79,6 +79,7 @@ func (ts *TemplateOp) Do(ctx ActionContext) error {
 		return fmt.Errorf("unknown ParseAs mode: %v", *ts.ParseAs)
 	}
 	ctx.Data().AddValueAt(ctx.TemplateEngine().RenderLenient(ts.Path, ss), node)
+	ctx.InvalidateSnapshot()
 	return err
 }
 
