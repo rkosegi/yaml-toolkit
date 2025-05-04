@@ -72,8 +72,11 @@ type Listener interface {
 type ActionContext interface {
 	// Data exposes data document
 	Data() dom.ContainerBuilder
-	// Snapshot is read-only view of Data() in point in time
+	// Snapshot is read-only view of Data() in point in time.
+	// This value is cached for performance reasons.
 	Snapshot() map[string]interface{}
+	// InvalidateSnapshot marks cached snapshot as dirty so next snapshot request will cause retrieval.
+	InvalidateSnapshot()
 	// Factory give access to factory to create new documents
 	Factory() dom.ContainerFactory
 	// Executor returns reference to executor

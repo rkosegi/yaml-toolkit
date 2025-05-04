@@ -66,6 +66,7 @@ func (eo *EnvOp) Do(ctx ActionContext) error {
 			ctx.Data().AddValueAt(k, dom.LeafNode(parts[1]))
 		}
 	}
+	ctx.InvalidateSnapshot()
 	return nil
 }
 

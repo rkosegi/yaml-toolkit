@@ -362,3 +362,18 @@ func TestServiceRefs(t *testing.T) {
 	assert.NotNil(t, x)
 	assert.True(t, found)
 }
+
+func TestInvalidateSnapshot(t *testing.T) {
+	d := b.Container()
+	d.AddValue("x", dom.LeafNode("X"))
+	ac := newMockActBuilder().data(d).build().(*actContext)
+	assert.False(t, ac.ssDirty)
+	assert.Nil(t, ac.ss)
+	ac.Snapshot()
+	assert.NotNil(t, ac.ss)
+	assert.False(t, ac.ssDirty)
+	ac.InvalidateSnapshot()
+	assert.True(t, ac.ssDirty)
+	ac.Snapshot()
+	assert.False(t, ac.ssDirty)
+}

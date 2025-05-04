@@ -89,12 +89,14 @@ func (ia *ImportOp) Do(ctx ActionContext) error {
 	p := ctx.TemplateEngine().RenderLenient(ia.Path, ctx.Snapshot())
 	if len(p) > 0 {
 		ctx.Data().AddValueAt(p, val)
+		ctx.InvalidateSnapshot()
 	} else {
 		if !val.IsContainer() {
 			return ErrNotContainer
 		} else {
 			for k, v := range val.(dom.Container).Children() {
 				ctx.Data().AddValueAt(k, v)
+				ctx.InvalidateSnapshot()
 			}
 		}
 	}

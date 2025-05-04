@@ -62,6 +62,7 @@ func (ps *PatchOp) Do(ctx ActionContext) error {
 		oo.From = &from
 	}
 	ctx.Logger().Log(fmt.Sprintf("Patch[Op=%v,Path=%v]", oo.Op, oo.Path))
+	defer ctx.InvalidateSnapshot()
 	return patch.Do(oo, ctx.Data())
 }
 

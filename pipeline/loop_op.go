@@ -53,6 +53,7 @@ func (l *LoopOp) Do(ctx ActionContext) (err error) {
 	}
 
 	for {
+		ctx.InvalidateSnapshot()
 		var next bool
 		if next, err = ctx.TemplateEngine().EvalBool(l.Test, ctx.Snapshot()); err != nil {
 			return err

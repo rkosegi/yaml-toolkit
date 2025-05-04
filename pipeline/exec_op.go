@@ -101,6 +101,7 @@ func (e *ExecOp) Do(ctx ActionContext) error {
 	if errors.As(err, &exitErr) {
 		if e.SaveExitCodeTo != nil {
 			ctx.Data().AddValueAt(*e.SaveExitCodeTo, dom.LeafNode(exitErr.ExitCode()))
+			ctx.InvalidateSnapshot()
 		}
 		if !slices.Contains(*e.ValidExitCodes, exitErr.ExitCode()) {
 			return err

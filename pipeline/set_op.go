@@ -97,6 +97,7 @@ func (sa *SetOp) Do(ctx ActionContext) error {
 	}
 	data := ctx.Factory().FromMap(sa.Data)
 	handler(sa.Path, gd, data)
+	ctx.InvalidateSnapshot()
 	return nil
 }
 
