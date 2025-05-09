@@ -34,6 +34,13 @@ var (
 	ErrNotContainer  = errors.New("data element must be container when no path is provided")
 )
 
+type ErrorPropagationPolicy string
+
+const (
+	// ErrorPropagationPolicyIgnore error is ignored and not propagated to caller
+	ErrorPropagationPolicyIgnore ErrorPropagationPolicy = "ignore"
+)
+
 // Executor interface is used by external callers to execute Action items
 type Executor interface {
 	Execute(act Action) error

@@ -42,6 +42,10 @@ func (s ActionSpec) String() string {
 	return fmt.Sprintf("ActionSpec[meta=%v]", s.ActionMeta)
 }
 
+func (s ActionSpec) shouldPropagateError() bool {
+	return s.ErrorPropagation == nil || *s.ErrorPropagation != ErrorPropagationPolicyIgnore
+}
+
 func (s ActionSpec) Do(ctx ActionContext) error {
 	for _, a := range []Action{s.Operations, s.Children} {
 		if s.When != nil {
@@ -51,9 +55,12 @@ func (s ActionSpec) Do(ctx ActionContext) error {
 				return nil
 			}
 		}
-		err := ctx.Executor().Execute(a)
-		if err != nil {
-			return err
+		if err := ctx.Executor().Execute(a); err != nil {
+			if s.shouldPropagateError() {
+				return err
+			} else {
+				return nil
+			}
 		}
 	}
 	return nil

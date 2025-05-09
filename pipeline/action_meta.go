@@ -33,6 +33,10 @@ type ActionMeta struct {
 	// Execution of this step is skipped when this expression is evaluated to false.
 	// If value of this field is omitted, then this action is executed.
 	When *string `yaml:"when,omitempty"`
+
+	// ErrorPropagation configure behavior of error propagation. By default, error is propagated to caller.
+	// When set to ErrorPropagationPolicyIgnore, then error is silently ignored.
+	ErrorPropagation *ErrorPropagationPolicy `yaml:"errorPropagation,omitempty"`
 }
 
 func (am ActionMeta) String() string {
