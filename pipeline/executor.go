@@ -129,7 +129,7 @@ type listenerLoggerAdapter struct {
 }
 
 func (n *listenerLoggerAdapter) Log(v ...interface{}) {
-	n.l.OnLog(n.c, v)
+	n.l.OnLog(n.c, v...)
 }
 
 type Opt func(*exec)
