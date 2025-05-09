@@ -21,6 +21,7 @@ import (
 	"io"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"gopkg.in/yaml.v3"
 )
@@ -152,7 +153,9 @@ type Container interface {
 	Lookup(path string) Node
 	// Flatten flattens this Container into list of leaves
 	Flatten() map[string]Leaf
-
+	// Get attempts to find child Node at given path.Path.
+	// If no value exists on given path, nil is returned.
+	Get(path path.Path) Node
 	// AsMap converts recursively content of this container into map[string]interface{}
 	// Result consists from Go vanilla constructs only and thus could be directly used in Go templates.
 	AsMap() map[string]interface{}
@@ -164,11 +167,17 @@ type Container interface {
 // ContainerBuilder is mutable extension of Container
 type ContainerBuilder interface {
 	Container
-	// AddValue adds Node value into this Container
+	// AddValue adds Node value into this Container.
 	AddValue(name string, value Node) ContainerBuilder
 	// AddValueAt adds Leaf value into this Container at given path.
 	// Child nodes are creates as needed.
 	AddValueAt(path string, value Node) ContainerBuilder
+	// Set sets Node into this Container at given path.
+	// Child nodes are creates as needed.
+	Set(path path.Path, value Node)
+	// Delete removes Node at given path.
+	// It might not exist, in which case this operation is no-op.
+	Delete(path path.Path)
 	// AddContainer adds child Container into this Container
 	AddContainer(name string) ContainerBuilder
 	// AddList adds child List into this Container
