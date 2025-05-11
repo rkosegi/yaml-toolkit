@@ -228,3 +228,27 @@ func anyValFromMap(m map[string]interface{}) *AnyVal {
 
 // ChildActions is map of named actions that are executed as a part of parent action
 type ChildActions map[string]ActionSpec
+
+// StrKeysStrValues is key-value map with strings.
+type StrKeysStrValues map[string]string
+
+// AsAnyValuesMap converts this map to StrKeysAnyValues suitable for template related operations.
+func (skv StrKeysStrValues) AsAnyValuesMap() StrKeysAnyValues {
+	out := make(StrKeysAnyValues, len(skv))
+	for k, v := range skv {
+		out[k] = v
+	}
+	return out
+}
+
+// RenderValues renders values of this map using provided TemplateEngine and data.
+func (skv StrKeysStrValues) RenderValues(te TemplateEngine, data StrKeysAnyValues) StrKeysStrValues {
+	out := make(map[string]string, len(skv))
+	for k, v := range skv {
+		out[k] = te.RenderLenient(v, data)
+	}
+	return out
+}
+
+// StrKeysAnyValues is a map with string keys and values with any type
+type StrKeysAnyValues map[string]any

@@ -19,6 +19,7 @@ package pipeline
 import (
 	"testing"
 
+	sprig "github.com/go-task/slim-sprig/v3"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
@@ -103,4 +104,24 @@ func TestValOrRefString(t *testing.T) {
 	assert.Equal(t, "[Val=A]", (&ValOrRef{Val: "A"}).String())
 	assert.Equal(t, "[Ref=a.b]", (&ValOrRef{Ref: "a.b"}).String())
 	assert.Equal(t, "[Ref=x.y,Val=X]", (&ValOrRef{Val: "X", Ref: "x.y"}).String())
+}
+
+func TestStrKeyValuesAsAnyValuesMap(t *testing.T) {
+	in := StrKeysStrValues{
+		"A": "abc",
+	}
+	out := in.AsAnyValuesMap()
+	assert.Equal(t, "abc", out["A"])
+}
+
+func TestStrKeyValuesRenderValues(t *testing.T) {
+	in := StrKeysStrValues{
+		"A": `{{ printf "%s %s" .X .Y }}`,
+	}
+	te := &templateEngine{fm: sprig.FuncMap()}
+	out := in.RenderValues(te, StrKeysAnyValues{
+		"X": "Hello",
+		"Y": "World",
+	})
+	assert.Equal(t, "Hello World", out["A"])
 }
