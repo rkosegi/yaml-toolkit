@@ -80,6 +80,15 @@ func TestTemplateEngineRenderMapLenient(t *testing.T) {
 	assert.Equal(t, 1, ret["int_leaf"])
 }
 
+func TestTemplateEngineRenderSliceLenient(t *testing.T) {
+	te := &templateEngine{}
+	ret := te.RenderSliceLenient([]string{"a", "{{ .x }}"}, map[string]interface{}{
+		"x": "abc",
+	})
+	assert.Equal(t, "a", ret[0])
+	assert.Equal(t, "abc", ret[1])
+}
+
 func TestTemplateEngineRenderTpl(t *testing.T) {
 	var (
 		out string

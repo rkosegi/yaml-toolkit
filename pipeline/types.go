@@ -52,6 +52,8 @@ type TemplateEngine interface {
 	// Value of template is first checked by simple means if it is actually template to avoid unnecessary errors.
 	// Use with caution.
 	RenderLenient(template string, data map[string]interface{}) string
+	// RenderSliceLenient attempts to render slices of template strings using provided data, without reporting any error.
+	RenderSliceLenient(templates []string, data map[string]interface{}) []string
 	// RenderMapLenient attempts to render every leaf value in provided map
 	RenderMapLenient(input map[string]interface{}, data map[string]interface{}) map[string]interface{}
 	EvalBool(template string, data map[string]interface{}) (bool, error)
