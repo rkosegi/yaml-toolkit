@@ -81,6 +81,14 @@ func (te templateEngine) RenderLenient(tmpl string, data map[string]interface{})
 	return renderLenientTemplate(tmpl, data, te.fm)
 }
 
+func (te templateEngine) RenderSliceLenient(tmpls []string, data map[string]interface{}) []string {
+	out := make([]string, len(tmpls))
+	for i, tmpl := range tmpls {
+		out[i] = renderLenientTemplate(tmpl, data, te.fm)
+	}
+	return out
+}
+
 func (te templateEngine) RenderMapLenient(input map[string]interface{}, data map[string]interface{}) map[string]interface{} {
 	ret := make(map[string]interface{})
 	for k, v := range input {
