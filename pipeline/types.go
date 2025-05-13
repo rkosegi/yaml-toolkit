@@ -122,6 +122,12 @@ type ActionFactory interface {
 	NewForArgs(args map[string]interface{}) Action
 }
 
+// ActionContextFactory is API to create instances of ActionContext
+type ActionContextFactory interface {
+	// NewActionContext creates new context gor given Action
+	NewActionContext(Action) ActionContext
+}
+
 // ArgsSetter is implemented by ext Action if it wishes to receive arguments.
 type ArgsSetter interface {
 	// SetArgs sets arguments from map
