@@ -109,6 +109,10 @@ func (p *exec) newCtx(a Action) *actContext {
 	return ctx
 }
 
+func (p *exec) NewActionContext(a Action) ActionContext {
+	return p.newCtx(a)
+}
+
 func (p *exec) Execute(act Action) (err error) {
 	ctx := p.newCtx(act)
 	p.l.OnBefore(ctx)

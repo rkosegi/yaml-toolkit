@@ -51,6 +51,12 @@ func parse[T any](t *testing.T, source string) *T {
 	return &x
 }
 
+func TestExecutorIsActionContextFactory(t *testing.T) {
+	acf, ok := New().(ActionContextFactory)
+	assert.True(t, ok)
+	assert.NotNil(t, acf.NewActionContext(&SetOp{}))
+}
+
 func TestBoolExpressionEval(t *testing.T) {
 	var (
 		val bool
