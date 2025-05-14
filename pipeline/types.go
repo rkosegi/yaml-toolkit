@@ -77,6 +77,22 @@ type Listener interface {
 	OnLog(ctx ActionContext, v ...interface{})
 }
 
+// ExtInterface enables actions to use extensions.
+type ExtInterface interface {
+	// Define defines named ActionSpec in action registry.
+	Define(string, ActionSpec)
+	// Get retrieves previously registered ActionSpec from registry.
+	Get(string) (ActionSpec, bool)
+	// AddAction adds named ActionFactory to registry, so it can be retrieved later via GetAction() call.
+	AddAction(string, ActionFactory)
+	// GetAction retrieves previously added ActionFactory of given name.
+	GetAction(string) (ActionFactory, bool)
+	// RegisterService registers named service with registry.
+	RegisterService(string, interface{})
+	// GetService gets a reference to previously registered service from registry
+	GetService(string) (interface{}, bool)
+}
+
 // ActionContext is created by Executor implementation for sole purpose of invoking Action's Do function.
 type ActionContext interface {
 	// Data exposes data document

@@ -73,15 +73,6 @@ type actContext struct {
 	ss      *map[string]interface{}
 }
 
-type ExtInterface interface {
-	Define(string, ActionSpec)
-	Get(string) (ActionSpec, bool)
-	AddAction(string, ActionFactory)
-	GetAction(string) (ActionFactory, bool)
-	RegisterService(string, interface{})
-	GetService(string) (interface{}, bool)
-}
-
 func (ac *actContext) Action() Action                 { return ac.c }
 func (ac *actContext) Data() dom.ContainerBuilder     { return ac.d }
 func (ac *actContext) Factory() dom.ContainerFactory  { return b }
