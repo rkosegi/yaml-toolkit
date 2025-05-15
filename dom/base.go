@@ -16,7 +16,13 @@ limitations under the License.
 
 package dom
 
-type base struct{}
+type base struct {
+	desc string
+}
+
+func (b *base) Desc() string {
+	return b.desc
+}
 
 func (b *base) IsContainer() bool {
 	return false
@@ -31,13 +37,13 @@ func (b *base) IsList() bool {
 }
 
 func (b *base) AsLeaf() Leaf {
-	panic("not a leaf")
+	panic("not a leaf: " + b.Desc())
 }
 
 func (b *base) AsContainer() Container {
-	panic("not a container")
+	panic("not a container" + b.Desc())
 }
 
 func (b *base) AsList() List {
-	panic("not a list")
+	panic("not a list" + b.Desc())
 }

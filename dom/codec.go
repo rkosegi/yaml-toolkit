@@ -65,7 +65,7 @@ func decodeListFn(v []interface{}, l ListBuilder) {
 		case reflect.Map:
 			l.Append(DefaultNodeDecoderFn(item.(map[string]interface{})))
 		case reflect.Slice, reflect.Array:
-			list := &listBuilderImpl{}
+			list := initListBuilder()
 			decodeListFn(item.([]interface{}), list)
 			l.Append(list)
 		case reflect.Float32, reflect.Float64, reflect.String, reflect.Bool,

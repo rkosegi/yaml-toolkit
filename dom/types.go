@@ -74,7 +74,7 @@ func DefaultNodeEncoderFn(n Container) interface{} {
 }
 
 func DefaultNodeDecoderFn(m map[string]interface{}) Container {
-	cb := containerBuilderImpl{}
+	cb := *initContainerBuilder()
 	decodeContainerFn(&m, &cb)
 	return &cb
 }
@@ -116,6 +116,9 @@ type Node interface {
 
 	// AsList casts this Node to a List, panics if this Node is not a List.
 	AsList() List
+
+	// Desc returns human-readable description of runtime type, such as "list".
+	Desc() string
 }
 
 // Leaf represent Node of scalar value

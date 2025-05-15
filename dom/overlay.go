@@ -109,7 +109,7 @@ func ensurePath(node ContainerBuilder, pc []string) ContainerBuilder {
 		if listPathRe.MatchString(component) {
 			list, index, _ := ensureList(component, node)
 			if list.Items()[int(index)] == nilLeaf {
-				c := &containerBuilderImpl{}
+				c := initContainerBuilder()
 				list.Set(index, c)
 				node = c
 				continue
@@ -132,7 +132,7 @@ func (m *overlayDocument) Merged(opts ...MergeOption) Container {
 
 func (m *overlayDocument) ensureOverlay(name string) ContainerBuilder {
 	if m.overlays[name] == nil {
-		m.overlays[name] = &containerBuilderImpl{}
+		m.overlays[name] = initContainerBuilder()
 		m.names = append(m.names, name)
 	}
 	return m.overlays[name]

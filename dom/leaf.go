@@ -24,7 +24,7 @@ type leaf struct {
 }
 
 func (l *leaf) Clone() Node {
-	return &leaf{value: l.value}
+	return LeafNode(l.value)
 }
 
 func (l *leaf) Equals(node Node) bool {
@@ -48,5 +48,7 @@ func (l *leaf) AsLeaf() Leaf {
 }
 
 func LeafNode(val interface{}) Leaf {
-	return &leaf{value: val}
+	ln := &leaf{value: val}
+	ln.desc = "leaf"
+	return ln
 }
