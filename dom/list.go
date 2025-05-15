@@ -23,6 +23,12 @@ type listImpl struct {
 	items []Node
 }
 
+func initList() *listImpl {
+	l := &listImpl{}
+	l.desc = "list"
+	return l
+}
+
 func (l *listImpl) IsList() bool {
 	return true
 }
@@ -42,7 +48,7 @@ func (l *listImpl) Size() int {
 }
 
 func (l *listImpl) Clone() Node {
-	l2 := &listImpl{}
+	l2 := initList()
 	for _, item := range l.items {
 		l2.items = append(l2.items, item.Clone())
 	}
@@ -75,6 +81,12 @@ func (l *listImpl) SameAs(node Node) bool {
 
 type listBuilderImpl struct {
 	listImpl
+}
+
+func initListBuilder() *listBuilderImpl {
+	lb := &listBuilderImpl{}
+	lb.desc = "writable list"
+	return lb
 }
 
 func (l *listBuilderImpl) Clear() ListBuilder {
@@ -110,7 +122,7 @@ func (l *listBuilderImpl) Seal() List {
 }
 
 func ListNode(items ...Node) ListBuilder {
-	l := &listBuilderImpl{}
+	l := initListBuilder()
 	for _, item := range items {
 		l.Append(item)
 	}

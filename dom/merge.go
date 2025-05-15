@@ -44,7 +44,7 @@ type merger struct {
 }
 
 func mergeListsAppend(l1, l2 List) List {
-	l := &listBuilderImpl{}
+	l := initListBuilder()
 	for i := 0; i < l1.Size(); i++ {
 		l.Append(l1.Items()[i])
 	}
@@ -59,7 +59,7 @@ func (mg *merger) mergeListsMeld(l1, l2 List) List {
 	c2 := l2.Size()
 	maxLen := int(math.Max(float64(c1), float64(c2)))
 	minLen := int(math.Min(float64(c1), float64(c2)))
-	l := &listBuilderImpl{}
+	l := initListBuilder()
 	for i := 0; i < maxLen; i++ {
 		l.Append(nilLeaf)
 	}
@@ -98,7 +98,7 @@ func (mg *merger) mergeContainers(c1, c2 Container) ContainerBuilder {
 			merged[k] = v
 		}
 	}
-	r := &containerBuilderImpl{}
+	r := initContainerBuilder()
 	r.children = merged
 	return r
 }
@@ -118,7 +118,7 @@ func (mg *merger) mergeLists(l1, l2 List) List {
 
 func (mg *merger) mergeOverlay(m *overlayDocument) Container {
 	var merged Container
-	merged = &containerBuilderImpl{}
+	merged = initContainerBuilder()
 	for _, name := range m.names {
 		merged = mg.mergeContainers(merged, m.overlays[name])
 	}

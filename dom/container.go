@@ -169,7 +169,7 @@ func (c *containerImpl) Lookup(path string) Node {
 }
 
 func (c *containerImpl) Clone() Node {
-	c2 := &containerImpl{}
+	c2 := initContainer()
 	c2.ensureChildren()
 	for k, v := range c.children {
 		c2.children[k] = v.Clone()
@@ -183,6 +183,18 @@ func (c *containerImpl) AsContainer() Container {
 
 type containerBuilderImpl struct {
 	containerImpl
+}
+
+func initContainer() *containerImpl {
+	cb := &containerImpl{}
+	cb.desc = "container"
+	return cb
+}
+
+func initContainerBuilder() *containerBuilderImpl {
+	cb := &containerBuilderImpl{}
+	cb.desc = "writable container"
+	return cb
 }
 
 func (c *containerBuilderImpl) Seal() Container {
@@ -208,7 +220,7 @@ func (c *containerBuilderImpl) Merge(other Container, opts ...MergeOption) Conta
 }
 
 func (c *containerBuilderImpl) AddList(name string) ListBuilder {
-	lb := &listBuilderImpl{}
+	lb := initListBuilder()
 	c.add(name, lb)
 	return lb
 }
@@ -219,7 +231,7 @@ func (c *containerBuilderImpl) Remove(name string) ContainerBuilder {
 }
 
 func (c *containerBuilderImpl) AddContainer(name string) ContainerBuilder {
-	cb := &containerBuilderImpl{}
+	cb := initContainerBuilder()
 	c.add(name, cb)
 	return cb
 }
@@ -260,9 +272,9 @@ func (c *containerBuilderImpl) AddValue(name string, value Node) ContainerBuilde
 func (c *containerBuilderImpl) addChild(parent ContainerBuilder, name string) ContainerBuilder {
 	if listPathRe.MatchString(name) {
 		list, index, _ := ensureList(name, parent)
-		c := &containerBuilderImpl{}
-		list.Set(index, c)
-		return c
+		x := initContainerBuilder()
+		list.Set(index, x)
+		return x
 	} else {
 		return parent.AddContainer(name)
 	}
@@ -316,7 +328,7 @@ func (f *containerFactory) FromProperties(in map[string]interface{}) ContainerBu
 }
 
 func (f *containerFactory) Container() ContainerBuilder {
-	return &containerBuilderImpl{}
+	return initContainerBuilder()
 }
 
 func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBuilder, error) {
