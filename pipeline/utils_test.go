@@ -94,15 +94,6 @@ func removeFilesLater(t *testing.T, files ...*os.File) {
 	})
 }
 
-func removeDirsLater(t *testing.T, dirs ...string) {
-	t.Cleanup(func() {
-		for _, f := range dirs {
-			t.Logf("delete temporary directory %s", f)
-			_ = os.RemoveAll(f)
-		}
-	})
-}
-
 func TestGetActionFromContext(t *testing.T) {
 	ac := mockEmptyActCtx().(*actContext)
 	ac.c = &ExportOp{}

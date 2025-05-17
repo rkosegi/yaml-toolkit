@@ -19,8 +19,8 @@ package pipeline
 import (
 	"testing"
 
-	sprig "github.com/go-task/slim-sprig/v3"
 	"github.com/rkosegi/yaml-toolkit/dom"
+	te "github.com/rkosegi/yaml-toolkit/pipeline/template_engine"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
@@ -118,8 +118,8 @@ func TestStrKeyValuesRenderValues(t *testing.T) {
 	in := StrKeysStrValues{
 		"A": `{{ printf "%s %s" .X .Y }}`,
 	}
-	te := &templateEngine{fm: sprig.FuncMap()}
-	out := in.RenderValues(te, StrKeysAnyValues{
+	teng := te.DefaultTemplateEngine()
+	out := in.RenderValues(teng, StrKeysAnyValues{
 		"X": "Hello",
 		"Y": "World",
 	})

@@ -20,7 +20,6 @@ import (
 	"strings"
 	"testing"
 
-	sprig "github.com/go-task/slim-sprig/v3"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/patch"
 	"github.com/stretchr/testify/assert"
@@ -31,7 +30,7 @@ type dummyActFactory struct {
 	act Action
 }
 
-func (d *dummyActFactory) NewForArgs(_ map[string]interface{}) Action {
+func (d *dummyActFactory) NewForArgs(StrKeysAnyValues) Action {
 	return d.act
 }
 
@@ -52,34 +51,9 @@ func parse[T any](t *testing.T, source string) *T {
 }
 
 func TestExecutorIsActionContextFactory(t *testing.T) {
-	acf, ok := New().(ActionContextFactory)
-	assert.True(t, ok)
-	assert.NotNil(t, acf.NewActionContext(&SetOp{}))
-}
-
-func TestBoolExpressionEval(t *testing.T) {
-	var (
-		val bool
-		err error
-	)
-	te := &templateEngine{
-		fm: sprig.TxtFuncMap(),
-	}
-	expr := `{{ eq .Env "Development" }}`
-	val, err = te.EvalBool(expr, map[string]interface{}{
-		"Env": "Development",
-	})
-	assert.NoError(t, err)
-	assert.Equal(t, true, val)
-
-	val, err = te.EvalBool(expr, map[string]interface{}{
-		"Env": "Production",
-	})
-	assert.NoError(t, err)
-	assert.Equal(t, false, val)
-
-	_, err = te.EvalBool(`{{`, map[string]interface{}{})
-	assert.Error(t, err)
+	acf := New().Runtime()
+	assert.NotNil(t, New().NewActionContext(&SetOp{}))
+	assert.NotNil(t, acf.Ext())
 }
 
 func TestParseStep(t *testing.T) {
@@ -349,24 +323,25 @@ func TestExecuteForEachFileGlob(t *testing.T) {
 			ForEach: fe,
 		},
 	}
-	ex.ea = map[string]ActionFactory{
-		"noop": &dummyActFactory{act: &noopOp{}},
-	}
+	ex.RegisterActionFactory("noop", &dummyActFactory{act: &noopOp{}})
 	assert.NoError(t, ex.Execute(ss))
 	assert.Equal(t, 2, len(gd.Lookup("import.files").(dom.Container).Children()))
 	assert.Contains(t, fe.String(), "doc?.yaml")
 }
 
+type dummyService struct{}
+
+func (d *dummyService) Configure(StrKeysAnyValues) Service { return d }
+func (d *dummyService) Init() error                        { return nil }
+func (d *dummyService) Close() error                       { return nil }
+
 func TestServiceRefs(t *testing.T) {
 	e := newTestExec(b.Container())
-
-	x, found := e.GetService("bad")
+	x := e.GetService("bad")
 	assert.Nil(t, x)
-	assert.False(t, found)
-	e.RegisterService("good", struct{}{})
-	x, found = e.GetService("good")
+	e.RegisterService("good", &dummyService{})
+	x = e.GetService("good")
 	assert.NotNil(t, x)
-	assert.True(t, found)
 }
 
 func TestInvalidateSnapshot(t *testing.T) {

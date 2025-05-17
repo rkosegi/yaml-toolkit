@@ -14,14 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package pipeline
+package template_engine
 
 import (
 	"bytes"
 	"strconv"
 	"strings"
 	"text/template"
+
+	sprig "github.com/go-task/slim-sprig/v3"
 )
+
+var defFuncs = template.FuncMap{
+	"toYaml":         toYamlFunc,
+	"isEmpty":        isEmptyFunc,
+	"unflatten":      unflattenFunc,
+	"fileExists":     fileExistsFunc,
+	"mergeFiles":     mergeFilesFunc,
+	"isDir":          isDirFunc,
+	"glob":           globFunc,
+	"dom2yaml":       dom2yamlFunc,
+	"dom2json":       dom2jsonFunc,
+	"dom2properties": dom2propertiesFunc,
+	"domdiff":        domDiffFunc,
+	"urlParseQuery":  urlParseQuery,
+	"fileGlob":       fileGlobFunc,
+}
 
 type templateEngine struct {
 	fm template.FuncMap
@@ -30,20 +48,7 @@ type templateEngine struct {
 func renderTemplate(tmplStr string, data interface{}, fm template.FuncMap) (string, error) {
 	tmpl := template.New("tmpl").Funcs(fm)
 	tmpl.Funcs(template.FuncMap{
-		"tpl":            tplFunc(tmpl),
-		"toYaml":         toYamlFunc,
-		"isEmpty":        isEmptyFunc,
-		"unflatten":      unflattenFunc,
-		"fileExists":     fileExistsFunc,
-		"mergeFiles":     mergeFilesFunc,
-		"isDir":          isDirFunc,
-		"glob":           globFunc,
-		"dom2yaml":       dom2yamlFunc,
-		"dom2json":       dom2jsonFunc,
-		"dom2properties": dom2propertiesFunc,
-		"domdiff":        domDiffFunc,
-		"urlParseQuery":  urlParseQuery,
-		"fileGlob":       fileGlobFunc,
+		"tpl": tplFunc(tmpl),
 	})
 	_, err := tmpl.Parse(tmplStr)
 	if err != nil {
@@ -115,4 +120,32 @@ func (te templateEngine) EvalBool(template string, data map[string]interface{}) 
 		return false, err
 	}
 	return strconv.ParseBool(strings.TrimSpace(val))
+}
+
+type TemplateEngineOpt func(*templateEngine)
+
+func AddFuncMap(fm template.FuncMap) TemplateEngineOpt {
+	return func(p *templateEngine) {
+		for k, v := range fm {
+			p.fm[k] = v
+		}
+	}
+}
+
+func DefaultFuncMapOpt() TemplateEngineOpt {
+	return AddFuncMap(defFuncs)
+}
+
+func NewTemplateEngine(opts ...TemplateEngineOpt) TemplateEngine {
+	te := &templateEngine{fm: template.FuncMap{}}
+	for _, opt := range opts {
+		opt(te)
+	}
+	return te
+}
+
+func DefaultTemplateEngine() TemplateEngine {
+	return NewTemplateEngine(
+		DefaultFuncMapOpt(),
+		AddFuncMap(sprig.TxtFuncMap()))
 }
