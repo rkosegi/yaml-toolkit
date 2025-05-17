@@ -78,7 +78,7 @@ func (mcb *mockActCtxBuilder) testLogger(t *testing.T) *mockActCtxBuilder {
 
 func (mcb *mockActCtxBuilder) build() ActionContext {
 	mcb.opts = append(mcb.opts, WithData(mcb.d))
-	return New(mcb.opts...).(*exec).newCtx(nil)
+	return New(mcb.opts...).(*exec).newActionCtx(nil)
 }
 
 func mockEmptyActCtx() ActionContext {
@@ -94,17 +94,8 @@ func removeFilesLater(t *testing.T, files ...*os.File) {
 	})
 }
 
-func removeDirsLater(t *testing.T, dirs ...string) {
-	t.Cleanup(func() {
-		for _, f := range dirs {
-			t.Logf("delete temporary directory %s", f)
-			_ = os.RemoveAll(f)
-		}
-	})
-}
-
 func TestGetActionFromContext(t *testing.T) {
-	ac := mockEmptyActCtx().(*actContext)
+	ac := mockEmptyActCtx().(*clientCtx)
 	ac.c = &ExportOp{}
 	assert.NotNil(t, ac.Action())
 }

@@ -19,7 +19,6 @@ package pipeline
 import (
 	"testing"
 
-	sprig "github.com/go-task/slim-sprig/v3"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -41,6 +40,11 @@ func TestSortActionNames(t *testing.T) {
 }
 
 func TestChildActionsCloneWith(t *testing.T) {
+	ac := newMockActBuilder().data(b.FromMap(map[string]interface{}{
+		"sub1": map[string]interface{}{
+			"leaf1": "root.sub2",
+		},
+	})).build()
 	a := ChildActions{
 		"step1": ActionSpec{
 			Operations: OpSpec{
@@ -53,15 +57,7 @@ func TestChildActionsCloneWith(t *testing.T) {
 				},
 			},
 		},
-	}.CloneWith(&actContext{
-		exec: &exec{
-			d: b.FromMap(map[string]interface{}{
-				"sub1": map[string]interface{}{
-					"leaf1": "root.sub2",
-				},
-			}), t: &templateEngine{fm: sprig.TxtFuncMap()},
-		},
-	})
+	}.CloneWith(ac)
 	assert.NotNil(t, a)
 	assert.Equal(t, "root.sub2", a.(ChildActions)["step1"].Operations.Set.Path)
 }
