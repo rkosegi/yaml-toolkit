@@ -21,6 +21,13 @@ import (
 	"strings"
 )
 
+type ErrorPropagationPolicy string
+
+const (
+	// ErrorPropagationPolicyIgnore error is ignored and not propagated to caller
+	ErrorPropagationPolicyIgnore ErrorPropagationPolicy = "ignore"
+)
+
 // ActionMeta holds action's metadata used by Executor
 type ActionMeta struct {
 	// Name of this step, should be unique within current scope

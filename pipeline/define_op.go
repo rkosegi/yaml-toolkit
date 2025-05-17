@@ -30,10 +30,10 @@ func (d *DefineOp) String() string {
 }
 
 func (d *DefineOp) Do(ctx ActionContext) error {
-	if _, exists := ctx.Ext().Get(d.Name); exists {
+	if _, exists := ctx.Ext().GetAction(d.Name); exists {
 		return fmt.Errorf("callable '%s' is already defined", d.Name)
 	}
-	ctx.Ext().Define(d.Name, d.Action)
+	ctx.Ext().DefineAction(d.Name, d.Action)
 	return nil
 }
 

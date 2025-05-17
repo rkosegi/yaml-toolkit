@@ -367,6 +367,36 @@
       },
       "type": "object"
     },
+    "pipelineSpec": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/actionSpec"
+        }
+      ],
+      "description": "Pipeline operation specification",
+      "properties": {
+        "services": {
+          "additionalProperties": {
+            "$ref": "#/$defs/serviceSpec"
+          },
+          "description": "Services declaration"
+        },
+        "vars": {
+          "additionalProperties": true,
+          "description": "Initial variables",
+          "type": "object"
+        }
+      }
+    },
+    "serviceSpec": {
+      "description": "Service definition",
+      "properties": {
+        "args": {
+          "additionalProperties": true,
+          "description": "Service configuration"
+        }
+      }
+    },
     "setOpSpec": {
       "additionalProperties": true,
       "properties": {
@@ -397,6 +427,7 @@
       "type": "string"
     },
     "templateOpSpec": {
+      "description": "TemplateOp can be used to render value from data at runtime",
       "properties": {
         "path": {
           "description": "Path within global data tree where to set result at",
@@ -419,7 +450,8 @@
     }
   },
   "$id": "https://github.com/rkosegi/yaml-toolkit/schemas/pipeline",
-  "$ref": "#/$defs/actionSpec",
+  "$ref": "#/$defs/pipelineSpec",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Pipeline specification",
   "type": "object"
 }
