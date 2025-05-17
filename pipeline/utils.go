@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
+	te "github.com/rkosegi/yaml-toolkit/pipeline/template_engine"
 )
 
 func strTruncIfNeeded(in string, size int) string {
@@ -107,21 +108,21 @@ func safeCopyIntSlice(in *[]int) *[]int {
 	return &r
 }
 
-func safeRenderStrPointer(str *string, te TemplateEngine, data map[string]interface{}) *string {
+func safeRenderStrPointer(str *string, teng te.TemplateEngine, data map[string]interface{}) *string {
 	if str == nil {
 		return nil
 	}
-	s := te.RenderLenient(*str, data)
+	s := teng.RenderLenient(*str, data)
 	return &s
 }
 
-func safeRenderStrSlice(args *[]string, te TemplateEngine, data map[string]interface{}) *[]string {
+func safeRenderStrSlice(args *[]string, teng te.TemplateEngine, data map[string]interface{}) *[]string {
 	if args == nil {
 		return nil
 	}
 	r := make([]string, len(*args))
 	for i, arg := range *args {
-		r[i] = te.RenderLenient(arg, data)
+		r[i] = teng.RenderLenient(arg, data)
 	}
 	return &r
 }

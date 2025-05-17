@@ -17,68 +17,41 @@ limitations under the License.
 package pipeline
 
 import (
-	sprig "github.com/go-task/slim-sprig/v3"
+	"fmt"
+
 	"github.com/rkosegi/yaml-toolkit/dom"
+	te "github.com/rkosegi/yaml-toolkit/pipeline/template_engine"
 )
 
 var (
 	b = dom.Builder()
 )
 
-type ext struct {
-	sr map[string]interface{}
-	ea map[string]ActionFactory
-	cm map[string]ActionSpec
-}
-
-func (e *ext) Define(name string, spec ActionSpec) {
-	e.cm[name] = spec
-}
-
-func (e *ext) Get(name string) (ActionSpec, bool) {
-	r, ok := e.cm[name]
-	return r, ok
-}
-
-func (e *ext) AddAction(name string, action ActionFactory) {
-	e.ea[name] = action
-}
-
-func (e *ext) GetAction(name string) (ActionFactory, bool) {
-	r, ok := e.ea[name]
-	return r, ok
-}
-
-func (e *ext) RegisterService(name string, ref interface{}) {
-	e.sr[name] = ref
-}
-
-func (e *ext) GetService(name string) (interface{}, bool) {
-	r, ok := e.sr[name]
-	return r, ok
-}
-
 type exec struct {
-	*ext
+	*runtimeCtx
+
+	// settable by options
 	d dom.ContainerBuilder
 	l Listener
-	t TemplateEngine
+}
+
+func (p *exec) Runtime() RuntimeServices {
+	return p
 }
 
 type actContext struct {
 	*exec
-	c       Action
-	la      *listenerLoggerAdapter
+	c Action
+	*listenerLoggerAdapter
 	ssDirty bool
 	ss      *map[string]interface{}
 }
 
-func (ac *actContext) Action() Action                 { return ac.c }
-func (ac *actContext) Data() dom.ContainerBuilder     { return ac.d }
-func (ac *actContext) Factory() dom.ContainerFactory  { return b }
-func (ac *actContext) Executor() Executor             { return ac.exec }
-func (ac *actContext) TemplateEngine() TemplateEngine { return ac.t }
-func (ac *actContext) Logger() Logger                 { return ac.la }
+func (ac *actContext) Action() Action                { return ac.c }
+func (ac *actContext) Executor() Executor            { return ac.exec }
+func (ac *actContext) Logger() Logger                { return ac }
+func (ac *actContext) Data() dom.ContainerBuilder    { return ac.d }
+func (ac *actContext) Factory() dom.ContainerFactory { return b }
 func (ac *actContext) Snapshot() map[string]interface{} {
 	if ac.ssDirty || ac.ss == nil {
 		ac.ss = ptr(dom.DefaultNodeEncoderFn(ac.Data()).(map[string]interface{}))
@@ -86,17 +59,24 @@ func (ac *actContext) Snapshot() map[string]interface{} {
 	}
 	return *ac.ss
 }
+
+func (ac *actContext) Log(v ...interface{}) {
+	ac.listenerLoggerAdapter.Log(v...)
+}
+
 func (ac *actContext) InvalidateSnapshot() {
 	ac.ssDirty = true
 }
-func (ac *actContext) Ext() ExtInterface { return ac.ext }
+
 func (p *exec) newCtx(a Action) *actContext {
 	ctx := &actContext{
 		c:    a,
 		exec: p,
-		la:   &listenerLoggerAdapter{l: p.l},
 	}
-	ctx.la.c = ctx
+	ctx.listenerLoggerAdapter = &listenerLoggerAdapter{
+		c: ctx,
+		l: p.l,
+	}
 	return ctx
 }
 
@@ -110,6 +90,41 @@ func (p *exec) Execute(act Action) (err error) {
 	err = act.Do(ctx)
 	p.l.OnAfter(ctx, err)
 	return err
+}
+
+func initService(spec ConfigurableSpec, impl Service) error {
+	return impl.Configure(spec.Args).Init()
+}
+
+func (p *exec) initServices(servicesConfig map[string]ConfigurableSpec) error {
+	for name, spec := range servicesConfig {
+		var impl Service
+		// every service specification must have runtime-registered counterpart
+		// but still you can have registered service without configuration
+		if impl = p.GetService(name); impl == nil {
+			return fmt.Errorf("service '%s' is not registered", name)
+		}
+		// apply configuration to instance and call Init() on it
+		if err := initService(spec, impl); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (p *exec) closeServices() {
+	for s := range p.EnumServices() {
+		_ = s.Close()
+	}
+}
+
+func (p *exec) Run(po *PipelineOp) error {
+	if err := p.initServices(po.Services); err != nil {
+		return err
+	}
+	p.d = p.d.Merge(b.FromMap(po.Vars))
+	defer p.closeServices()
+	return p.Execute(po)
 }
 
 type noopListener struct{}
@@ -141,16 +156,24 @@ func WithData(gd dom.ContainerBuilder) Opt {
 	}
 }
 
-func WithTemplateEngine(t TemplateEngine) Opt {
+func WithTemplateEngine(t te.TemplateEngine) Opt {
 	return func(p *exec) {
-		p.t = t
+		p.teng = t
 	}
 }
 
 func WithExtActions(m map[string]ActionFactory) Opt {
 	return func(p *exec) {
 		for k, v := range m {
-			p.AddAction(k, v)
+			p.RegisterActionFactory(k, v)
+		}
+	}
+}
+
+func WithServices(s map[string]Service) Opt {
+	return func(p *exec) {
+		for k, v := range s {
+			p.RegisterService(k, v)
 		}
 	}
 }
@@ -158,19 +181,14 @@ func WithExtActions(m map[string]ActionFactory) Opt {
 var defOpts = []Opt{
 	WithListener(&noopListener{}),
 	WithData(b.Container()),
-	WithTemplateEngine(&templateEngine{
-		fm: sprig.TxtFuncMap(),
-	}),
+	WithTemplateEngine(te.DefaultTemplateEngine()),
 	WithExtActions(make(map[string]ActionFactory)),
+	WithServices(make(map[string]Service)),
 }
 
 func New(opts ...Opt) Executor {
 	p := &exec{
-		ext: &ext{
-			ea: make(map[string]ActionFactory),
-			cm: make(map[string]ActionSpec),
-			sr: make(map[string]interface{}),
-		},
+		runtimeCtx: newRuntimeCtx(),
 	}
 	for _, opt := range defOpts {
 		opt(p)

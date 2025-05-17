@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package pipeline
+package template_engine
 
 import (
 	"net/url"
@@ -22,8 +22,29 @@ import (
 	"testing"
 
 	sprig "github.com/go-task/slim-sprig/v3"
+	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/stretchr/testify/assert"
 )
+
+var b = dom.Builder()
+
+func removeDirsLater(t *testing.T, dirs ...string) {
+	t.Cleanup(func() {
+		for _, f := range dirs {
+			t.Logf("delete temporary directory %s", f)
+			_ = os.RemoveAll(f)
+		}
+	})
+}
+
+func removeFilesLater(t *testing.T, files ...*os.File) {
+	t.Cleanup(func() {
+		for _, f := range files {
+			t.Logf("cleanup temporary file %s", f.Name())
+			_ = os.Remove(f.Name())
+		}
+	})
+}
 
 func TestPossiblyTemplate(t *testing.T) {
 	assert.True(t, possiblyTemplate("{{ . }}"))
@@ -117,12 +138,12 @@ func TestTemplateEngineRenderToYaml(t *testing.T) {
 		out string
 		err error
 	)
-	out, err = renderTemplate("{{ toYaml . }}", map[string]interface{}{
+	out, err = DefaultTemplateEngine().Render("{{ toYaml . }}", map[string]interface{}{
 		"x": map[string]interface{}{
 			"z": "abc",
 		},
 		"y": 25,
-	}, sprig.TxtFuncMap())
+	})
 	assert.NoError(t, err)
 	assert.Equal(t, "x:\n  z: abc\n\"y\": 25", out)
 }
@@ -247,10 +268,10 @@ func TestTemplateFuncDom2Yaml(t *testing.T) {
 		},
 	} {
 		var res string
-		res, err = renderTemplate(`{{ mergeFiles ( glob ( printf "%s/*.yaml" .Temp ) ) | dom2`+tc.format+` | trim }}`,
+		res, err = DefaultTemplateEngine().Render(`{{ mergeFiles ( glob ( printf "%s/*.yaml" .Temp ) ) | dom2`+tc.format+` | trim }}`,
 			map[string]interface{}{
 				"Temp": d,
-			}, sprig.HermeticTxtFuncMap())
+			})
 		t.Logf("Merged content using format '%s':\n%s", tc.format, res)
 		assert.NoError(t, err)
 		assert.Contains(t, res, tc.exp)
@@ -309,11 +330,36 @@ func TestTemplateFuncFileGlob(t *testing.T) {
 		files []string
 		err   error
 	)
-	files, err = fileGlobFunc("../testdata")
+	files, err = fileGlobFunc("../../testdata")
 	assert.NoError(t, err)
 	assert.True(t, len(files) > 0)
 
 	files, err = fileGlobFunc("../non-existent")
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(files))
+}
+
+func TestBoolExpressionEval(t *testing.T) {
+	var (
+		val bool
+		err error
+	)
+	te := &templateEngine{
+		fm: sprig.TxtFuncMap(),
+	}
+	expr := `{{ eq .Env "Development" }}`
+	val, err = te.EvalBool(expr, map[string]interface{}{
+		"Env": "Development",
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, true, val)
+
+	val, err = te.EvalBool(expr, map[string]interface{}{
+		"Env": "Production",
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, false, val)
+
+	_, err = te.EvalBool(`{{`, map[string]interface{}{})
+	assert.Error(t, err)
 }

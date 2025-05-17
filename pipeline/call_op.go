@@ -47,7 +47,7 @@ func (c *CallOp) Do(ctx ActionContext) error {
 		ap = *c.ArgsPath
 	}
 	ap = ctx.TemplateEngine().RenderLenient(ap, snap)
-	if spec, exists := ctx.Ext().Get(c.Name); !exists {
+	if spec, exists := ctx.Ext().GetAction(c.Name); !exists {
 		return fmt.Errorf("callable '%s' is not registered", c.Name)
 	} else {
 		ctx.Data().AddValueAt(ap, dom.DefaultNodeDecoderFn(
