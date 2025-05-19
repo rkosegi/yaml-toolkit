@@ -31,7 +31,7 @@ func (e *ExtOp) String() string {
 
 func (e *ExtOp) Do(ctx ActionContext) error {
 	if fn := ctx.Ext().GetActionFactory(e.Function); fn != nil {
-		return ctx.Executor().Execute(fn.NewForArgs(e.Args))
+		return ctx.Executor().Execute(fn.ForArgs(ctx, e.Args))
 	}
 	return fmt.Errorf("no such function: %s", e.Function)
 }

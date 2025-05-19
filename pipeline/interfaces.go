@@ -141,6 +141,6 @@ type Cloneable interface {
 
 // ActionFactory can be used to create instances of Action
 type ActionFactory interface {
-	// NewForArgs creates new instance of Action for given set of arguments.
-	NewForArgs(args StrKeysAnyValues) Action
+	// ForArgs creates instance of Action for given set of arguments.
+	ForArgs(ctx ClientContext, args StrKeysAnyValues) Action
 }

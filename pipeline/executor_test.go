@@ -30,7 +30,7 @@ type dummyActFactory struct {
 	act Action
 }
 
-func (d *dummyActFactory) NewForArgs(StrKeysAnyValues) Action {
+func (d *dummyActFactory) ForArgs(ClientContext, StrKeysAnyValues) Action {
 	return d.act
 }
 
