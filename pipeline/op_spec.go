@@ -42,6 +42,9 @@ type OpSpec struct {
 	// Call calls previously defined callable
 	Call *CallOp `yaml:"call,omitempty"`
 
+	// Convert can convert leaf value to specific format.
+	Convert *ConvertOp `yaml:"convert,omitempty"`
+
 	// Define defines callable ActionSpec
 	Define *DefineOp `yaml:"define,omitempty"`
 
