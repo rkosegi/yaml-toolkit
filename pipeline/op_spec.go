@@ -73,7 +73,7 @@ type OpSpec struct {
 	Abort *AbortOp `yaml:"abort,omitempty"`
 
 	// Html2Dom can be used to process HTML source into DOM
-	Html2Dom *Html2DomOp `yaml:"html2DomOp,omitempty"`
+	Html2Dom *Html2DomOp `yaml:"html2dom,omitempty"`
 }
 
 func (as OpSpec) toList() []Action {
