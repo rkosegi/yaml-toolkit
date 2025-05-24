@@ -54,7 +54,7 @@ func (pv *AnyVal) Value() dom.Node {
 // If Path references non-existent node, or node pointed to is not a dom.Leaf, empty value is returned
 type ValOrRef struct {
 	isRef bool
-	// Ref is resolved reference, is any
+	// Ref is resolved reference, if any
 	Ref string
 	// Val is value of dom.Leaf pointed to by ref after Resolve(ctx) has been called, or immediate value
 	// if Ref is empty
