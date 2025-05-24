@@ -55,8 +55,9 @@ type Html2DomOp struct {
 	// From is path within the global data to the leaf node where XML source is stored as string.
 	From string `yaml:"from" clone:"template"`
 	// Query is optional xpath expression to use to extract subset from source XML document.
+	// Only first matching node is taken into account.
 	// When omitted, then whole document is used.
-	Query *string `yaml:"query"`
+	Query *ValOrRef `yaml:"query"`
 	// To is destination where to put converted document as dom.Container.
 	To string `yaml:"to" clone:"template"`
 	// Layout defines how HTML data are put into DOM
@@ -64,13 +65,17 @@ type Html2DomOp struct {
 }
 
 func (x *Html2DomOp) String() string {
-	return fmt.Sprintf("Html2DomOp[from=%s,to=%s]", x.From, x.To)
+	return fmt.Sprintf("Html2Dom[from=%s,to=%s, query=%v]", x.From, x.To, x.Query)
 }
 
 func (x *Html2DomOp) Do(ctx ActionContext) error {
 	ss := ctx.Snapshot()
 	from := ctx.TemplateEngine().RenderLenient(x.From, ss)
 	to := ctx.TemplateEngine().RenderLenient(x.To, ss)
+	var qry string
+	if x.Query != nil {
+		qry = x.Query.Resolve(ctx)
+	}
 	if len(from) == 0 {
 		return errors.New("'from' is empty")
 	}
@@ -81,7 +86,7 @@ func (x *Html2DomOp) Do(ctx ActionContext) error {
 	if fromNode == nil || !fromNode.IsLeaf() {
 		return fmt.Errorf("cannot find leaf node at '%s'", from)
 	}
-	htmlData := fromNode.(dom.Leaf).Value().(string)
+	htmlData := fromNode.AsLeaf().Value().(string)
 	var (
 		err      error
 		buff     bytes.Buffer
@@ -100,8 +105,8 @@ func (x *Html2DomOp) Do(ctx ActionContext) error {
 	_, _ = buff.WriteString(htmlData)
 	// TODO: how can parse return an error?
 	srcNode, _ = htmlquery.Parse(&buff)
-	if x.Query != nil {
-		srcNode, err = htmlquery.Query(srcNode, *x.Query)
+	if len(qry) != 0 {
+		srcNode, err = htmlquery.Query(srcNode, qry)
 	}
 	if err != nil {
 		return err
