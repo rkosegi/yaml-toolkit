@@ -53,12 +53,12 @@ func TestHtml2Dom(t *testing.T) {
 		{
 			From:  "html1",
 			To:    "to",
-			Query: ptr("////not a valid xpath"),
+			Query: &ValOrRef{Val: "////not a valid xpath"},
 		},
 		{
 			From:  "html1",
 			To:    "to",
-			Query: ptr("//non-existent-node/bla"),
+			Query: &ValOrRef{Val: "//non-existent-node/bla"},
 		},
 	} {
 		assert.Error(t, ctx.Executor().Execute(ic))
@@ -67,7 +67,7 @@ func TestHtml2Dom(t *testing.T) {
 	err = ctx.Executor().Execute(&Html2DomOp{
 		From:  "html2",
 		To:    "Result.Out",
-		Query: ptr("//span[@class='panel1']"),
+		Query: &ValOrRef{Val: "//span[@class='panel1']"},
 	})
 	assert.NoError(t, err)
 	assert.Equal(t, "panel1", d.Lookup("Result.Out.span.Attrs.class").(dom.Leaf).Value())
