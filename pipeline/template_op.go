@@ -18,6 +18,7 @@ package pipeline
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
@@ -31,6 +32,10 @@ const (
 	ParseTextAsNone ParseTextAs = "none"
 	// ParseTextAsYaml parse text as a YAML source into dom.Node
 	ParseTextAsYaml ParseTextAs = "yaml"
+	// ParseTextAsFloat64 parse text as float64 number into dom.Leaf
+	ParseTextAsFloat64 ParseTextAs = "float64"
+	// ParseTextAsInt64 parse text as int64 number into dom.Leaf
+	ParseTextAsInt64 ParseTextAs = "int64"
 )
 
 // TemplateOp can be used to render value from data at runtime.
@@ -59,6 +64,9 @@ func (ts *TemplateOp) Do(ctx ActionContext) error {
 	}
 	ss := ctx.Snapshot()
 	val, err := ctx.TemplateEngine().Render(ts.Template, ss)
+	if err != nil {
+		return err
+	}
 	if safeBoolDeref(ts.Trim) {
 		val = strings.TrimSpace(val)
 	}
@@ -75,6 +83,20 @@ func (ts *TemplateOp) Do(ctx ActionContext) error {
 		node = dom.YamlNodeDecoder()(&yn)
 	case ParseTextAsNone:
 		node = dom.LeafNode(val)
+	case ParseTextAsFloat64:
+		var x float64
+		if x, err = strconv.ParseFloat(val, 64); err != nil {
+			return err
+		} else {
+			node = dom.LeafNode(x)
+		}
+	case ParseTextAsInt64:
+		var x int64
+		if x, err = strconv.ParseInt(val, 10, 64); err != nil {
+			return err
+		} else {
+			node = dom.LeafNode(x)
+		}
 	default:
 		return fmt.Errorf("unknown ParseAs mode: %v", *ts.ParseAs)
 	}

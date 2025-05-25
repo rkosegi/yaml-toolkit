@@ -122,3 +122,55 @@ func TestExecuteTemplateOpAsInvalid(t *testing.T) {
 		ParseAs:  ptr(ParseTextAs("invalid")),
 	}))
 }
+
+func TestExecuteTemplateOpAsFloat64(t *testing.T) {
+	var (
+		gd  dom.ContainerBuilder
+		ts  *TemplateOp
+		err error
+	)
+	gd = b.Container()
+	ts = &TemplateOp{
+		Template: `{{ maxf 1.5 3 4.5 }}`,
+		Path:     "Out",
+		ParseAs:  ptr(ParseTextAsFloat64),
+	}
+	err = New(WithData(gd)).Execute(ts)
+	assert.NoError(t, err)
+	assert.Equal(t, 4.5, gd.Lookup("Out").(dom.Leaf).Value())
+
+	gd.AddValueAt("X", dom.LeafNode("Ou"))
+	ts = &TemplateOp{
+		Template: `XYZ`,
+		Path:     "Out",
+		ParseAs:  ptr(ParseTextAsFloat64),
+	}
+	err = New(WithData(gd)).Execute(ts)
+	assert.Error(t, err)
+}
+
+func TestExecuteTemplateOpAsInt64(t *testing.T) {
+	var (
+		gd  dom.ContainerBuilder
+		ts  *TemplateOp
+		err error
+	)
+	gd = b.Container()
+	ts = &TemplateOp{
+		Template: `{{ max 1 3 5 }}`,
+		Path:     "Out",
+		ParseAs:  ptr(ParseTextAsInt64),
+	}
+	err = New(WithData(gd)).Execute(ts)
+	assert.NoError(t, err)
+	assert.Equal(t, int64(5), gd.Lookup("Out").(dom.Leaf).Value())
+
+	gd.AddValueAt("X", dom.LeafNode("Ou"))
+	ts = &TemplateOp{
+		Template: `XYZ`,
+		Path:     "Out",
+		ParseAs:  ptr(ParseTextAsInt64),
+	}
+	err = New(WithData(gd)).Execute(ts)
+	assert.Error(t, err)
+}
