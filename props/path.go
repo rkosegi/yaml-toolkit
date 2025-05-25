@@ -17,48 +17,116 @@ limitations under the License.
 package props
 
 import (
-	"fmt"
+	"io"
 	"strings"
 
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
-type PathSegment struct {
-	Index int
-	IsNum bool
-	Value string
+type pathSupport struct {
+	// delimiter, usually '.'
+	d rune
 }
 
-type Path []PathSegment
+func (p *pathSupport) MustParse(s string) path.Path {
+	return p.mustParse(strings.NewReader(s))
+}
 
-func (ps PathSegment) String() string {
-	if ps.IsNum {
-		return fmt.Sprintf("%d", ps.Index)
+func (p *pathSupport) mustParse(r io.RuneReader) path.Path {
+	if x, err := p.parse(r); err != nil {
+		panic(err)
 	} else {
-		return ps.Value
+		return x
 	}
 }
 
-// ParsePath parses path specification in string form into Path.
-func ParsePath(raw string) Path {
-	q := Path{}
-	raw = strings.TrimFunc(strings.TrimSpace(raw), func(r rune) bool {
-		return r == '.'
-	})
-	parts := strings.Split(raw, ".")
-
-	for _, c := range parts {
-		if n, idxes, ok := utils.ParseListPathComponent(c); ok {
-			q = append(q, PathSegment{Value: n})
-			for _, idx := range idxes {
-				q = append(q, PathSegment{
-					Index: idx,
-					IsNum: true,
-				})
+func (p *pathSupport) parse(r io.RuneReader) (path.Path, error) {
+	prev := rune(0)
+	sb := strings.Builder{}
+	segments := make([]string, 0)
+	for {
+		if c, _, err := r.ReadRune(); err != nil {
+			if err == io.EOF {
+				// don't append empty component
+				t := strings.ReplaceAll(sb.String(), "\\.", ".")
+				if len(t) > 0 {
+					segments = append(segments, t)
+					// b.Append(path.Simple(t))
+				}
+				break
+			} else {
+				return nil, err
 			}
 		} else {
-			q = append(q, PathSegment{Value: c})
+			if c == p.d {
+				if prev == '\\' {
+					// escaped delimiter is just a part of path component
+					sb.WriteRune(p.d)
+					prev = c
+				} else {
+					// flush current component to builder and reset state
+					segments = append(segments, sb.String())
+					sb.Reset()
+					prev = rune(0)
+				}
+			} else {
+				sb.WriteRune(c)
+				prev = c
+			}
 		}
 	}
-	return q
+	b := path.NewBuilder()
+	for _, seg := range segments {
+		if n, idxes, isListItem := utils.ParseListPathComponent(seg); isListItem {
+			b.Append(path.Simple(n))
+			for _, idx := range idxes {
+				b.Append(path.Numeric(idx))
+			}
+		} else {
+			b.Append(path.Simple(seg))
+		}
+	}
+	return b.Build(), nil
+}
+func (p *pathSupport) Parse(s string) (path.Path, error) {
+	return p.parse(strings.NewReader(s))
+}
+
+func (p *pathSupport) Serialize(in path.Path) string {
+	var sb strings.Builder
+	cp := in.Components()
+	lastIdx := len(cp) - 1
+
+	for idx, c := range cp {
+		nextIsNum := false
+		if idx+1 < len(cp) && cp[idx+1].IsNumeric() {
+			nextIsNum = true
+		}
+		if c.IsNumeric() {
+			sb.WriteRune('[')
+			sb.WriteString(c.Value())
+			sb.WriteRune(']')
+		} else {
+			sb.WriteString(c.Value())
+		}
+		if idx < lastIdx && !nextIsNum {
+			sb.WriteRune(p.d)
+		}
+	}
+	return sb.String()
+}
+
+func newPathSupport(delim rune) *pathSupport {
+	return &pathSupport{
+		d: delim,
+	}
+}
+
+func NewPathParser() path.Parser {
+	return newPathSupport('.')
+}
+
+func NewPathSerializer() path.Serializer {
+	return newPathSupport('.')
 }
