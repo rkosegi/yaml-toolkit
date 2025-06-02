@@ -41,13 +41,13 @@ repos:
         args:
           - -c=.yamllint-config.yaml
   - repo: https://github.com/santhosh-tekuri/jsonschema
-    rev: cmd/jv/v0.7.0
+    rev: v6.0.2
     hooks:
       - id: jsonschema-validate
         files: testdata/pipeline.*\.yaml
         args:
           - schemas/pipeline.json
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.26.0
+    rev: v8.27.0
     hooks:
       - id: gitleaks
