@@ -73,6 +73,10 @@ type OpSpec struct {
 	Html2Dom *Html2DomOp `yaml:"html2dom,omitempty"`
 }
 
+func (as OpSpec) IsEmpty() bool {
+	return len(as.toList()) == 0
+}
+
 func (as OpSpec) toList() []Action {
 	actions := make([]Action, 0)
 	asv := reflect.ValueOf(as)

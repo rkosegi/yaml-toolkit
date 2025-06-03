@@ -19,6 +19,7 @@ package pipeline
 import (
 	"fmt"
 
+	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/fluent"
 	te "github.com/rkosegi/yaml-toolkit/pipeline/template_engine"
@@ -74,6 +75,9 @@ func (p *exec) newServiceCtx() *clientCtx {
 
 func (p *exec) Execute(act Action) (err error) {
 	ctx := p.newActionCtx(act)
+	if emptyCheck, ok := act.(common.EmptyChecker); ok && emptyCheck.IsEmpty() {
+		return nil
+	}
 	p.l.OnBefore(ctx)
 	err = act.Do(ctx)
 	p.l.OnAfter(ctx, err)
