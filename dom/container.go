@@ -38,8 +38,7 @@ type containerImpl struct {
 }
 
 func flattenLeaf(node Leaf, path string, ret *map[string]Leaf) {
-	m := *ret
-	m[path] = node
+	(*ret)[path] = node
 }
 
 func flattenList(node List, path string, ret *map[string]Leaf) {
