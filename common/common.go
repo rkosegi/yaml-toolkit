@@ -58,6 +58,12 @@ func DefaultFileDecoderProvider(file string) dom.DecoderFunc {
 	}
 }
 
+// EmptyChecker interface can be used to check is implementing struct is "empty".
+type EmptyChecker interface {
+	// IsEmpty returns true if this instance is "empty".
+	IsEmpty() bool
+}
+
 type StringPredicateFn func(string) bool
 
 var (
