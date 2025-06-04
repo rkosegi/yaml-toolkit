@@ -111,9 +111,9 @@ func (e *ExportOp) Do(ctx ActionContext) (err error) {
 		if !d.IsLeaf() {
 			return fmt.Errorf("unsupported node for 'text' format: %v", d)
 		}
-		return enc(f, d.(dom.Leaf).Value())
+		return enc(f, d.AsLeaf().Value())
 	}
-	return enc(f, dom.DefaultNodeEncoderFn(d.(dom.Container)))
+	return enc(f, dom.DefaultNodeEncoderFn(d.AsContainer()))
 }
 
 func (e *ExportOp) CloneWith(ctx ActionContext) Action {

@@ -52,7 +52,7 @@ func (tfo *TemplateFileOp) Do(ctx ActionContext) error {
 	data = ctx.Data()
 	if tfo.Path != nil {
 		if n := ctx.Data().Lookup(*tfo.Path); n != nil && n.IsContainer() {
-			data = n.(dom.Container)
+			data = n.AsContainer()
 		} else {
 			return fmt.Errorf("path does not point to a container: %s", *tfo.Path)
 		}

@@ -127,7 +127,7 @@ func dom2propertiesFunc(c dom.Container) (string, error) {
 // Both of nodes must be of dom.Container type, otherwise result is empty slice
 func domDiffFunc(left, right dom.Node) ([]diff.Modification, error) {
 	if left != nil && left.IsContainer() && left.SameAs(right) {
-		return *diff.Diff(left.(dom.Container), right.(dom.Container)), nil
+		return *diff.Diff(left.AsContainer(), right.AsContainer()), nil
 	}
 	return []diff.Modification{}, nil
 }

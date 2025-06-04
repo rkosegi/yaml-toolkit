@@ -94,7 +94,7 @@ func (ia *ImportOp) Do(ctx ActionContext) error {
 		if !val.IsContainer() {
 			return ErrNotContainer
 		} else {
-			for k, v := range val.(dom.Container).Children() {
+			for k, v := range val.AsContainer().Children() {
 				ctx.Data().AddValueAt(k, v)
 				ctx.InvalidateSnapshot()
 			}

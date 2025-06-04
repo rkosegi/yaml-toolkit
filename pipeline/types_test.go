@@ -37,7 +37,7 @@ func TestAnyVal(t *testing.T) {
 	d1 := `v: 123`
 	err = yaml.Unmarshal([]byte(d1), &ts)
 	assert.NoError(t, err)
-	assert.Equal(t, "123", ts.V.Value().(dom.Leaf).Value())
+	assert.Equal(t, "123", ts.V.Value().AsLeaf().Value())
 	d2 := `
 v:
   a: 123
@@ -45,7 +45,7 @@ v:
 `
 	err = yaml.Unmarshal([]byte(d2), &ts)
 	assert.NoError(t, err)
-	assert.Equal(t, "123", ts.V.Value().(dom.Container).Child("a").(dom.Leaf).Value())
+	assert.Equal(t, "123", ts.V.Value().AsContainer().Child("a").AsLeaf().Value())
 }
 
 func TestValOrRef(t *testing.T) {

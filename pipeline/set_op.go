@@ -28,7 +28,7 @@ func setOpMergeIfContainersReplaceOtherwise(orig, other dom.ContainerBuilder) {
 	for k, v := range other.Children() {
 		origChild := orig.Child(k)
 		if origChild != nil && origChild.IsContainer() && v.IsContainer() {
-			orig.AddValue(k, origChild.(dom.ContainerBuilder).Merge(v.(dom.Container)))
+			orig.AddValue(k, origChild.(dom.ContainerBuilder).Merge(v.AsContainer()))
 		} else {
 			orig.AddValue(k, v)
 		}

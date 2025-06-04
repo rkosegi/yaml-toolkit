@@ -19,7 +19,6 @@ package pipeline
 import (
 	"testing"
 
-	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -80,7 +79,7 @@ func TestLoopOpSimple(t *testing.T) {
 	ac := newMockActBuilder().data(d).build()
 	err := op.Do(ac)
 	assert.NoError(t, err)
-	assert.Equal(t, "10", d.Lookup("i").(dom.Leaf).Value())
+	assert.Equal(t, "10", d.Lookup("i").AsLeaf().Value())
 }
 
 func TestLoopOpNegative(t *testing.T) {

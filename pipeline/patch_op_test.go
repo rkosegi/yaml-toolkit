@@ -46,7 +46,7 @@ func TestExecutePatchOp(t *testing.T) {
 		}),
 	}
 	assert.NoError(t, New(WithData(gd)).Execute(&ps))
-	assert.Equal(t, "xyz", gd.Lookup("root.sub1.leaf2").(dom.Leaf).Value())
+	assert.Equal(t, "xyz", gd.Lookup("root.sub1.leaf2").AsLeaf().Value())
 	assert.Contains(t, ps.String(), "Op=replace,Path=/root/sub1")
 
 	gd = b.Container()
@@ -57,7 +57,7 @@ func TestExecutePatchOp(t *testing.T) {
 		Path: "/root/sub2",
 	}
 	assert.NoError(t, New(WithData(gd)).Execute(&ps))
-	assert.Equal(t, "abcd", gd.Lookup("root.sub2.leaf3").(dom.Leaf).Value())
+	assert.Equal(t, "abcd", gd.Lookup("root.sub2.leaf3").AsLeaf().Value())
 
 	gd = b.Container()
 	gd.AddValueAt("root.sub1.leaf3", dom.LeafNode("abcd"))
@@ -95,5 +95,5 @@ func TestPatchOpAddValue(t *testing.T) {
 		ValueFrom: ptr("root.{{ .mypath }}"),
 	}
 	assert.NoError(t, New(WithData(gd)).Execute(&ps))
-	assert.Equal(t, "aaaa", gd.Lookup("root.sub.leaf3").(dom.Leaf).Value())
+	assert.Equal(t, "aaaa", gd.Lookup("root.sub.leaf3").AsLeaf().Value())
 }
