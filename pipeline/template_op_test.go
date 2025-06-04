@@ -38,7 +38,7 @@ func TestExecuteTemplateOp(t *testing.T) {
 		Trim:     ptr(true),
 	}
 	assert.NoError(t, New(WithData(gd)).Execute(&ts))
-	assert.Equal(t, "\"246912\"", gd.Lookup("result.x1").(dom.Leaf).Value())
+	assert.Equal(t, "\"246912\"", gd.Lookup("result.x1").AsLeaf().Value())
 	assert.Contains(t, ts.String(), "result.x1")
 
 	// empty template error
@@ -88,7 +88,7 @@ items:
 	}
 	err = New(WithData(gd)).Execute(&ts)
 	assert.NoError(t, err)
-	assert.Equal(t, 3, gd.Lookup("Out.items").(dom.List).Size())
+	assert.Equal(t, 3, gd.Lookup("Out.items").AsList().Size())
 
 	// 2, render using template function
 	gd = b.Container()
@@ -102,7 +102,7 @@ items:
 	}
 	err = New(WithData(gd)).Execute(&ts)
 	assert.NoError(t, err)
-	assert.Equal(t, 3, len(gd.Lookup("Out.items").(dom.List).Items()[0].(dom.Container).Children()))
+	assert.Equal(t, 3, len(gd.Lookup("Out.items").AsList().Items()[0].AsContainer().Children()))
 
 	// 3, render invalid
 	gd = b.Container()
@@ -137,7 +137,7 @@ func TestExecuteTemplateOpAsFloat64(t *testing.T) {
 	}
 	err = New(WithData(gd)).Execute(ts)
 	assert.NoError(t, err)
-	assert.Equal(t, 4.5, gd.Lookup("Out").(dom.Leaf).Value())
+	assert.Equal(t, 4.5, gd.Lookup("Out").AsLeaf().Value())
 
 	gd.AddValueAt("X", dom.LeafNode("Ou"))
 	ts = &TemplateOp{
@@ -163,7 +163,7 @@ func TestExecuteTemplateOpAsInt64(t *testing.T) {
 	}
 	err = New(WithData(gd)).Execute(ts)
 	assert.NoError(t, err)
-	assert.Equal(t, int64(5), gd.Lookup("Out").(dom.Leaf).Value())
+	assert.Equal(t, int64(5), gd.Lookup("Out").AsLeaf().Value())
 
 	gd.AddValueAt("X", dom.LeafNode("Ou"))
 	ts = &TemplateOp{

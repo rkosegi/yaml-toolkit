@@ -59,19 +59,19 @@ func (fea *ForEachOp) Do(ctx ActionContext) error {
 	} else if fea.Query != nil {
 		if n := ctx.Data().Lookup(fea.Query.Resolve(ctx)); n != nil {
 			if n.IsList() {
-				for _, item := range n.(dom.List).Items() {
+				for _, item := range n.AsList().Items() {
 					if err := fea.performWithItem(ctx, item); err != nil {
 						return err
 					}
 				}
 			} else if n.IsContainer() {
-				for item := range n.(dom.Container).Children() {
+				for item := range n.AsContainer().Children() {
 					if err := fea.performWithItem(ctx, dom.LeafNode(item)); err != nil {
 						return err
 					}
 				}
 			} else {
-				if err := fea.performWithItem(ctx, n.(dom.Leaf)); err != nil {
+				if err := fea.performWithItem(ctx, n.AsLeaf()); err != nil {
 					return err
 				}
 			}

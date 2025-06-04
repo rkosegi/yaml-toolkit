@@ -107,8 +107,8 @@ func TestExecute(t *testing.T) {
 			},
 		},
 	}))
-	assert.Equal(t, "abcd", gd.Lookup("leaf").(dom.Leaf).Value())
-	assert.Equal(t, "abcd", gd.Lookup("sub1.sub2.leaf").(dom.Leaf).Value())
+	assert.Equal(t, "abcd", gd.Lookup("leaf").AsLeaf().Value())
+	assert.Equal(t, "abcd", gd.Lookup("sub1.sub2.leaf").AsLeaf().Value())
 
 	gd = b.Container()
 	ex = newTestExec(gd)
@@ -130,7 +130,7 @@ func TestExecute(t *testing.T) {
 			},
 		},
 	}))
-	assert.Equal(t, "720", gd.Lookup("Results.Factorial").(dom.Leaf).Value())
+	assert.Equal(t, "720", gd.Lookup("Results.Factorial").AsLeaf().Value())
 
 }
 
@@ -153,7 +153,7 @@ func TestExecuteImport(t *testing.T) {
 			},
 		},
 	}))
-	assert.Equal(t, "abcdef", gd.Lookup("wrapped.root.sub1.leaf2").(dom.Leaf).Value())
+	assert.Equal(t, "abcdef", gd.Lookup("wrapped.root.sub1.leaf2").AsLeaf().Value())
 }
 
 func TestExecuteImportInvalid(t *testing.T) {
@@ -192,7 +192,7 @@ func TestExecutePatch(t *testing.T) {
 			},
 		},
 	}))
-	assert.Equal(t, "abcd", gd.Lookup("root.leaf").(dom.Leaf).Value())
+	assert.Equal(t, "abcd", gd.Lookup("root.leaf").AsLeaf().Value())
 }
 
 func TestExecuteInnerSteps(t *testing.T) {
@@ -237,7 +237,7 @@ func TestExecuteInnerSteps(t *testing.T) {
 			},
 		},
 	}))
-	assert.Equal(t, 456, gd.Lookup("root.sub").(dom.Leaf).Value())
+	assert.Equal(t, 456, gd.Lookup("root.sub").AsLeaf().Value())
 }
 
 func TestExecuteInnerStepsFail(t *testing.T) {
@@ -324,7 +324,7 @@ func TestExecuteForEachFileGlob(t *testing.T) {
 	}
 	ex.RegisterActionFactory("noop", &dummyActFactory{act: &noopOp{}})
 	assert.NoError(t, ex.Execute(ss))
-	assert.Equal(t, 2, len(gd.Lookup("import.files").(dom.Container).Children()))
+	assert.Equal(t, 2, len(gd.Lookup("import.files").AsContainer().Children()))
 	assert.Contains(t, fe.String(), "doc?.yaml")
 }
 

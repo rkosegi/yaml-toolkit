@@ -70,9 +70,9 @@ func TestHtml2Dom(t *testing.T) {
 		Query: &ValOrRef{Val: "//span[@class='panel1']"},
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, "panel1", d.Lookup("Result.Out.span.Attrs.class").(dom.Leaf).Value())
-	assert.Equal(t, "Click here", d.Lookup("Result.Out.span.span[2].a.Value").(dom.Leaf).Value())
-	assert.Equal(t, "http://localhost:8080/doc1", d.Lookup("Result.Out.span.span[2].a.Attrs.href").(dom.Leaf).Value())
+	assert.Equal(t, "panel1", d.Lookup("Result.Out.span.Attrs.class").AsLeaf().Value())
+	assert.Equal(t, "Click here", d.Lookup("Result.Out.span.span[2].a.Value").AsLeaf().Value())
+	assert.Equal(t, "http://localhost:8080/doc1", d.Lookup("Result.Out.span.span[2].a.Attrs.href").AsLeaf().Value())
 }
 
 func TestHtml2DomCloneWith(t *testing.T) {
