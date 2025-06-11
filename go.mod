@@ -21,7 +21,7 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/magiconair/properties v1.8.10
-	github.com/samber/lo v1.50.0
+	github.com/samber/lo v1.51.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/net v0.41.0
 	gopkg.in/yaml.v3 v3.0.1
