@@ -41,9 +41,9 @@ func (b *base) AsLeaf() Leaf {
 }
 
 func (b *base) AsContainer() Container {
-	panic("not a container" + b.Desc())
+	panic("not a container: " + b.Desc())
 }
 
 func (b *base) AsList() List {
-	panic("not a list" + b.Desc())
+	panic("not a list: " + b.Desc())
 }
