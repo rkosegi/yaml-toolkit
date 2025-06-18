@@ -215,6 +215,8 @@ type ContainerFactory interface {
 	FromMap(in map[string]interface{}) ContainerBuilder
 	// FromProperties is similar to FromMap except that keys are parsed into path before inserting into ContainerBuilder
 	FromProperties(in map[string]interface{}) ContainerBuilder
+	// From creates builder from Container
+	From(container Container) ContainerBuilder
 }
 
 // Coordinate is address of Node within OverlayDocument

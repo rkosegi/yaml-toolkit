@@ -314,6 +314,14 @@ func (c *containerBuilderImpl) RemoveAt(path string) ContainerBuilder {
 type containerFactory struct {
 }
 
+func (f *containerFactory) From(container Container) ContainerBuilder {
+	out := f.Container()
+	for k, v := range container.Flatten() {
+		out.AddValueAt(k, v)
+	}
+	return out
+}
+
 func (f *containerFactory) FromMap(in map[string]interface{}) ContainerBuilder {
 	return DefaultNodeDecoderFn(in).(ContainerBuilder)
 }

@@ -334,3 +334,13 @@ func TestContainerBuilderSeal(t *testing.T) {
 	_, isType := c.(ContainerBuilder)
 	assert.False(t, isType)
 }
+
+func TestContainerFactoryFrom(t *testing.T) {
+	data, err := os.ReadFile("../testdata/doc2.yaml")
+	assert.NoError(t, err)
+	doc, err := b.FromReader(bytes.NewReader(data), DefaultYamlDecoder)
+	assert.NoError(t, err)
+	out := b.From(doc)
+	assert.NotNil(t, out)
+	assert.True(t, out.Equals(doc))
+}
