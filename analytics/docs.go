@@ -19,6 +19,7 @@ limitations under the License.
 //
 //	1, placeholder resolution - attempts to resolve every property placeholder within documentSet.
 //	2, dependency resolution - counts references to every property in documentSet
+//  3, deduplication - find properties that are common in given documentSet
 //
 // Examples.
 //
