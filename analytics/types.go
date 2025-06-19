@@ -133,3 +133,15 @@ type DependencyResolutionReport struct {
 	// Mapping between any property key and coordinates
 	Map map[string]dom.Coordinates
 }
+
+type Deduplicator interface {
+	// FindCommon finds common properties (same keys and values) in given dom.OverlayDocument - in other words properties
+	// that are same in each document. If property is not found in just one document, it will not qualify.
+	// Result is assembled into dom.Container. Input DocumentSet remains untouched.
+	FindCommon(od dom.OverlayDocument) dom.Container
+
+	// Deduplicate works like FindCommon, but it produces
+	//  1) new dom.OverlayDocument with modified documents (with removed common properties)
+	//  2) document with common values only
+	Deduplicate(od dom.OverlayDocument) (dom.OverlayDocument, dom.Container)
+}
