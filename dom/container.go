@@ -327,11 +327,11 @@ func (f *containerFactory) FromMap(in map[string]interface{}) ContainerBuilder {
 }
 
 func (f *containerFactory) FromProperties(in map[string]interface{}) ContainerBuilder {
-	b := f.Container()
+	x := f.Container()
 	for k, v := range in {
-		b.AddValueAt(k, LeafNode(v))
+		x.AddValueAt(k, LeafNode(v))
 	}
-	return b
+	return x
 }
 
 func (f *containerFactory) Container() ContainerBuilder {
