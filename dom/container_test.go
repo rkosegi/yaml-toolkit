@@ -23,6 +23,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -116,6 +117,42 @@ func TestLookup(t *testing.T) {
 	assert.Nil(t, doc.Lookup(""))
 	assert.Nil(t, doc.Lookup("level1.level2b.level3"))
 	assert.Equal(t, "leaf1", doc.Lookup("level1.level2a.level3a").(Leaf).Value())
+}
+
+func TestGet(t *testing.T) {
+	doc := getTestDoc(t, "doc1")
+	assert.NotNil(t, doc.Get(path.NewBuilder().Append(path.Simple("level1")).Build()))
+	assert.Nil(t, doc.Get(path.NewBuilder().Append(path.Simple("level1a")).Build()))
+	assert.Nil(t, doc.Get(path.NewBuilder().Build()))
+	assert.Nil(t, doc.Get(path.NewBuilder().
+		Append(path.Simple("level1")).
+		Append(path.Simple("level2b")).
+		Append(path.Simple("level3")).
+		Build()))
+	assert.Equal(t, "leaf1", doc.Get(path.NewBuilder().
+		Append(path.Simple("level1")).
+		Append(path.Simple("level2a")).
+		Append(path.Simple("level3a")).
+		Build()).(Leaf).Value())
+}
+
+func TestDelete(t *testing.T) {
+	doc := getTestDoc(t, "doc1")
+	p := path.NewBuilder().
+		Append(path.Simple("level1")).
+		Append(path.Simple("level2a")).
+		Append(path.Simple("level3a")).Build()
+	assert.NotNil(t, doc.Get(p))
+	doc.Delete(p)
+	assert.Nil(t, doc.Get(p))
+}
+
+func TestGetWithDot(t *testing.T) {
+	c := b.Container()
+	c.Set(path.NewBuilder().Append(path.Simple("application.yaml")).Build(), LeafNode("/tmp/1.yaml"))
+	assert.Equal(t, "/tmp/1.yaml", c.Get(path.NewBuilder().Append(
+		path.Simple("application.yaml")).
+		Build()).(Leaf).Value())
 }
 
 func TestContainerAsMap(t *testing.T) {

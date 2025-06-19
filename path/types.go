@@ -17,6 +17,8 @@ limitations under the License.
 package path
 
 // Builder provides convenient way to construct Path using fluent builder pattern.
+// Existing instance of Builder can be re-used after calling Reset, otherwise
+// it will remember previously-added path components.
 type Builder interface {
 	// Append adds path component to the end of path.
 	Append(opts ...AppendOpt) Builder
