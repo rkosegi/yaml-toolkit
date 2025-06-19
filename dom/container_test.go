@@ -94,22 +94,23 @@ func TestRemove(t *testing.T) {
 	assert.Equal(t, "{}\n", buf.String())
 }
 
-func TestBuilderFromFile(t *testing.T) {
-	data, err := os.ReadFile("../testdata/doc1.yaml")
-	assert.Nil(t, err)
+func getTestDoc(t *testing.T, name string) ContainerBuilder {
+	data, err := os.ReadFile("../testdata/" + name + ".yaml")
+	assert.NoError(t, err)
 	doc, err := b.FromReader(bytes.NewReader(data), DefaultYamlDecoder)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
+	return doc
+}
+
+func TestBuilderFromFile(t *testing.T) {
+	doc := getTestDoc(t, "doc1")
 	assert.True(t, doc.IsContainer())
 	assert.Equal(t, "leaf1", doc.Child("level1").(Container).Child("level2a").(Container).Child("level3a").(Leaf).Value())
 	assert.Equal(t, 3, doc.Child("level1").(Container).Child("level2b").(Leaf).Value())
 }
 
 func TestLookup(t *testing.T) {
-	data, err := os.ReadFile("../testdata/doc1.yaml")
-	assert.Nil(t, err)
-	doc, err := b.FromReader(bytes.NewReader(data), DefaultYamlDecoder)
-	assert.Nil(t, err)
-
+	doc := getTestDoc(t, "doc1")
 	assert.NotNil(t, doc.Lookup("level1"))
 	assert.Nil(t, doc.Lookup("level1a"))
 	assert.Nil(t, doc.Lookup(""))
@@ -118,31 +119,19 @@ func TestLookup(t *testing.T) {
 }
 
 func TestContainerAsMap(t *testing.T) {
-	data, err := os.ReadFile("../testdata/doc1.yaml")
-	assert.Nil(t, err)
-	doc, err := b.FromReader(bytes.NewReader(data), DefaultYamlDecoder)
-	assert.Nil(t, err)
-	fm := doc.AsMap()
+	fm := getTestDoc(t, "doc1").AsMap()
 	assert.Equal(t, 1, len(fm))
 	assert.NotNil(t, fm["level1"])
 }
 
 func TestFlatten(t *testing.T) {
-	data, err := os.ReadFile("../testdata/doc1.yaml")
-	assert.Nil(t, err)
-	doc, err := b.FromReader(bytes.NewReader(data), DefaultYamlDecoder)
-	assert.Nil(t, err)
-	fm := doc.Flatten()
+	fm := getTestDoc(t, "doc1").Flatten()
 	assert.Equal(t, 5, len(fm))
 	assert.NotNil(t, fm["level1.level2b"])
 }
 
 func TestFlatten2(t *testing.T) {
-	data, err := os.ReadFile("../testdata/doc2.yaml")
-	assert.Nil(t, err)
-	doc, err := b.FromReader(bytes.NewReader(data), DefaultYamlDecoder)
-	assert.Nil(t, err)
-	fm := doc.Flatten()
+	fm := getTestDoc(t, "doc2").Flatten()
 	assert.Equal(t, 5, len(fm))
 	assert.Equal(t, LeafNode(1), fm["root[2][0]"])
 }
