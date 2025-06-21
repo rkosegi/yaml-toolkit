@@ -62,10 +62,6 @@ component/path:
   - changed-files:
       - any-glob-to-any-file:
           - path/*
-component/pipeline:
-  - changed-files:
-      - any-glob-to-any-file:
-          - pipeline/*
 component/props:
   - changed-files:
       - any-glob-to-any-file:
