@@ -17,19 +17,94 @@ limitations under the License.
 package props
 
 import (
+	"errors"
 	"testing"
 
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParsePath(t *testing.T) {
-	var p Path
-	p = ParsePath("a.b.c")
-	assert.Equal(t, 3, len(p))
-	assert.Equal(t, "a", p[0].String())
-	p = ParsePath("x[1].b.c[3]")
-	assert.Equal(t, 5, len(p))
-	assert.Equal(t, "x", p[0].String())
-	assert.Equal(t, "1", p[1].String())
-	assert.Equal(t, "b", p[2].String())
+type failingRuneReader struct {
+}
+
+func (f *failingRuneReader) ReadRune() (r rune, size int, err error) {
+	return 0, 0, errors.New("failing rune reader")
+}
+
+func TestPathParser(t *testing.T) {
+	var (
+		p   path.Path
+		err error
+	)
+
+	p, err = NewPathParser().Parse("root.part1.list[0].sub2")
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, 5, len(p.Components()))
+	assert.Equal(t, "sub2", p.Last().Value())
+
+	p, err = newPathSupport('.').Parse("root.files.application\\.yaml")
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, 3, len(p.Components()))
+	assert.Equal(t, "application.yaml", p.Last().Value())
+
+	_, err = newPathSupport('.').parse(&failingRuneReader{})
+	assert.Error(t, err)
+}
+
+func TestPathParserMustParseFail(t *testing.T) {
+	defer func() {
+		recover()
+	}()
+	newPathSupport('.').mustParse(&failingRuneReader{})
+	assert.Fail(t, "failing")
+}
+
+func TestPathParserMustParsePass(t *testing.T) {
+	p := NewPathParser().MustParse("root.part1.list[0].sub2")
+	assert.NotNil(t, p)
+	assert.Equal(t, 5, len(p.Components()))
+	assert.Equal(t, "sub2", p.Last().Value())
+}
+
+func TestPathParseSerialize(t *testing.T) {
+	var (
+		err error
+		x   path.Path
+	)
+	s := NewPathSerializer()
+	p := NewPathParser()
+
+	type testcase struct {
+		p    string
+		fail bool
+		c    int
+	}
+	for _, tc := range []testcase{
+		{
+			p:    "root.sub1",
+			fail: false,
+			c:    2,
+		},
+		{
+			p:    "root.list[1].sublist[3].sub4",
+			fail: false,
+			c:    6,
+		},
+		{
+			p:    "",
+			fail: false,
+			c:    0,
+		},
+	} {
+		x, err = p.Parse(tc.p)
+		if tc.fail {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
+			assert.Equal(t, tc.c, len(x.Components()))
+		}
+		assert.Equal(t, tc.p, s.Serialize(x))
+	}
 }

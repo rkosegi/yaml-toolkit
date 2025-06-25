@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/path"
 )
 
 type PathSegment string
@@ -172,4 +173,58 @@ func (p Path) Eval(target dom.Container) (dom.NodeList, dom.Node) {
 		}
 	}
 	return res, curr
+}
+
+type pathSupport struct{}
+
+func (ps pathSupport) Serialize(in path.Path) string {
+	if in.IsEmpty() {
+		return ""
+	}
+	var (
+		sb strings.Builder
+		pc path.Component
+	)
+	for _, pc = range in.Components() {
+		sb.WriteRune('/')
+		rps := []rune(pc.Value())
+		for i := 0; i < len(rps); i++ {
+			if rps[i] == '~' {
+				sb.WriteString("~0")
+			} else if rps[i] == '/' {
+				sb.WriteString("~1")
+			} else {
+				sb.WriteRune(rps[i])
+			}
+		}
+	}
+	return sb.String()
+}
+
+func (ps pathSupport) MustParse(s string) path.Path {
+	if x, err := ps.Parse(s); err != nil {
+		panic(err)
+	} else {
+		return x
+	}
+}
+
+func (ps pathSupport) Parse(in string) (path.Path, error) {
+	p, err := ParsePath(in)
+	if err != nil {
+		return nil, err
+	}
+	b := path.NewBuilder()
+	for _, pc := range p {
+		b.Append(path.Simple(string(pc)))
+	}
+	return b.Build(), nil
+}
+
+func NewPathParser() path.Parser {
+	return pathSupport{}
+}
+
+func NewPathSerializer() path.Serializer {
+	return pathSupport{}
 }

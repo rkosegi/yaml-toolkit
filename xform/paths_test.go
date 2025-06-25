@@ -24,6 +24,6 @@ import (
 )
 
 func TestPropPath2Pointer(t *testing.T) {
-	xp := PropPath2Pointer(props.ParsePath("root.sub1.list1[1][2].sub2.list2[3]"))
+	xp := PropPath2Pointer(props.NewPathParser().MustParse("root.sub1.list1[1][2].sub2.list2[3]"))
 	assert.Equal(t, "/root/sub1/list1/1/2/sub2/list2/3", xp.String())
 }

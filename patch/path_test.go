@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -140,4 +141,49 @@ func TestPathLastSegment(t *testing.T) {
 
 	p, _ = ParsePath("")
 	assert.Equal(t, "", string(p.LastSegment()))
+}
+
+func TestNewPathParser(t *testing.T) {
+	var (
+		p   path.Path
+		err error
+	)
+	p, err = NewPathParser().Parse("/x/y/z")
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+	assert.Equal(t, 3, len(p.Components()))
+	assert.Equal(t, "z", p.Last().Value())
+
+	p, err = NewPathParser().Parse("invalid")
+	assert.Error(t, err)
+	assert.Nil(t, p)
+}
+
+func TestPathParserMustParseFail(t *testing.T) {
+	defer func() {
+		recover()
+	}()
+	NewPathParser().MustParse("invalid")
+	assert.Fail(t, "should not be here")
+}
+
+func TestPathParserMustParsePass(t *testing.T) {
+	parser := NewPathParser()
+	for _, p := range []string{"/a/0"} {
+		x := parser.MustParse(p)
+		assert.NotNil(t, x)
+	}
+}
+
+func TestPathSerializer(t *testing.T) {
+	parser := NewPathParser()
+	ser := NewPathSerializer()
+	for _, p := range []string{"", "/a/0", "/~0", "/~1"} {
+		x, err := parser.Parse(p)
+		assert.NoError(t, err)
+		assert.NotNil(t, x)
+		p2 := ser.Serialize(x)
+		assert.Equal(t, p, p2)
+	}
+
 }

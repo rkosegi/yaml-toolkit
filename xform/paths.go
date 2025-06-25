@@ -21,21 +21,22 @@ import (
 	"strings"
 
 	"github.com/rkosegi/yaml-toolkit/patch"
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/rkosegi/yaml-toolkit/props"
 )
 
-func PropPath2Pointer(in props.Path) patch.Path {
+func PropPath2Pointer(in path.Path) patch.Path {
 	var r strings.Builder
-	for _, pc := range in {
-		if pc.IsNum {
-			r.WriteString(fmt.Sprintf("/%d", pc.Index))
+	for _, pc := range in.Components() {
+		if pc.IsNumeric() {
+			r.WriteString(fmt.Sprintf("/%d", pc.NumericValue()))
 		} else {
-			r.WriteString(fmt.Sprintf("/%s", pc.Value))
+			r.WriteString(fmt.Sprintf("/%s", pc.Value()))
 		}
 	}
 	return patch.MustParsePath(r.String())
 }
 
 func PointerFromPropPathString(raw string) patch.Path {
-	return PropPath2Pointer(props.ParsePath(raw))
+	return PropPath2Pointer(props.NewPathParser().MustParse(raw))
 }
