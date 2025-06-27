@@ -216,7 +216,7 @@ func (ps pathSupport) Parse(in string) (path.Path, error) {
 	}
 	b := path.NewBuilder()
 	for _, pc := range p {
-		b.Append(path.Simple(string(pc)))
+		b = b.Append(path.Simple(string(pc)))
 	}
 	return b.Build(), nil
 }

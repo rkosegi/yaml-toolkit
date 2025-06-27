@@ -19,15 +19,12 @@ package path
 // Builder provides convenient way to construct Path using fluent builder pattern.
 type Builder interface {
 	// Append adds path component to the end of path.
-	Append(opts ...AppendOpt) Builder
-
-	// Reset clears internal state of builder.
-	// Path instances created using this builder previously are unaffected by this operation.
-	Reset() Builder
+	// Builder state is cloned before adding component, so original builder instance is different from
+	// returned one.
+	Append(c Component) Builder
 
 	// Build creates Path using current state.
-	// It's safe to call this function multiple times or re-use it afterward,
-	// it will always create fresh Path everytime.
+	// Subsequent invocation of this function will always produce new Path instance, but with same content.
 	Build() Path
 }
 
@@ -43,10 +40,6 @@ type Component interface {
 	// Only valid if IsNumeric returns true.
 	NumericValue() int
 
-	// IsWildcard returns true if this path element represent wildcard match, ie equal to any value.
-	// This is used e.g. in property paths such as "x.y.z.*.w"
-	IsWildcard() bool
-
 	// Value returns canonical value of this component.
 	Value() string
 }
@@ -61,8 +54,6 @@ type Path interface {
 	// Last gets very last path Component, panics if path is empty.
 	Last() Component
 }
-
-type AppendOpt func(*component)
 
 // Parser interface is implemented by different Path syntax parsers.
 type Parser interface {
