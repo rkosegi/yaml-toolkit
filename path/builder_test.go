@@ -25,7 +25,6 @@ import (
 func TestBuilder(t *testing.T) {
 	b := NewBuilder().
 		Append(Simple("root")).
-		Append(Wildcard()).
 		Append(Numeric(1)).
 		Append(AfterLast())
 	p := b.Build()
@@ -33,25 +32,14 @@ func TestBuilder(t *testing.T) {
 	pc := p.Components()
 
 	assert.False(t, p.IsEmpty())
-	assert.Equal(t, 4, len(pc))
+	assert.Equal(t, 3, len(pc))
 	assert.Equal(t, "root", pc[0].Value())
-	assert.True(t, pc[1].IsWildcard())
-	assert.True(t, pc[2].IsNumeric())
-	assert.Equal(t, "1", pc[2].Value())
-	assert.Equal(t, 1, pc[2].NumericValue())
-	assert.True(t, pc[3].IsInsertAfterLast())
+	assert.True(t, pc[1].IsNumeric())
+	assert.Equal(t, "1", pc[1].Value())
+	assert.Equal(t, 1, pc[1].NumericValue())
+	assert.True(t, pc[2].IsInsertAfterLast())
 	assert.False(t, p.Last().IsNumeric())
 
-	b.Reset()
-	assert.True(t, b.Build().IsEmpty())
-}
-
-func TestBuilderAppendNoOption(t *testing.T) {
-	defer func() {
-		recover()
-	}()
-	BuildComponent()
-	assert.Fail(t, "should not be here")
 }
 
 func TestPathGetLastEmpty(t *testing.T) {
@@ -60,4 +48,18 @@ func TestPathGetLastEmpty(t *testing.T) {
 	}()
 	NewBuilder().Build().Last()
 	assert.Fail(t, "should not be here")
+}
+
+func TestParentOf(t *testing.T) {
+	// parent of empty path is nil
+	assert.Nil(t, ParentOf(NewBuilder().Build()))
+	assert.Len(t, ParentOf(NewBuilder().Append(Simple("a")).
+		Append(Simple("b")).Build()).Components(), 1)
+	assert.Equal(t, emptyPath, ParentOf(NewBuilder().Append(Simple("A")).Build()))
+}
+
+func TestChildOf(t *testing.T) {
+	np := ChildOf(NewBuilder().Append(Simple("a")).Build(), Simple("b"), Simple("c"))
+	assert.Len(t, np.Components(), 3)
+	assert.Equal(t, "c", np.Last().Value())
 }

@@ -20,7 +20,6 @@ type component struct {
 	value string
 	// rfc6901 - pointer after last list item "-"
 	afterLast bool
-	wildcard  bool
 	num       int
 	isNumeric bool
 }
@@ -35,10 +34,6 @@ func (c component) IsNumeric() bool {
 
 func (c component) NumericValue() int {
 	return c.num
-}
-
-func (c component) IsWildcard() bool {
-	return c.wildcard
 }
 
 func (c component) Value() string {

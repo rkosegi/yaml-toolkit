@@ -21,6 +21,7 @@ import (
 	"io"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/rkosegi/yaml-toolkit/utils"
 	"gopkg.in/yaml.v3"
 )
@@ -92,7 +93,7 @@ type Serializable interface {
 	Serialize(writer io.Writer, mappingFunc NodeEncoderFunc, encFn EncoderFunc) error
 }
 
-// Node is elemental unit of document. At runtime, it could be either Leaf or Container.
+// Node is elemental unit of document. At runtime, it could be either Leaf, List or Container.
 type Node interface {
 	// IsContainer returns true if this node is Container
 	IsContainer() bool
@@ -151,6 +152,8 @@ type Container interface {
 	Children() map[string]Node
 	// Child returns single child Node by its name
 	Child(name string) Node
+
+	// deprecated use Get()
 	// Lookup attempts to find child Node at given path
 	Lookup(path string) Node
 	// Flatten flattens this Container into list of leaves
@@ -162,6 +165,9 @@ type Container interface {
 	// Search finds all paths where Node's value is equal to given value according to provided SearchValueFunc.
 	// If no match is found, nil is returned.
 	Search(fn SearchValueFunc) []string
+
+	// Get gets value at given path.
+	Get(p path.Path) Node
 }
 
 // ContainerBuilder is mutable extension of Container
@@ -169,10 +175,11 @@ type ContainerBuilder interface {
 	Container
 	// AddValue adds Node value into this Container
 	AddValue(name string, value Node) ContainerBuilder
-	// AddValueAt adds Leaf value into this Container at given path.
+	// deprecated, use Set()
+	// AddValueAt adds Node into this Container at given path.
 	// Child nodes are creates as needed.
 	AddValueAt(path string, value Node) ContainerBuilder
-	// AddContainer adds child Container into this Container
+	// AddContainer adds child Container into this Container and returns it to caller
 	AddContainer(name string) ContainerBuilder
 	// AddList adds child List into this Container
 	AddList(name string) ListBuilder
@@ -186,6 +193,16 @@ type ContainerBuilder interface {
 	Merge(other Container, opts ...MergeOption) ContainerBuilder
 	// Seal seals the builder so that returning object will be immutable
 	Seal() Container
+
+	// Set sets node at given path.
+	// Child nodes are creates as needed.
+	// Upon success, this function return this ContainerBuilder to allow chaining.
+	Set(p path.Path, node Node) ContainerBuilder
+
+	// Delete removes node at given path.
+	// If no such node exist, this function is no-op.
+	// Upon success, this function return this ContainerBuilder to allow chaining.
+	Delete(p path.Path) ContainerBuilder
 }
 
 type WalkFn func(path string, parent ContainerBuilder, node Node) bool
