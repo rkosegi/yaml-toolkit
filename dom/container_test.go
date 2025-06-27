@@ -23,6 +23,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -325,11 +326,26 @@ func TestContainerBuilderSeal(t *testing.T) {
 }
 
 func TestContainerFactoryFrom(t *testing.T) {
-	data, err := os.ReadFile("../testdata/doc2.yaml")
-	assert.NoError(t, err)
-	doc, err := b.FromReader(bytes.NewReader(data), DefaultYamlDecoder)
-	assert.NoError(t, err)
+	doc := getTestDoc(t, "doc2")
 	out := b.From(doc)
 	assert.NotNil(t, out)
 	assert.True(t, out.Equals(doc))
+}
+
+func TestContainerBuilderSet(t *testing.T) {
+	a := b.Container()
+	p := path.NewBuilder().Append(path.Simple("a")).Append(path.Simple("b")).Build()
+	a.Set(p, LeafNode(1))
+	assert.Equal(t, 1, a.Child("a").AsContainer().Child("b").AsLeaf().Value())
+}
+
+func TestContainerBuilderDelete(t *testing.T) {
+	a := getTestDoc(t, "doc1")
+	p := path.NewBuilder().
+		Append(path.Simple("level1")).
+		Append(path.Simple("level2b")).
+		Build()
+	assert.Equal(t, 3, a.Get(p).AsLeaf().Value())
+	a.Delete(p)
+	assert.Nil(t, a.Get(p))
 }

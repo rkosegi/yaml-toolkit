@@ -17,23 +17,20 @@ limitations under the License.
 package path
 
 type builder struct {
-	components []component
+	components []Component
 }
 
-func (b *builder) Reset() Builder {
-	b.components = nil
-	return b
-}
+var emptyPath = &path{}
 
 func (b *builder) Build() Path {
-	c := make([]component, len(b.components))
-	copy(c, b.components)
-	return &path{components: c}
+	return &path{components: b.components}
 }
 
-func (b *builder) Append(opts ...AppendOpt) Builder {
-	b.components = append(b.components, *buildComponent(opts...))
-	return b
+func (b *builder) Append(c Component) Builder {
+	cs := make([]Component, len(b.components))
+	copy(cs, b.components)
+	cs = append(b.components, c)
+	return &builder{components: cs}
 }
 
 // NewBuilder creates new Builder
@@ -41,17 +38,25 @@ func NewBuilder() Builder {
 	return &builder{}
 }
 
-func buildComponent(opts ...AppendOpt) *component {
-	if len(opts) == 0 {
-		panic("no append option provided by caller")
+// ParentOf returns Path with last component stripped out.
+// If given Path is empty, nil is returned.
+func ParentOf(p Path) Path {
+	switch len(p.Components()) {
+	case 0:
+		return nil
+	case 1:
+		return emptyPath
+	default:
+		c := make([]Component, len(p.(*path).components)-1)
+		copy(c, p.(*path).components[:len(p.(*path).components)-1])
+		return &path{components: c}
 	}
-	c := &component{}
-	for _, opt := range opts {
-		opt(c)
-	}
-	return c
 }
 
-func BuildComponent(opts ...AppendOpt) Component {
-	return buildComponent(opts...)
+// ChildOf creates path based on parent Path with additional child path Components.
+func ChildOf(parent Path, cps ...Component) Path {
+	cs := make([]Component, len(parent.(*path).components))
+	copy(cs, parent.(*path).components)
+	cs = append(cs, cps...)
+	return &path{components: cs}
 }

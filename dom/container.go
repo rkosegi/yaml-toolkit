@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
@@ -167,6 +168,10 @@ func (c *containerImpl) Lookup(path string) Node {
 	return current.Child(pc[len(pc)-1])
 }
 
+func (c *containerImpl) Get(p path.Path) Node {
+	return getFromNode(c, p)
+}
+
 func (c *containerImpl) Clone() Node {
 	c2 := initContainer()
 	c2.ensureChildren()
@@ -233,6 +238,16 @@ func (c *containerBuilderImpl) AddContainer(name string) ContainerBuilder {
 	cb := initContainerBuilder()
 	c.add(name, cb)
 	return cb
+}
+
+func (c *containerBuilderImpl) Set(p path.Path, node Node) ContainerBuilder {
+	applyToNode(c, p, node)
+	return c
+}
+
+func (c *containerBuilderImpl) Delete(p path.Path) ContainerBuilder {
+	removeFromNode(c, p)
+	return c
 }
 
 func ensureList(name string, parent ContainerBuilder) (ListBuilder, uint, string) {

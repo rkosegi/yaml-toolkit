@@ -19,7 +19,7 @@ package path
 import "strconv"
 
 type path struct {
-	components []component
+	components []Component
 }
 
 func (p path) Last() Component {
@@ -35,39 +35,28 @@ func (p path) IsEmpty() bool {
 
 func (p path) Components() []Component {
 	c := make([]Component, len(p.components))
-	for i := range p.components {
-		c[i] = p.components[i]
-	}
+	copy(c, p.components)
 	return c
 }
 
-func AfterLast() AppendOpt {
-	return func(c *component) {
-		c.afterLast = true
-		c.value = "-"
+func AfterLast() Component {
+	return &component{
+		afterLast: true,
+		value:     "-",
 	}
 }
 
-func Wildcard() AppendOpt {
-	return func(c *component) {
-		c.wildcard = true
-		c.isNumeric = false
-		c.afterLast = false
+func Numeric(val int) Component {
+	return &component{
+		value:     strconv.Itoa(val),
+		isNumeric: true,
+		afterLast: false,
+		num:       val,
 	}
 }
 
-func Numeric(val int) AppendOpt {
-	return func(c *component) {
-		c.value = strconv.Itoa(val)
-		c.isNumeric = true
-		c.wildcard = false
-		c.afterLast = false
-		c.num = val
-	}
-}
-
-func Simple(value string) AppendOpt {
-	return func(c *component) {
-		c.value = value
+func Simple(value string) Component {
+	return &component{
+		value: value,
 	}
 }
