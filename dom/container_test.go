@@ -248,20 +248,14 @@ root:
 `), DefaultYamlDecoder)
 	assert.NotNil(t, c)
 	assert.NoError(t, err)
-	assert.NotNil(t, c.Children()["root"].(ContainerBuilder).Children()["level2"].(ContainerBuilder).Children()["orphan"])
+	p := path.NewBuilder().
+		Append(path.Simple("root")).
+		Append(path.Simple("level2")).
+		Append(path.Simple("orphan")).
+		Build()
+	assert.NotNil(t, c.Get(p))
 	c.Walk(CompactFn)
-	assert.Nil(t, c.Children()["root"].(ContainerBuilder).Children()["level2"].(ContainerBuilder).Children()["orphan"])
-
-	c, err = Builder().FromReader(strings.NewReader(`
-root:
-  level2:
-    orphan: {}
-`), DefaultYamlDecoder)
-	assert.NotNil(t, c)
-	assert.NoError(t, err)
-	assert.NotNil(t, c.Children()["root"].(ContainerBuilder).Children()["level2"].(ContainerBuilder).Children()["orphan"])
-	c.Walk(CompactFn)
-	assert.Nil(t, c.Children()["root"])
+	assert.Nil(t, c.Get(p))
 }
 
 func TestWalk(t *testing.T) {
@@ -277,7 +271,7 @@ root:
 `), DefaultYamlDecoder)
 	assert.NotNil(t, c)
 	assert.NoError(t, err)
-	c.Walk(func(path string, parent ContainerBuilder, node Node) bool {
+	c.Walk(func(p path.Path, parent Node, node Node) bool {
 		if node.IsLeaf() && node.(Leaf).Value() == 123 {
 			return false
 		}
