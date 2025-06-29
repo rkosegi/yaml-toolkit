@@ -228,6 +228,7 @@ var (
 )
 
 type ContainerFactory interface {
+	// deprecated, use ContainerNode()
 	// Container creates empty ContainerBuilder
 	Container() ContainerBuilder
 	// FromReader creates ContainerBuilder pre-populated with data from provided io.Reader and DecoderFunc

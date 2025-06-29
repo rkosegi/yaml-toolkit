@@ -346,7 +346,7 @@ func (f *containerFactory) FromProperties(in map[string]interface{}) ContainerBu
 }
 
 func (f *containerFactory) Container() ContainerBuilder {
-	return initContainerBuilder()
+	return ContainerNode()
 }
 
 func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBuilder, error) {
@@ -360,4 +360,9 @@ func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBui
 
 func Builder() ContainerFactory {
 	return b
+}
+
+// ContainerNode creates new ContainerBuilder
+func ContainerNode() ContainerBuilder {
+	return initContainerBuilder()
 }
