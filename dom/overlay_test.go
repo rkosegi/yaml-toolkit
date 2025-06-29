@@ -22,6 +22,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
@@ -173,20 +174,21 @@ func TestOverlayWalk(t *testing.T) {
 		LeafNode(3),
 	))
 	var cnt int
-	d.Walk(func(layer, path string, parent Node, node Node) bool {
-		t.Logf("layer=%s, path=%s, parent=%v, node=%v", layer, path, parent, node)
+	d.Walk(func(layer string, p path.Path, parent Node, node Node) bool {
+		t.Logf("layer=%s, path=%v, parent=%v, node=%v", layer, p, parent, node)
 		cnt++
-		if node.IsLeaf() && node.(Leaf).Value() == 2 {
+		if node.IsLeaf() && node.(Leaf).Value() == 1 {
 			t.Logf("Hit false condition, terminating walk")
 			return false
 		}
 		return true
 	})
-	assert.Equal(t, 3, cnt)
+	assert.Equal(t, 7, cnt)
 	cnt = 0
-	d.Walk(func(layer, path string, parent Node, node Node) bool {
+	d.Walk(func(layer string, p path.Path, parent Node, node Node) bool {
+		t.Logf("layer=%s, path=%v, parent=%v, node=%v", layer, p, parent, node)
 		cnt++
 		return true
 	})
-	assert.Equal(t, 4, cnt)
+	assert.Equal(t, 9, cnt)
 }

@@ -150,24 +150,33 @@ type Container interface {
 	Serializable
 	// Children returns mapping between child name and its corresponding Node
 	Children() map[string]Node
-	// Child returns single child Node by its name
-	Child(name string) Node
 
-	// deprecated use Get()
-	// Lookup attempts to find child Node at given path
-	Lookup(path string) Node
-	// Flatten flattens this Container into list of leaves
-	Flatten() map[string]Leaf
+	// Child returns single child Node by its name. If no such child exists, nil is returned.
+	Child(name string) Node
 
 	// AsMap converts recursively content of this container into map[string]interface{}
 	// Result consists from Go vanilla constructs only and thus could be directly used in Go templates.
 	AsMap() map[string]interface{}
-	// Search finds all paths where Node's value is equal to given value according to provided SearchValueFunc.
-	// If no match is found, nil is returned.
-	Search(fn SearchValueFunc) []string
 
 	// Get gets value at given path.
 	Get(p path.Path) Node
+
+	// Walk walks all child Nodes in BFS manner, until provided function return false, or all Nodes are processed.
+	// TODO: I want to use DFS as well. Maybe use custom Opt?
+	Walk(fn NodeVisitorFn)
+
+	// deprecated, use Walk
+	// Search finds all paths where Node's value is equal to given value according to provided SearchValueFunc.
+	// If no match is found, nil is returned.
+	Search(fn SearchValueFunc) []string
+	// deprecated use Get()
+	// Lookup attempts to find child Node at given path
+	Lookup(path string) Node
+	// deprecated
+	// Flatten flattens this Container into list of leaves
+	// returned map can break structure since it uses naive property syntax to serialize keys.
+	// Just try to add child Node anywhere with name that contains "."
+	Flatten() map[string]Leaf
 }
 
 // ContainerBuilder is mutable extension of Container
@@ -175,20 +184,12 @@ type ContainerBuilder interface {
 	Container
 	// AddValue adds Node value into this Container
 	AddValue(name string, value Node) ContainerBuilder
-	// deprecated, use Set()
-	// AddValueAt adds Node into this Container at given path.
-	// Child nodes are creates as needed.
-	AddValueAt(path string, value Node) ContainerBuilder
-	// AddContainer adds child Container into this Container and returns it to caller
+	// AddContainer adds child Container into this Container and returns it to caller.
 	AddContainer(name string) ContainerBuilder
-	// AddList adds child List into this Container
+	// AddList adds child List into this Container and returns it to caller.
 	AddList(name string) ListBuilder
 	// Remove removes direct child Node.
 	Remove(name string) ContainerBuilder
-	// RemoveAt removes child Node at given path.
-	RemoveAt(path string) ContainerBuilder
-	// Walk walks whole document tree, visiting every node
-	Walk(fn WalkFn)
 	// Merge creates new Container instance and merge current Container with other into it.
 	Merge(other Container, opts ...MergeOption) ContainerBuilder
 	// Seal seals the builder so that returning object will be immutable
@@ -203,20 +204,23 @@ type ContainerBuilder interface {
 	// If no such node exist, this function is no-op.
 	// Upon success, this function return this ContainerBuilder to allow chaining.
 	Delete(p path.Path) ContainerBuilder
+
+	// deprecated, use Set(path, node)
+	// AddValueAt adds Node into this Container at given path.
+	// Child nodes are creates as needed.
+	AddValueAt(path string, value Node) ContainerBuilder
+
+	// deprecated, use Delete(path)
+	// RemoveAt removes child Node at given path.
+	RemoveAt(path string) ContainerBuilder
 }
-
-type WalkFn func(path string, parent ContainerBuilder, node Node) bool
-
-// OverlayVisitorFn visits every node in OverlayDocument.
-// Returning false from this function will cause termination of process.
-type OverlayVisitorFn func(layer, path string, parent Node, node Node) bool
 
 var (
 	// CompactFn is WalkFn that you can use to compact document tree by removing empty containers.
-	CompactFn = func(path string, parent ContainerBuilder, node Node) bool {
+	CompactFn = func(p path.Path, parent Node, node Node) bool {
 		if node.IsContainer() {
 			if len(node.(ContainerBuilder).Children()) == 0 {
-				parent.Remove(path)
+				parent.(ContainerBuilder).Remove(p.Last().Value())
 			}
 		}
 		return true
@@ -264,6 +268,10 @@ type ListBuilder interface {
 // MergeOption is function used to customize merger behavior
 type MergeOption func(*merger)
 
+// OverlayVisitorFn visits every Node in each layer within the OverlayDocument.
+// Returning false from this function will terminate iteration in current layer.
+type OverlayVisitorFn func(layer string, p path.Path, parent Node, node Node) bool
+
 // OverlayDocument represents multiple documents layered over each other.
 // It allows lookup across all layers while respecting precedence
 type OverlayDocument interface {
@@ -289,6 +297,7 @@ type OverlayDocument interface {
 	Layers() map[string]Container
 	// LayerNames returns copy of list of all layer names, in insertion order
 	LayerNames() []string
-	// Walk walks every layer in this document and visits every node.
+	// Walk walks every layer in this document and visits every node in BFS manner.
+	// TODO: I want to use DFS as well. Maybe use custom Opt?
 	Walk(fn OverlayVisitorFn)
 }

@@ -181,6 +181,10 @@ func (c *containerImpl) Clone() Node {
 	return c2
 }
 
+func (c *containerImpl) Walk(fn NodeVisitorFn) {
+	walkContainer(path.NewBuilder(), c, fn)
+}
+
 func (c *containerImpl) AsContainer() Container {
 	return c
 }
@@ -201,20 +205,12 @@ func initContainerBuilder() *containerBuilderImpl {
 	return cb
 }
 
-func (c *containerBuilderImpl) Seal() Container {
-	return &c.containerImpl
+func (c *containerBuilderImpl) AsContainer() Container {
+	return c
 }
 
-func (c *containerBuilderImpl) Walk(fn WalkFn) {
-	c.ensureChildren()
-	for k, v := range c.children {
-		if v.IsContainer() {
-			v.(ContainerBuilder).Walk(fn)
-		}
-		if !fn(k, c, v) {
-			return
-		}
-	}
+func (c *containerBuilderImpl) Seal() Container {
+	return &c.containerImpl
 }
 
 func (c *containerBuilderImpl) Merge(other Container, opts ...MergeOption) ContainerBuilder {

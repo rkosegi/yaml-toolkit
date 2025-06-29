@@ -22,6 +22,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
@@ -59,9 +60,9 @@ func (m *overlayDocument) Search(fn SearchValueFunc) Coordinates {
 	var r Coordinates
 	for _, l := range m.names {
 		if paths := m.overlays[l].Search(fn); paths != nil {
-			for _, path := range paths {
+			for _, p := range paths {
 				r = append(r, &coordinate{
-					path:  path,
+					path:  p,
 					layer: l,
 				})
 			}
@@ -189,49 +190,11 @@ func (m *overlayDocument) Serialize(writer io.Writer, mappingFunc NodeEncoderFun
 	return encFn(writer, mappingFunc(m.Merged()))
 }
 
-func walkNode(layer, path string, parent, node Node, fn OverlayVisitorFn) bool {
-	if node.IsContainer() {
-		if !walkContainer(layer, path, node.(ContainerBuilder), fn) {
-			return false
-		}
-	} else if node.IsList() {
-		if !walkList(layer, path, node.(ListBuilder), fn) {
-			return false
-		}
-	} else {
-		if !fn(layer, path, parent, node) {
-			return false
-		}
-	}
-	return true
-}
-
-func walkList(layer, path string, list ListBuilder, fn OverlayVisitorFn) bool {
-	for idx, li := range list.Items() {
-		p := utils.ToListPath(path, idx)
-		if walkNode(layer, p, list, li, fn) == false {
-			return false
-		}
-	}
-	return true
-}
-
-func walkContainer(layer, path string, con ContainerBuilder, fn OverlayVisitorFn) bool {
-	for k, v := range con.Children() {
-		p := utils.ToPath(path, k)
-		if walkNode(layer, p, con, v, fn) == false {
-			return false
-		}
-	}
-	return true
-}
-
 func (m *overlayDocument) Walk(fn OverlayVisitorFn) {
 	for _, n := range m.names {
-		c := m.overlays[n]
-		if !walkContainer(n, "", c, fn) {
-			return
-		}
+		walkContainer(path.NewBuilder(), m.overlays[n], func(p path.Path, parent Node, node Node) bool {
+			return fn(n, p, parent, node)
+		})
 	}
 }
 
