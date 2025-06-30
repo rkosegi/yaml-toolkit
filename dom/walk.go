@@ -27,6 +27,11 @@ func walkList(pb path.Builder, l List, fn NodeVisitorFn) {
 		if !fn(pb.Append(path.Numeric(idx)).Build(), l, item) {
 			return
 		}
+		if item.IsContainer() {
+			walkContainer(pb.Append(path.Numeric(idx)), item.AsContainer(), fn)
+		} else if item.IsList() {
+			walkList(pb.Append(path.Numeric(idx)), item.AsList(), fn)
+		}
 	}
 }
 

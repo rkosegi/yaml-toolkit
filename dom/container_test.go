@@ -277,6 +277,30 @@ root:
 		}
 		return true
 	})
+
+	x, err := Builder().FromReader(strings.NewReader(`
+root:
+  level1c:
+    - value:
+        - 1
+    -
+      - 1
+      - 2
+`), DefaultYamlDecoder)
+	assert.NotNil(t, x)
+	assert.NoError(t, err)
+	cnt1, cnt2 := 0, 0
+	x.Walk(func(p path.Path, parent Node, node Node) bool {
+		if node.IsList() {
+			cnt1++
+		}
+		if parent.IsList() {
+			cnt2++
+		}
+		return true
+	})
+	assert.Equal(t, 3, cnt1)
+	assert.Equal(t, 5, cnt2)
 }
 
 func TestContainerEquals(t *testing.T) {
