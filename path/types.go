@@ -16,6 +16,8 @@ limitations under the License.
 
 package path
 
+import "fmt"
+
 // Builder provides convenient way to construct Path using fluent builder pattern.
 type Builder interface {
 	// Append adds path component to the end of path.
@@ -45,6 +47,7 @@ type Component interface {
 }
 
 type Path interface {
+	fmt.Stringer
 	// Components returns copy of path components in this path
 	Components() []Component
 
