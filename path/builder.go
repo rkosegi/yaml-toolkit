@@ -20,10 +20,10 @@ type builder struct {
 	components []Component
 }
 
-var emptyPath = &path{}
+var emptyPath = buildPath([]Component{})
 
 func (b *builder) Build() Path {
-	return &path{components: b.components}
+	return buildPath(b.components)
 }
 
 func (b *builder) Append(c Component) Builder {
@@ -31,6 +31,12 @@ func (b *builder) Append(c Component) Builder {
 	copy(cs, b.components)
 	cs = append(b.components, c)
 	return &builder{components: cs}
+}
+
+func buildPath(pc []Component) Path {
+	p := &path{components: pc}
+	p.s = p.buildString()
+	return p
 }
 
 // NewBuilder creates new Builder
@@ -49,7 +55,7 @@ func ParentOf(p Path) Path {
 	default:
 		c := make([]Component, len(p.(*path).components)-1)
 		copy(c, p.(*path).components[:len(p.(*path).components)-1])
-		return &path{components: c}
+		return buildPath(c)
 	}
 }
 
@@ -58,5 +64,5 @@ func ChildOf(parent Path, cps ...Component) Path {
 	cs := make([]Component, len(parent.(*path).components))
 	copy(cs, parent.(*path).components)
 	cs = append(cs, cps...)
-	return &path{components: cs}
+	return buildPath(cs)
 }

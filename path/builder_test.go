@@ -63,3 +63,26 @@ func TestChildOf(t *testing.T) {
 	assert.Len(t, np.Components(), 3)
 	assert.Equal(t, "c", np.Last().Value())
 }
+
+func TestPathString(t *testing.T) {
+	type testCase struct {
+		exp string
+		p   Path
+	}
+	for _, tc := range []testCase{
+		{
+			exp: "[]",
+			p:   NewBuilder().Build(),
+		},
+		{
+			exp: `["a","b"]`,
+			p:   NewBuilder().Append(Simple("a")).Append(Simple("b")).Build(),
+		},
+		{
+			exp: `["a",0,3]`,
+			p:   NewBuilder().Append(Simple("a")).Append(Numeric(0)).Append(Numeric(3)).Build(),
+		},
+	} {
+		assert.Equal(t, tc.exp, tc.p.String())
+	}
+}
