@@ -33,4 +33,3 @@ my-app:
                   - my-app
   container:
     - name: nginx
-
