@@ -21,8 +21,8 @@ import (
 	"testing"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/fluent"
-	"github.com/rkosegi/yaml-toolkit/path"
+	f "github.com/rkosegi/yaml-toolkit/fluent"
+	p "github.com/rkosegi/yaml-toolkit/path"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -76,18 +76,18 @@ func TestDeduplicate(t *testing.T) {
 	})
 
 	assert.NoError(t, ds.AddDocument("prod", d))
-	assert.NoError(t, ds.AddDocument("qa", fluent.NewMorpher().
-		Copy(d, fluent.CopyModeReplace()).
+	assert.NoError(t, ds.AddDocument("qa", f.NewMorpher().
+		Copy(d, f.CopyModeReplace()).
 		Mutate(func(b dom.ContainerBuilder) {
 			b.AddValue("url", dom.LeafNode("http://qa.myapp.tld"))
 		}).Result()))
-	assert.NoError(t, ds.AddDocument("test", fluent.NewMorpher().
-		Copy(d, fluent.CopyModeReplace()).
+	assert.NoError(t, ds.AddDocument("test", f.NewMorpher().
+		Copy(d, f.CopyModeReplace()).
 		Mutate(func(b dom.ContainerBuilder) {
 			b.AddValue("url", dom.LeafNode("http://test.myapp.tld"))
 		}).Result()))
-	assert.NoError(t, ds.AddDocument("dev", fluent.NewMorpher().
-		Copy(d, fluent.CopyModeReplace()).
+	assert.NoError(t, ds.AddDocument("dev", f.NewMorpher().
+		Copy(d, f.CopyModeReplace()).
 		Mutate(func(b dom.ContainerBuilder) {
 			b.AddValue("url", dom.LeafNode("http://dev.myapp.tld"))
 		}).Result()))
@@ -118,13 +118,43 @@ url: http://qa.myapp.tld
 	ds := NewDocumentSet()
 	assert.NoError(t, ds.AddDocumentFromReader("doc1", strings.NewReader(doc1), dom.DefaultYamlDecoder))
 	assert.NoError(t, ds.AddDocumentFromReader("doc2", strings.NewReader(doc2), dom.DefaultYamlDecoder))
-	dd := NewDeduplicator(DeduplicationOptFilterFn(func(p path.Path, parent dom.Node, node dom.Node) bool {
+	dd := NewDeduplicator(DeduplicationOptFilterFn(func(p p.Path, parent dom.Node, node dom.Node) bool {
 		return !parent.IsList()
 	}))
 	out, res := dd.Deduplicate(ds.AsOne())
 	assert.NotNil(t, out)
 	assert.Len(t, res.Children(), 1)
 	assert.Len(t, out.Layers()["doc1"].Children(), 2)
+}
+
+func TestDeduplicateK8sValues(t *testing.T) {
+	ds := NewDocumentSet()
+	assert.NoError(t, ds.AddDocumentFromFile("../testdata/k8s_values1.yaml", dom.DefaultYamlDecoder))
+	assert.NoError(t, ds.AddDocumentFromFile("../testdata/k8s_values2.yaml", dom.DefaultYamlDecoder))
+
+	dd := NewDeduplicator(DeduplicationOptFilterFn(func(p p.Path, parent dom.Node, node dom.Node) bool {
+		// skip lists
+		return !parent.IsList()
+	}))
+	out, res := dd.Deduplicate(ds.AsOne())
+	assert.NotNil(t, out)
+	assert.Len(t, res.Children(), 1)
+	assert.Len(t, out.Layers(), 2)
+	assert.Equal(t, `{ "holdApplicationUntilProxyStarts": true }`, res.Get(p.NewBuilder().
+		Append(p.Simple("my-app")).
+		Append(p.Simple("podAnnotations")).
+		Append(p.Simple("proxy.istio.io/config")).
+		Build()).AsLeaf().Value())
+	assert.Equal(t, "100m", out.Layers()["../testdata/k8s_values1.yaml"].Get(p.NewBuilder().
+		Append(p.Simple("my-app")).
+		Append(p.Simple("podAnnotations")).
+		Append(p.Simple("sidecar.istio.io/proxyCPU")).
+		Build()).AsLeaf().Value())
+	assert.Equal(t, "50m", out.Layers()["../testdata/k8s_values2.yaml"].Get(p.NewBuilder().
+		Append(p.Simple("my-app")).
+		Append(p.Simple("podAnnotations")).
+		Append(p.Simple("sidecar.istio.io/proxyCPU")).
+		Build()).AsLeaf().Value())
 }
 
 func TestDeduplicateEmpty(t *testing.T) {

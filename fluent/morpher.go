@@ -114,7 +114,8 @@ func (m *morpher) Mutate(fn func(doc dom.ContainerBuilder)) Morpher {
 }
 
 func (m *morpher) Result() dom.ContainerBuilder {
-	return dom.Builder().From(m.d)
+	c := &copier{filterFn: matchAllFn}
+	return c.do(m.d)
 }
 
 func NewMorpher() Morpher {
