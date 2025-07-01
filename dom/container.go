@@ -322,9 +322,11 @@ func (c *containerBuilderImpl) RemoveAt(path string) ContainerBuilder {
 	return c
 }
 
+// deprecated
 type containerFactory struct {
 }
 
+// deprecated
 func (f *containerFactory) From(container Container) ContainerBuilder {
 	out := f.Container()
 	for k, v := range container.Flatten() {
@@ -333,10 +335,12 @@ func (f *containerFactory) From(container Container) ContainerBuilder {
 	return out
 }
 
+// deprecated
 func (f *containerFactory) FromMap(in map[string]interface{}) ContainerBuilder {
 	return DefaultNodeDecoderFn(in).(ContainerBuilder)
 }
 
+// deprecated
 func (f *containerFactory) FromProperties(in map[string]interface{}) ContainerBuilder {
 	x := f.Container()
 	for k, v := range in {
@@ -345,10 +349,12 @@ func (f *containerFactory) FromProperties(in map[string]interface{}) ContainerBu
 	return x
 }
 
+// deprecated
 func (f *containerFactory) Container() ContainerBuilder {
 	return ContainerNode()
 }
 
+// deprecated
 func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBuilder, error) {
 	root := make(map[string]interface{})
 	if err := fn(r, &root); err != nil {
@@ -358,6 +364,7 @@ func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBui
 	}
 }
 
+// deprecated
 func Builder() ContainerFactory {
 	return b
 }

@@ -169,7 +169,7 @@ type Container interface {
 	// Search finds all paths where Node's value is equal to given value according to provided SearchValueFunc.
 	// If no match is found, nil is returned.
 	Search(fn SearchValueFunc) []string
-	// deprecated use Get()
+	// deprecated, use Get()
 	// Lookup attempts to find child Node at given path
 	Lookup(path string) Node
 	// deprecated
@@ -227,6 +227,7 @@ var (
 	}
 )
 
+// deprecated
 type ContainerFactory interface {
 	// deprecated, use ContainerNode()
 	// Container creates empty ContainerBuilder
@@ -237,6 +238,7 @@ type ContainerFactory interface {
 	FromMap(in map[string]interface{}) ContainerBuilder
 	// FromProperties is similar to FromMap except that keys are parsed into path before inserting into ContainerBuilder
 	FromProperties(in map[string]interface{}) ContainerBuilder
+	// deprecated
 	// From creates builder from Container
 	From(container Container) ContainerBuilder
 }
