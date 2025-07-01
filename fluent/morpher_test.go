@@ -19,14 +19,14 @@ package fluent
 import (
 	"bytes"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMorpherAddWithFilter(t *testing.T) {
+func TestMorpherCopyMerge(t *testing.T) {
 	d := dom.Builder().Container()
 	d.AddValue("a", dom.LeafNode(1))
 	d.AddValueAt("b", dom.LeafNode(2))
@@ -36,20 +36,52 @@ func TestMorpherAddWithFilter(t *testing.T) {
 	doc, err := b.FromReader(bytes.NewReader(data), dom.DefaultYamlDecoder)
 	assert.NoError(t, err)
 
-	res := NewMorpher().AddWithFilter(doc, func(path string, leaf dom.Leaf) bool {
-		t.Logf("path=%v, leaf=%v", path, leaf)
-		return !strings.HasPrefix(path, "root[2]")
-	}).Result()
+	res := NewMorpher().Copy(doc, CopyModeMerge(
+		CopyParamFilterFunc(func(p path.Path, parent dom.Node, node dom.Node) bool {
+			pc := p.Components()
+			return len(pc) > 1 && pc[1].NumericValue() != 2
+		}))).Result()
 
 	assert.Equal(t, "str leaf", res.Child("root").AsList().Items()[0].AsLeaf().Value())
 	assert.Equal(t, 2, len(res.Child("root").AsList().Items()))
 }
 
+func TestMorpherCopyMergeWithList(t *testing.T) {
+	d1 := dom.ContainerNode()
+	d1.AddValue("a", dom.LeafNode("AAA"))
+	d1.AddValue("c", dom.ListNode(dom.LeafNode(2), dom.LeafNode(3)))
+
+	d2 := dom.ContainerNode()
+	d2.AddValue("b", dom.LeafNode("BBB"))
+	d2.AddValue("c", dom.ListNode(dom.LeafNode(8), dom.LeafNode(9)))
+
+	res := NewMorpher().
+		Copy(d1, CopyModeMerge()).
+		Copy(d2, CopyModeMerge(CopyParamMergeOptions(dom.ListsMergeAppend()))).
+		Result()
+
+	assert.Equal(t, 4, len(res.Child("c").AsList().Items()))
+}
+
+func TestMorpherCopyReplace(t *testing.T) {
+	d1 := dom.ContainerNode()
+	d1.AddValue("a", dom.LeafNode(1))
+	d2 := dom.ContainerNode()
+	d2.AddValue("b", dom.LeafNode(2))
+	res := NewMorpher().
+		Copy(d1, CopyModeReplace()).
+		Copy(d2, CopyModeReplace(CopyParamFilterFunc(func(p path.Path, parent dom.Node, node dom.Node) bool {
+			return p.Last().Value() != "b"
+		}))).
+		Result()
+	assert.Equal(t, 0, len(res.Children()))
+}
+
 func TestMorpherMutate(t *testing.T) {
-	res := NewMorpher().Set(dom.Builder().FromMap(map[string]interface{}{
+	res := NewMorpher().Copy(dom.Builder().FromMap(map[string]interface{}{
 		"A": 123,
 		"B": "Hi",
-	})).Mutate(func(d dom.ContainerBuilder) {
+	}), CopyModeReplace()).Mutate(func(d dom.ContainerBuilder) {
 		d.AddValue("A", dom.LeafNode(1))
 	}).Result()
 

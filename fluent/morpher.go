@@ -18,20 +18,63 @@ package fluent
 
 import (
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/path"
 )
 
-type FilterPredicate func(path string, leaf dom.Leaf) bool
+var matchAllFn = func(p path.Path, parent dom.Node, node dom.Node) bool {
+	return true
+}
+
+type copier struct {
+	replace   bool
+	filterFn  dom.NodeVisitorFn
+	mergeOpts []dom.MergeOption
+}
+
+type CopyParam func(*copier)
+
+func CopyParamFilterFunc(fn dom.NodeVisitorFn) CopyParam {
+	return func(p *copier) {
+		p.filterFn = fn
+	}
+}
+
+func CopyParamMergeOptions(mOpts ...dom.MergeOption) CopyParam {
+	return func(p *copier) {
+		p.mergeOpts = mOpts
+	}
+}
+
+type CopyMode func(*copier)
+
+// CopyModeReplace Copies source container and removes anything that existed
+func CopyModeReplace(param ...CopyParam) CopyMode {
+	return func(c *copier) {
+		CopyParamFilterFunc(matchAllFn)(c)
+		for _, p := range param {
+			p(c)
+		}
+		c.replace = true
+	}
+}
+
+func CopyModeMerge(param ...CopyParam) CopyMode {
+	return func(c *copier) {
+		CopyParamFilterFunc(matchAllFn)(c)
+		for _, p := range param {
+			p(c)
+		}
+		c.replace = false
+	}
+}
 
 // Morpher allows fluent modification of document(s)
 type Morpher interface {
-	// AddWithFilter conditionally adds nodes from source dom.Container if they match predicate function
-	AddWithFilter(srcDoc dom.Container, fn FilterPredicate) Morpher
-
-	// Set just replaces current builder with content from provided dom.Container
-	Set(srcDoc dom.Container) Morpher
-
-	// Mutate invokes provided callback to modify document
+	// Mutate invokes provided callback to modify dom.Container
 	Mutate(func(dom.ContainerBuilder)) Morpher
+
+	// Copy copies content of src dom.Container into Morpher.
+	Copy(src dom.Container, mode CopyMode) Morpher
 
 	// Result gets a fresh copy of result. Subsequent invocation of this method will always produce a new copy.
 	Result() dom.ContainerBuilder
@@ -41,29 +84,39 @@ type morpher struct {
 	d dom.ContainerBuilder
 }
 
+func (c *copier) do(src dom.Container) dom.ContainerBuilder {
+	cb := dom.ContainerNode()
+
+	src.Walk(func(p path.Path, parent dom.Node, node dom.Node) bool {
+		if c.filterFn(p, parent, node) {
+			cb.Set(p, node)
+		}
+		return true
+	})
+	return cb
+}
+
+func (m *morpher) Copy(src dom.Container, mode CopyMode) Morpher {
+	c := &copier{}
+	mode(c)
+	cp := c.do(src)
+	if c.replace {
+		m.d = cp
+	} else {
+		m.d = m.d.Merge(cp, c.mergeOpts...)
+	}
+	return m
+}
+
 func (m *morpher) Mutate(fn func(doc dom.ContainerBuilder)) Morpher {
 	fn(m.d)
 	return m
 }
 
 func (m *morpher) Result() dom.ContainerBuilder {
-	return dom.Builder().From(m.d.Clone().AsContainer())
-}
-
-func (m *morpher) Set(srcDoc dom.Container) Morpher {
-	m.d = dom.Builder().From(srcDoc)
-	return m
-}
-
-func (m *morpher) AddWithFilter(src dom.Container, fn FilterPredicate) Morpher {
-	for k, v := range src.Flatten() {
-		if fn(k, v) {
-			m.d.AddValueAt(k, v)
-		}
-	}
-	return m
+	return dom.Builder().From(m.d)
 }
 
 func NewMorpher() Morpher {
-	return (&morpher{}).Set(dom.Builder().Container())
+	return &morpher{d: dom.ContainerNode()}
 }

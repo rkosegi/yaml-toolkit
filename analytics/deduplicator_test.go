@@ -22,6 +22,7 @@ import (
 
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/fluent"
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -75,19 +76,55 @@ func TestDeduplicate(t *testing.T) {
 	})
 
 	assert.NoError(t, ds.AddDocument("prod", d))
-	assert.NoError(t, ds.AddDocument("qa", fluent.NewMorpher().Set(d).Mutate(func(b dom.ContainerBuilder) {
-		b.AddValue("url", dom.LeafNode("http://qa.myapp.tld"))
-	}).Result()))
-	assert.NoError(t, ds.AddDocument("test", fluent.NewMorpher().Set(d).Mutate(func(b dom.ContainerBuilder) {
-		b.AddValue("url", dom.LeafNode("http://test.myapp.tld"))
-	}).Result()))
-	assert.NoError(t, ds.AddDocument("dev", fluent.NewMorpher().Set(d).Mutate(func(b dom.ContainerBuilder) {
-		b.AddValue("url", dom.LeafNode("http://dev.myapp.tld"))
-	}).Result()))
+	assert.NoError(t, ds.AddDocument("qa", fluent.NewMorpher().
+		Copy(d, fluent.CopyModeReplace()).
+		Mutate(func(b dom.ContainerBuilder) {
+			b.AddValue("url", dom.LeafNode("http://qa.myapp.tld"))
+		}).Result()))
+	assert.NoError(t, ds.AddDocument("test", fluent.NewMorpher().
+		Copy(d, fluent.CopyModeReplace()).
+		Mutate(func(b dom.ContainerBuilder) {
+			b.AddValue("url", dom.LeafNode("http://test.myapp.tld"))
+		}).Result()))
+	assert.NoError(t, ds.AddDocument("dev", fluent.NewMorpher().
+		Copy(d, fluent.CopyModeReplace()).
+		Mutate(func(b dom.ContainerBuilder) {
+			b.AddValue("url", dom.LeafNode("http://dev.myapp.tld"))
+		}).Result()))
 
 	out, res := dd.Deduplicate(ds.AsOne())
 	assert.Equal(t, 2, len(res.Children()))
 	assert.Len(t, out.LayerNames(), 4)
+}
+
+func TestDeduplicateWithFilter(t *testing.T) {
+	doc1 := `
+mounts:
+  - name: temp
+    path: /tmp
+probe:
+  enabled: true
+url: http://prod.myapp.tld
+`
+	doc2 := `
+mounts:
+  - name: temp
+    path: /tmp
+probe:
+  enabled: true
+url: http://qa.myapp.tld
+`
+
+	ds := NewDocumentSet()
+	assert.NoError(t, ds.AddDocumentFromReader("doc1", strings.NewReader(doc1), dom.DefaultYamlDecoder))
+	assert.NoError(t, ds.AddDocumentFromReader("doc2", strings.NewReader(doc2), dom.DefaultYamlDecoder))
+	dd := NewDeduplicator(DeduplicationOptFilterFn(func(p path.Path, parent dom.Node, node dom.Node) bool {
+		return !parent.IsList()
+	}))
+	out, res := dd.Deduplicate(ds.AsOne())
+	assert.NotNil(t, out)
+	assert.Len(t, res.Children(), 1)
+	assert.Len(t, out.Layers()["doc1"].Children(), 2)
 }
 
 func TestDeduplicateEmpty(t *testing.T) {
