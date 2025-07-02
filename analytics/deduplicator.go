@@ -22,6 +22,18 @@ import (
 	"github.com/rkosegi/yaml-toolkit/path"
 )
 
+// Current implementation might not be correct in all scenarios.
+// It works by flattening container to map of paths to leaves.
+// Alternative implementation could use different technique like calling Node's Equals() on each visited Node.
+// If it returns true, whole subtree can be considered "same" in both containers and walk branch is halted.
+// When false, then walk process continues by descending into sub-elements.
+//
+// Some notes about (un)expected results.
+// For some of documents types, users (wrongly) expect equality where they shouldn't.
+// Good example are k8s manifests, specifically Volumes and VolumeMounts within PodSpec.
+// Those constructs use lists, but yet, order of these items is rather irrelevant at runtime.
+// However, if you shuffle items within the list, original list and shuffled one will NOT be equal.
+
 var (
 	emptyContainer = dom.ContainerNode().Seal()
 	matchAllNodes  = func(path.Path, dom.Node, dom.Node) bool {
@@ -74,6 +86,13 @@ func (c *collector) visit(p path.Path, _ dom.Node, node dom.Node) bool {
 	return true
 }
 
+func (c *collector) hasNode(sp string, node dom.Node) bool {
+	if _, ok := c.pk[sp]; ok && c.pk[sp].Equals(node) {
+		return true
+	}
+	return false
+}
+
 func (d *deduplicatorImpl) Deduplicate(od dom.OverlayDocument) (dom.OverlayDocument, dom.Container) {
 	var cd = d.FindCommon(od)
 	if isContainerEmpty(cd) {
@@ -86,14 +105,7 @@ func (d *deduplicatorImpl) Deduplicate(od dom.OverlayDocument) (dom.OverlayDocum
 	for name, doc := range od.Layers() {
 		_ = out.AddDocument(name, fluent.NewMorpher().Copy(doc,
 			fluent.CopyModeReplace(fluent.CopyParamFilterFunc(func(p path.Path, parent dom.Node, node dom.Node) bool {
-				if node.IsLeaf() {
-					if _, ok := c.pk[p.String()]; ok && c.pk[p.String()].AsLeaf().Value() == node.AsLeaf().Value() {
-						return false
-					}
-				} else {
-					return false
-				}
-				return true
+				return node.IsLeaf() && !c.hasNode(p.String(), node)
 			}))).Result())
 	}
 	return out.AsOne(), cd

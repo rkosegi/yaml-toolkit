@@ -140,21 +140,15 @@ func TestDeduplicateK8sValues(t *testing.T) {
 	assert.NotNil(t, out)
 	assert.Len(t, res.Children(), 1)
 	assert.Len(t, out.Layers(), 2)
-	assert.Equal(t, `{ "holdApplicationUntilProxyStarts": true }`, res.Get(p.NewBuilder().
+	pp := p.NewBuilder().
 		Append(p.Simple("my-app")).
-		Append(p.Simple("podAnnotations")).
-		Append(p.Simple("proxy.istio.io/config")).
-		Build()).AsLeaf().Value())
-	assert.Equal(t, "100m", out.Layers()["../testdata/k8s_values1.yaml"].Get(p.NewBuilder().
-		Append(p.Simple("my-app")).
-		Append(p.Simple("podAnnotations")).
-		Append(p.Simple("sidecar.istio.io/proxyCPU")).
-		Build()).AsLeaf().Value())
-	assert.Equal(t, "50m", out.Layers()["../testdata/k8s_values2.yaml"].Get(p.NewBuilder().
-		Append(p.Simple("my-app")).
-		Append(p.Simple("podAnnotations")).
-		Append(p.Simple("sidecar.istio.io/proxyCPU")).
-		Build()).AsLeaf().Value())
+		Append(p.Simple("podAnnotations"))
+	assert.Equal(t, `{ "holdApplicationUntilProxyStarts": true }`, res.Get(pp.
+		Append(p.Simple("proxy.istio.io/config")).Build()).AsLeaf().Value())
+	assert.Equal(t, "100m", out.Layers()["../testdata/k8s_values1.yaml"].Get(pp.
+		Append(p.Simple("sidecar.istio.io/proxyCPU")).Build()).AsLeaf().Value())
+	assert.Equal(t, "50m", out.Layers()["../testdata/k8s_values2.yaml"].Get(pp.
+		Append(p.Simple("sidecar.istio.io/proxyCPU")).Build()).AsLeaf().Value())
 }
 
 func TestDeduplicateEmpty(t *testing.T) {
@@ -165,6 +159,6 @@ func TestDeduplicateEmpty(t *testing.T) {
 
 func TestIsContainerEmpty(t *testing.T) {
 	assert.True(t, isContainerEmpty(emptyContainer))
-	assert.True(t, isContainerEmpty(dom.Builder().Container()))
-	assert.False(t, isContainerEmpty(dom.Builder().Container().AddValue("A", dom.LeafNode(1))))
+	assert.True(t, isContainerEmpty(dom.ContainerNode()))
+	assert.False(t, isContainerEmpty(dom.ContainerNode().AddValue("A", dom.LeafNode(1))))
 }
