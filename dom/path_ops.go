@@ -16,7 +16,9 @@ limitations under the License.
 
 package dom
 
-import "github.com/rkosegi/yaml-toolkit/path"
+import (
+	"github.com/rkosegi/yaml-toolkit/path"
+)
 
 // Node operations that uses path.Path
 
@@ -48,6 +50,28 @@ func applyToList(tgt ListBuilder, c path.Component, addList bool) Node {
 	return x
 }
 
+func unsealListIfNeeded(l List) ListBuilder {
+	switch l := l.(type) {
+	case ListBuilder:
+		return l
+	default:
+		lb := initListBuilder()
+		lb.items = l.Items()
+		return lb
+	}
+}
+
+func unsealContainerIfNeeded(c Container) ContainerBuilder {
+	switch c := c.(type) {
+	case ContainerBuilder:
+		return c
+	default:
+		cb := initContainerBuilder()
+		cb.children = c.Children()
+		return cb
+	}
+}
+
 // applyToNode applies value val to targetNode at given path.
 // Empty path is not allowed and will result in no-op.
 // This function returns modified target node.
@@ -66,16 +90,16 @@ func applyToNode(targetNode Node, at path.Path, val Node) Node {
 			nextIsNum = true
 		}
 		if c.IsNumeric() {
-			tgt = applyToList(tgt.(ListBuilder), c, nextIsNum)
+			tgt = applyToList(unsealListIfNeeded(tgt.(List)), c, nextIsNum)
 		} else {
-			tgt = applyToContainer(tgt.(ContainerBuilder), c, nextIsNum)
+			tgt = applyToContainer(unsealContainerIfNeeded(tgt.(Container)), c, nextIsNum)
 		}
 	}
 	c := cp[lastIdx]
 	if c.IsNumeric() {
-		tgt.(ListBuilder).Set(uint(c.NumericValue()), val)
+		unsealListIfNeeded(tgt.(List)).Set(uint(c.NumericValue()), val)
 	} else {
-		tgt.(ContainerBuilder).AddValue(c.Value(), val)
+		unsealContainerIfNeeded(tgt.(Container)).AddValue(c.Value(), val)
 	}
 	return targetNode
 }

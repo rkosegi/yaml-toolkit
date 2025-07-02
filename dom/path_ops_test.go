@@ -101,3 +101,13 @@ func TestRemoveFromNode(t *testing.T) {
 	removeFromNode(cb, p)
 	assert.Nil(t, cb.Get(p))
 }
+
+func TestUnsealIfNeeded(t *testing.T) {
+	cb := ContainerNode()
+	assert.IsType(t, &containerBuilderImpl{}, unsealContainerIfNeeded(cb.Seal()))
+	assert.IsType(t, &containerBuilderImpl{}, unsealContainerIfNeeded(cb))
+
+	lb := ListNode()
+	assert.IsType(t, &listBuilderImpl{}, unsealListIfNeeded(lb.Seal()))
+	assert.IsType(t, &listBuilderImpl{}, unsealListIfNeeded(lb))
+}
