@@ -97,7 +97,7 @@ func DecodeEmbeddedDoc(item string, decFn dom.DecoderFunc) DecodeInternalFn {
 				return nil, err
 			}
 		} else {
-			cb = dom.Builder().Container()
+			cb = dom.ContainerNode()
 		}
 		return cb, nil
 	}
@@ -116,7 +116,7 @@ func EncodeEmbeddedDoc(item string, encFn dom.EncoderFunc) EncodeInternalFn {
 
 func DecodeEmbeddedProps() DecodeInternalFn {
 	return func(m Manifest) (dom.ContainerBuilder, error) {
-		c := dom.Builder().Container()
+		c := dom.ContainerNode()
 		for _, k := range m.StringData().List() {
 			c.AddValueAt(k, dom.LeafNode(*m.StringData().Get(k)))
 		}

@@ -63,9 +63,9 @@ func diffStrDocs(t *testing.T, doc1, doc2 string) *[]Modification {
 }
 
 func TestDiffSimple1(t *testing.T) {
-	c1 := dom.Builder().Container()
+	c1 := dom.ContainerNode()
 	c1.AddValue("leaf1", dom.LeafNode("abc"))
-	c2 := dom.Builder().Container()
+	c2 := dom.ContainerNode()
 	c2.AddValue("leaf1", dom.LeafNode(456))
 	res := Diff(c1, c2)
 	assert.Equal(t, 1, len(*res))
@@ -284,24 +284,24 @@ func TestDiffOverlayDocuments(t *testing.T) {
 		cb dom.ContainerBuilder
 	)
 	left := dom.NewOverlayDocument()
-	cb = dom.Builder().Container()
+	cb = dom.ContainerNode()
 	cb.AddValueAt("a.b.c", dom.LeafNode(1))
 	left.Add("layer1", cb)
-	cb = dom.Builder().Container()
+	cb = dom.ContainerNode()
 	cb.AddValueAt("a.b.d", dom.LeafNode("xyz"))
 	left.Add("layer2", cb)
-	cb = dom.Builder().Container()
+	cb = dom.ContainerNode()
 	cb.AddValue("something", dom.LeafNode("A"))
 	left.Add("layer3", cb)
 
 	right := dom.NewOverlayDocument()
-	cb = dom.Builder().Container()
+	cb = dom.ContainerNode()
 	cb.AddValueAt("a.b.c", dom.LeafNode(2))
 	right.Add("layer1", cb)
-	cb = dom.Builder().Container()
+	cb = dom.ContainerNode()
 	cb.AddValue("hello", dom.LeafNode("Hi!"))
 	right.Add("layer2", cb)
-	cb = dom.Builder().Container()
+	cb = dom.ContainerNode()
 	cb.AddValue("hello", dom.LeafNode("Aloha!"))
 	right.Add("layer4", cb)
 

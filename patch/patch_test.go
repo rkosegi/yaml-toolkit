@@ -25,9 +25,9 @@ import (
 
 func TestMissing(t *testing.T) {
 	var err error
-	err = Do(nil, b.Container())
+	err = Do(nil, dom.ContainerNode())
 	assert.Error(t, err)
-	err = Do(&OpObj{}, b.Container())
+	err = Do(&OpObj{}, dom.ContainerNode())
 	assert.Error(t, err)
 	err = Do(&OpObj{
 		Path: emptyPath,
