@@ -28,7 +28,7 @@ func applyToContainer(tgt ContainerBuilder, c path.Component, addList bool) Node
 		if addList {
 			x = ListNode()
 		} else {
-			x = Builder().Container()
+			x = ContainerNode()
 		}
 		tgt.AddValue(c.Value(), x)
 	}
@@ -43,7 +43,7 @@ func applyToList(tgt ListBuilder, c path.Component, addList bool) Node {
 		if addList {
 			x = ListNode()
 		} else {
-			x = Builder().Container()
+			x = ContainerNode()
 		}
 		tgt.Set(uint(c.NumericValue()), x)
 	}

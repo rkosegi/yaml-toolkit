@@ -25,7 +25,7 @@ import (
 
 func applyList(l dom.ListBuilder, idxes []int) dom.ContainerBuilder {
 	if len(idxes) == 1 {
-		c := dom.Builder().Container()
+		c := dom.ContainerNode()
 		l.Set(uint(idxes[0]), c)
 		return c
 	} else {

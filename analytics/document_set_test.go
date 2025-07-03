@@ -58,11 +58,11 @@ func TestDocumentSetMustCreate(t *testing.T) {
 
 func TestDocumentSetOrder(t *testing.T) {
 	ds := NewDocumentSet()
-	assert.NoError(t, ds.AddDocument("name1", b.Container(), WithTags("tag3")))
-	assert.NoError(t, ds.AddDocument("name2", b.Container(), WithTags("tag1")))
-	assert.NoError(t, ds.AddDocument("name3", b.Container(), WithTags("tag1")))
-	assert.NoError(t, ds.AddDocument("name4", b.Container(), WithTags("tag2")))
-	assert.NoError(t, ds.AddDocument("name5", b.Container(), WithTags("tag2")))
+	assert.NoError(t, ds.AddDocument("name1", dom.ContainerNode(), WithTags("tag3")))
+	assert.NoError(t, ds.AddDocument("name2", dom.ContainerNode(), WithTags("tag1")))
+	assert.NoError(t, ds.AddDocument("name3", dom.ContainerNode(), WithTags("tag1")))
+	assert.NoError(t, ds.AddDocument("name4", dom.ContainerNode(), WithTags("tag2")))
+	assert.NoError(t, ds.AddDocument("name5", dom.ContainerNode(), WithTags("tag2")))
 
 	var (
 		od     dom.OverlayDocument

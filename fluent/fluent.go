@@ -124,6 +124,6 @@ func (c *configHelper[T]) Result() *T {
 
 func NewConfigHelper[T any]( /* options */ ) ConfigHelper[T] {
 	return &configHelper[T]{
-		c: b.Container(),
+		c: dom.ContainerNode(),
 	}
 }

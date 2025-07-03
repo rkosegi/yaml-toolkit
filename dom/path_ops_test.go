@@ -24,7 +24,7 @@ import (
 )
 
 func TestApplyTo(t *testing.T) {
-	tgt := Builder().Container()
+	tgt := ContainerNode()
 
 	type tCase struct {
 		p   path.Path
@@ -69,7 +69,7 @@ func TestApplyTo(t *testing.T) {
 }
 
 func TestApplyToWithEmptyPath(t *testing.T) {
-	assert.Len(t, applyToNode(Builder().Container(),
+	assert.Len(t, applyToNode(ContainerNode(),
 		path.NewBuilder().Build(),
 		LeafNode(1)).AsContainer().Children(), 0)
 }

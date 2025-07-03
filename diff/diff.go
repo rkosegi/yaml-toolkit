@@ -164,14 +164,14 @@ func OverlayDocs(left, right dom.OverlayDocument) map[string]*[]Modification {
 		if rl, ok := rmap[ln]; ok {
 			res[ln] = Diff(ll, rl)
 		} else {
-			res[ln] = Diff(ll, dom.Builder().Container())
+			res[ln] = Diff(ll, dom.ContainerNode())
 		}
 	}
 	for rn, rl := range rmap {
 		if ll, ok := lmap[rn]; ok {
 			res[rn] = Diff(ll, rl)
 		} else {
-			res[rn] = Diff(dom.Builder().Container(), rl)
+			res[rn] = Diff(dom.ContainerNode(), rl)
 		}
 	}
 	return res

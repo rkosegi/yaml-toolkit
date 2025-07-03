@@ -46,7 +46,7 @@ func TestSerialize(t *testing.T) {
 	d.Put("layer-2", "key1.key2.key3", LeafNode("hello"))
 	d.Put("layer-2", "key1.key11", LeafNode("ola!"))
 	d.Put("layer-3", "key1.key2.key4", LeafNode(7))
-	c := Builder().Container()
+	c := ContainerNode()
 	c.AddContainer("test1").AddValue("test2", LeafNode("Hi"))
 	c.AddValue("test3", LeafNode("no"))
 	d.Put("", "key2", c)
@@ -115,7 +115,7 @@ func TestFirstValidListItem(t *testing.T) {
 
 func TestHasValue(t *testing.T) {
 	assert.True(t, hasValue(LeafNode(1)))
-	assert.True(t, hasValue(Builder().Container()))
+	assert.True(t, hasValue(ContainerNode()))
 	assert.True(t, hasValue(ListNode()))
 	assert.False(t, hasValue(nil))
 	assert.False(t, hasValue(nilLeaf))

@@ -229,9 +229,6 @@ var (
 
 // deprecated
 type ContainerFactory interface {
-	// deprecated, use ContainerNode()
-	// Container creates empty ContainerBuilder
-	Container() ContainerBuilder
 	// FromReader creates ContainerBuilder pre-populated with data from provided io.Reader and DecoderFunc
 	FromReader(r io.Reader, fn DecoderFunc) (ContainerBuilder, error)
 	// FromMap creates ContainerBuilder pre-populated with data from provided map

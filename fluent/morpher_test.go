@@ -27,7 +27,7 @@ import (
 )
 
 func TestMorpherCopyMerge(t *testing.T) {
-	d := dom.Builder().Container()
+	d := dom.ContainerNode()
 	d.AddValue("a", dom.LeafNode(1))
 	d.AddValueAt("b", dom.LeafNode(2))
 

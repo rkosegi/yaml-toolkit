@@ -40,7 +40,7 @@ func TestLeafEquals(t *testing.T) {
 	l := LeafNode(10)
 	assert.False(t, l.Equals(nil))
 	assert.False(t, l.Equals(LeafNode(11)))
-	assert.False(t, l.Equals(Builder().Container()))
+	assert.False(t, l.Equals(ContainerNode()))
 	assert.True(t, l.Equals(LeafNode(10)))
 }
 
