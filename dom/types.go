@@ -21,8 +21,8 @@ import (
 	"io"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/path"
-	"github.com/rkosegi/yaml-toolkit/utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -61,7 +61,7 @@ func DefaultJsonDecoder(r io.Reader, v interface{}) error {
 }
 
 func DefaultYamlEncoder(w io.Writer, v interface{}) error {
-	return utils.NewYamlEncoder(w).Encode(v)
+	return common.NewYamlEncoder(w).Encode(v)
 }
 
 func DefaultJsonEncoder(w io.Writer, v interface{}) error {

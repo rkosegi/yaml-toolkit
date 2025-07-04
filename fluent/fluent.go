@@ -20,10 +20,11 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/utils"
+	"github.com/rkosegi/yaml-toolkit/props"
 	"gopkg.in/yaml.v3"
 )
 
@@ -91,8 +92,8 @@ func (c *configHelper[T]) Load(file string) ConfigHelper[T] {
 		err error
 		cb  dom.ContainerBuilder
 	)
-	fdp := common.DefaultFileDecoderProvider(file)
-	f, err = utils.FileOpener(file)
+	fdp := DefaultFileDecoderProvider(file)
+	f, err = common.FileOpener(file)
 	panicIfError(err)
 	defer func() {
 		_ = f.Close()
@@ -103,7 +104,7 @@ func (c *configHelper[T]) Load(file string) ConfigHelper[T] {
 }
 
 func (c *configHelper[T]) Save(file string) ConfigHelper[T] {
-	fep := common.DefaultFileEncoderProvider(file)
+	fep := DefaultFileEncoderProvider(file)
 	f, err := os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0o664)
 	panicIfError(err)
 	defer func() {
@@ -125,5 +126,37 @@ func (c *configHelper[T]) Result() *T {
 func NewConfigHelper[T any]( /* options */ ) ConfigHelper[T] {
 	return &configHelper[T]{
 		c: dom.ContainerNode(),
+	}
+}
+
+// DefaultFileEncoderProvider is FileEncoderProvider that uses file suffix to choose dom.EncoderFunc
+func DefaultFileEncoderProvider(file string) dom.EncoderFunc {
+	switch filepath.Ext(file) {
+	case ".yaml", ".yml":
+		return dom.DefaultYamlEncoder
+	case ".json":
+		return dom.DefaultJsonEncoder
+	case ".properties":
+		return props.EncoderFn
+	default:
+		return nil
+	}
+}
+
+// FileDecoderProvider resolves dom.DecoderFunc for given file.
+// If file is not recognized, nil is returned.
+type FileDecoderProvider func(file string) dom.DecoderFunc
+
+// DefaultFileDecoderProvider is FileDecoderProvider that uses file suffix to choose dom.DecoderFunc
+func DefaultFileDecoderProvider(file string) dom.DecoderFunc {
+	switch filepath.Ext(file) {
+	case ".yaml", ".yml":
+		return dom.DefaultYamlDecoder
+	case ".json":
+		return dom.DefaultJsonDecoder
+	case ".properties":
+		return props.DecoderFn
+	default:
+		return nil
 	}
 }

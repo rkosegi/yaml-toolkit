@@ -21,6 +21,7 @@ import (
 
 	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/fluent"
 )
 
 // AddLayerOpt returns function that can be used to customize document being added to set.
@@ -54,13 +55,13 @@ type DocumentSet interface {
 	AddPropertiesFromManifest(file string, opts ...AddLayerOpt) error
 
 	// AddDocumentsFromDirectory takes provided glob pattern and loads all matching files into this documentSet.
-	AddDocumentsFromDirectory(pattern string, decProvFn common.FileDecoderProvider, opts ...AddLayerOpt) error
+	AddDocumentsFromDirectory(pattern string, decProvFn fluent.FileDecoderProvider, opts ...AddLayerOpt) error
 
 	// AddDocumentsFromManifest parses K8s manifest data entries into dom.ContainerBuilder and adds them into documentSet.
 	// See k8s package for more details about manifest support details.
 	// Warning: invocation of this function is not atomic if error occurs mid-execution;
 	// some manifest items might be added to DocumentSet before error occurred, while rest of them not.
-	AddDocumentsFromManifest(manifest string, decProvFn common.FileDecoderProvider, opts ...AddLayerOpt) error
+	AddDocumentsFromManifest(manifest string, decProvFn fluent.FileDecoderProvider, opts ...AddLayerOpt) error
 }
 
 // OnPlaceholderEncounteredFn is invoked when property value that contains placeholder

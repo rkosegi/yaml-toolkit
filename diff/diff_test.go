@@ -335,3 +335,8 @@ func TestDiffOverlayDocuments(t *testing.T) {
 		Value: "A",
 	}, res["layer3"])
 }
+
+func TestToListPath(t *testing.T) {
+	assert.Equal(t, "[2]", ToListPath("", 2))
+	assert.Equal(t, "item[3]", ToListPath("item", 3))
+}

@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/rkosegi/yaml-toolkit/path"
-	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 type pathSupport struct {
@@ -78,7 +77,7 @@ func (p *pathSupport) parse(r io.RuneReader) (path.Path, error) {
 	}
 	b := path.NewBuilder()
 	for _, seg := range segments {
-		if n, idxes, isListItem := utils.ParseListPathComponent(seg); isListItem {
+		if n, idxes, isListItem := ParseListPathComponent(seg); isListItem {
 			b = b.Append(path.Simple(n))
 			for _, idx := range idxes {
 				b = b.Append(path.Numeric(idx))

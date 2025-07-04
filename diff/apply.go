@@ -20,7 +20,7 @@ import (
 	"strings"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/utils"
+	"github.com/rkosegi/yaml-toolkit/props"
 )
 
 func applyList(l dom.ListBuilder, idxes []int) dom.ContainerBuilder {
@@ -41,7 +41,7 @@ func applySingle(node dom.ContainerBuilder, mod Modification) {
 	switch mod.Type {
 	case ModAdd, ModChange:
 		for _, c := range pc[0 : len(pc)-1] {
-			if n, idxes, ok := utils.ParseListPathComponent(c); ok {
+			if n, idxes, ok := props.ParseListPathComponent(c); ok {
 				current = applyListItem(current, n, idxes)
 			} else {
 				current = applyNonListItem(current, c)

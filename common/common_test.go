@@ -17,27 +17,12 @@ limitations under the License.
 package common
 
 import (
+	"bytes"
 	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func TestDefaultFileEncoderProvider(t *testing.T) {
-	for _, ext := range []string{"a.yaml", "b.yml", "c.json", "d.properties"} {
-		t.Log("file:", ext)
-		assert.NotNil(t, DefaultFileEncoderProvider(ext))
-	}
-	assert.Nil(t, DefaultFileEncoderProvider(".unknown"))
-}
-
-func TestDefaultFileDecoderProvider(t *testing.T) {
-	for _, ext := range []string{"a.yaml", "b.yml", "c.json", "d.properties"} {
-		t.Log("file:", ext)
-		assert.NotNil(t, DefaultFileDecoderProvider(ext))
-	}
-	assert.Nil(t, DefaultFileDecoderProvider(".unknown"))
-}
 
 func filterStrSlice(in []string, fn StringPredicateFn) []string {
 	result := make([]string, 0)
@@ -60,4 +45,42 @@ func TestStringMatchFunc(t *testing.T) {
 	assert.Equal(t, 1, len(res))
 	res = filterStrSlice(in, MatchRe(regexp.MustCompile(`[ac]`)))
 	assert.Equal(t, 2, len(res))
+}
+
+func TestToPath(t *testing.T) {
+	assert.Equal(t, "abc", ToPath("", "abc"))
+	assert.Equal(t, "abc.def", ToPath("abc", "def"))
+}
+
+func TestNewYamlEncoder(t *testing.T) {
+	assert.NotNil(t, NewYamlEncoder(bytes.NewBuffer(make([]byte, 0))))
+}
+
+func TestFailingReader(t *testing.T) {
+	_, err := FailingReader().Read([]byte{})
+	assert.Error(t, err)
+}
+
+func TestFailingWriter(t *testing.T) {
+	_, err := FailingWriter().Write([]byte{})
+	assert.Error(t, err)
+}
+
+func TestUnique(t *testing.T) {
+	assert.Equal(t, 3, len(Unique([]string{"a", "a", "b", "x", "x"})))
+}
+
+func TestUnflattenMap(t *testing.T) {
+	out := Unflatten(map[string]interface{}{
+		"a.b": 123,
+		"a.c": "0876",
+		"x.y": "hello",
+		"x.z": nil,
+		"s":   3.14,
+	})
+	assert.Equal(t, 123, out["a"].(map[string]interface{})["b"])
+	assert.Equal(t, "0876", out["a"].(map[string]interface{})["c"])
+	assert.Equal(t, "hello", out["x"].(map[string]interface{})["y"])
+	assert.Equal(t, nil, out["x"].(map[string]interface{})["z"])
+	assert.Equal(t, 3.14, out["s"])
 }

@@ -23,7 +23,6 @@ import (
 
 	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 func matchAll(string) bool {
@@ -104,7 +103,7 @@ func (dr *dependencyResolver) Resolve(srcDoc dom.OverlayDocument,
 			}
 		}
 	}
-	used = utils.Unique(used)
+	used = common.Unique(used)
 	orphan := subtract(allKeys, used)
 	slices.Sort(orphan)
 	slices.Sort(allKeys)

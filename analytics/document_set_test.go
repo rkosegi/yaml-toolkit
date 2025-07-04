@@ -21,7 +21,7 @@ import (
 
 	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/utils"
+	"github.com/rkosegi/yaml-toolkit/fluent"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,13 +32,13 @@ func TestDocumentSetAdd(t *testing.T) {
 	assert.Equal(t, 0, len(ds.TaggedSubset("unknown").Merged().Flatten()))
 	assert.Error(t, ds.AddPropertiesFromManifest("../testdata/non-existent-manifest-file.yaml"))
 	assert.NoError(t, ds.AddDocumentFromFile("../testdata/doc2.yaml", dom.DefaultYamlDecoder))
-	assert.NoError(t, ds.AddDocumentsFromManifest("../testdata/cm2.yaml", common.DefaultFileDecoderProvider))
-	assert.Error(t, ds.AddDocumentsFromManifest("non-existent/file.unknown", common.DefaultFileDecoderProvider))
+	assert.NoError(t, ds.AddDocumentsFromManifest("../testdata/cm2.yaml", fluent.DefaultFileDecoderProvider))
+	assert.Error(t, ds.AddDocumentsFromManifest("non-existent/file.unknown", fluent.DefaultFileDecoderProvider))
 	assert.Error(t, ds.AddDocumentFromFile("non-existent/file.unknown", nil))
-	assert.Error(t, ds.AddDocumentFromReader("none", utils.FailingReader(), dom.DefaultJsonDecoder))
-	assert.Error(t, ds.AddDocumentsFromDirectory("[]]", common.DefaultFileDecoderProvider))
-	assert.NoError(t, ds.AddDocumentsFromDirectory("../testdata/cm2.yaml", common.DefaultFileDecoderProvider))
-	assert.Error(t, ds.AddDocumentsFromDirectory("../testdata/invalid.yaml", common.DefaultFileDecoderProvider))
+	assert.Error(t, ds.AddDocumentFromReader("none", common.FailingReader(), dom.DefaultJsonDecoder))
+	assert.Error(t, ds.AddDocumentsFromDirectory("[]]", fluent.DefaultFileDecoderProvider))
+	assert.NoError(t, ds.AddDocumentsFromDirectory("../testdata/cm2.yaml", fluent.DefaultFileDecoderProvider))
+	assert.Error(t, ds.AddDocumentsFromDirectory("../testdata/invalid.yaml", fluent.DefaultFileDecoderProvider))
 	assert.Nil(t, ds.NamedDocument("invalid"))
 	assert.NotNil(t, ds.NamedDocument("../testdata/cm2.yaml"))
 }

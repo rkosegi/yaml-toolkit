@@ -22,8 +22,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/path"
-	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 type coordinate struct {
@@ -95,7 +95,7 @@ func (m *overlayDocument) Add(overlay string, value Container) {
 func (m *overlayDocument) Put(overlay, path string, value Node) {
 	if value.IsContainer() {
 		for k, v := range value.(Container).Flatten() {
-			m.Put(overlay, utils.ToPath(path, k), v)
+			m.Put(overlay, common.ToPath(path, k), v)
 		}
 	} else {
 		current := m.ensureOverlay(overlay)

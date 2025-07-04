@@ -23,8 +23,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 type doc struct {
@@ -193,7 +193,7 @@ func (b *builderImpl) Create(kind string, name string, opts ...CreateOption) (Do
 			return err
 		},
 		func() error {
-			return utils.NewYamlEncoder(f).Encode(init)
+			return common.NewYamlEncoder(f).Encode(init)
 		},
 		func() error {
 			return f.Close()

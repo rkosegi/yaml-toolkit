@@ -23,8 +23,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/path"
-	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 var (
@@ -57,7 +57,7 @@ func flattenList(node List, path string, ret *map[string]Leaf) {
 
 func flattenContainer(node Container, path string, ret *map[string]Leaf) {
 	for k, n := range node.Children() {
-		p := utils.ToPath(path, k)
+		p := common.ToPath(path, k)
 		if n.IsContainer() {
 			flattenContainer(n.(Container), p, ret)
 		} else if n.IsList() {
