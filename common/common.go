@@ -17,46 +17,16 @@ limitations under the License.
 package common
 
 import (
-	"path/filepath"
+	"errors"
+	"fmt"
+	"io"
+	"os"
 	"regexp"
+	"slices"
+	"strings"
 
-	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/props"
+	"gopkg.in/yaml.v3"
 )
-
-type FileEncoderProvider func(file string) dom.EncoderFunc
-
-// DefaultFileEncoderProvider is FileEncoderProvider that uses file suffix to choose dom.EncoderFunc
-func DefaultFileEncoderProvider(file string) dom.EncoderFunc {
-	switch filepath.Ext(file) {
-	case ".yaml", ".yml":
-		return dom.DefaultYamlEncoder
-	case ".json":
-		return dom.DefaultJsonEncoder
-	case ".properties":
-		return props.EncoderFn
-	default:
-		return nil
-	}
-}
-
-// FileDecoderProvider resolves dom.DecoderFunc for given file.
-// If file is not recognized, nil is returned.
-type FileDecoderProvider func(file string) dom.DecoderFunc
-
-// DefaultFileDecoderProvider is FileDecoderProvider that uses file suffix to choose dom.DecoderFunc
-func DefaultFileDecoderProvider(file string) dom.DecoderFunc {
-	switch filepath.Ext(file) {
-	case ".yaml", ".yml":
-		return dom.DefaultYamlDecoder
-	case ".json":
-		return dom.DefaultJsonDecoder
-	case ".properties":
-		return props.DecoderFn
-	default:
-		return nil
-	}
-}
 
 // EmptyChecker interface can be used to check is implementing struct is "empty".
 type EmptyChecker interface {
@@ -83,3 +53,72 @@ var (
 		}
 	}
 )
+
+var (
+	FileOpener = os.Open
+)
+
+// ToPath creates path from path and key name
+func ToPath(path, key string) string {
+	if len(path) == 0 {
+		return key
+	} else {
+		return fmt.Sprintf("%s.%s", path, key)
+	}
+}
+
+// NewYamlEncoder creates and uniformly configures yaml.Encoder across project
+func NewYamlEncoder(w io.Writer) *yaml.Encoder {
+	enc := yaml.NewEncoder(w)
+	enc.SetIndent(2)
+	return enc
+}
+
+type failingReader struct{}
+
+func (fr failingReader) Read([]byte) (int, error) {
+	return 0, errors.New("read just failed")
+}
+
+func FailingReader() io.Reader {
+	return &failingReader{}
+}
+
+type failingWriter struct{}
+
+func (fw failingWriter) Write([]byte) (int, error) {
+	return 0, errors.New("write just failed")
+}
+
+func FailingWriter() io.Writer {
+	return &failingWriter{}
+}
+
+func Unique(in []string) []string {
+	ret := make([]string, 0)
+	for _, s := range in {
+		if !slices.Contains(ret, s) {
+			ret = append(ret, s)
+		}
+	}
+	return ret
+}
+
+// Unflatten map entries into new map.
+func Unflatten(in map[string]interface{}) map[string]interface{} {
+	res := make(map[string]interface{})
+	for k, v := range in {
+		current := res
+		pc := strings.Split(k, ".")
+		for _, c := range pc[0 : len(pc)-1] {
+			if x, exists := current[c].(map[string]interface{}); exists {
+				current = x
+			} else {
+				current[c] = make(map[string]interface{})
+				current = current[c].(map[string]interface{})
+			}
+		}
+		current[pc[len(pc)-1]] = v
+	}
+	return res
+}

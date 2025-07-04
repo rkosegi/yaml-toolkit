@@ -21,8 +21,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,7 +37,7 @@ func TestEncoderFn(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Contains(t, buff.String(), "a.b.c=1\n")
 	assert.Contains(t, buff.String(), "x.y.z=Hi!\n")
-	assert.Error(t, EncoderFn(utils.FailingWriter(), m))
+	assert.Error(t, EncoderFn(common.FailingWriter(), m))
 }
 
 func TestDomEncoderFn(t *testing.T) {
@@ -51,7 +51,7 @@ func TestDomEncoderFn(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Contains(t, buff.String(), "a.b.c=1\n")
 	assert.Contains(t, buff.String(), "x.y.z=Hi!\n")
-	assert.Error(t, DomEncoderFn(utils.FailingWriter(), c))
+	assert.Error(t, DomEncoderFn(common.FailingWriter(), c))
 }
 
 func TestDecoderFn(t *testing.T) {
@@ -62,6 +62,18 @@ func TestDecoderFn(t *testing.T) {
 	assert.Equal(t, "1", m["a"].(map[string]interface{})["b"])
 	assert.Equal(t, "Hi!", m["x"].(map[string]interface{})["y"])
 
-	err = DecoderFn(utils.FailingReader(), m)
+	err = DecoderFn(common.FailingReader(), m)
 	assert.Error(t, err)
+}
+
+func TestParseListPathComponent(t *testing.T) {
+	name, indexes, ok := ParseListPathComponent("list[0][3][1]")
+	assert.True(t, ok)
+	assert.Equal(t, 3, len(indexes))
+	assert.Equal(t, 0, indexes[0])
+	assert.Equal(t, 3, indexes[1])
+	assert.Equal(t, 1, indexes[2])
+	assert.Equal(t, "list", name)
+	_, _, ok = ParseListPathComponent("not a list")
+	assert.False(t, ok)
 }

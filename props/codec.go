@@ -19,10 +19,13 @@ package props
 import (
 	"fmt"
 	"io"
+	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/magiconair/properties"
+	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 func encodeKv(k string, v interface{}, w io.Writer) error {
@@ -60,8 +63,29 @@ func DecoderFn(r io.Reader, x interface{}) error {
 	for k, v := range p.Map() {
 		m2[k] = v
 	}
-	for k, v := range utils.Unflatten(m2) {
+	for k, v := range common.Unflatten(m2) {
 		(*(x.(*map[string]interface{})))[k] = v
 	}
 	return nil
+}
+
+var listPropRe = regexp.MustCompile(`.*(\[\d+])+`)
+
+func ParseListPathComponent(path string) (string, []int, bool) {
+	if !listPropRe.MatchString(path) {
+		return "", nil, false
+	}
+	indexes := make([]int, 0)
+	first := strings.Index(path, "[")
+	cpath := path
+	for {
+		start := strings.Index(cpath, "[")
+		if start == -1 {
+			return path[0:first], indexes, true
+		}
+		end := strings.Index(cpath, "]")
+		index, _ := strconv.Atoi(cpath[start+1 : end])
+		indexes = append(indexes, index)
+		cpath = cpath[end+1:]
+	}
 }

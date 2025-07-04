@@ -23,7 +23,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/rkosegi/yaml-toolkit/utils"
+	"github.com/rkosegi/yaml-toolkit/common"
 	"gopkg.in/yaml.v3"
 )
 
@@ -182,7 +182,7 @@ func (k *manifest) WriteTo(w io.Writer) (int64, error) {
 	)
 	for _, fn := range []func() error{
 		func() error {
-			return utils.NewYamlEncoder(&buff).Encode(k.doc)
+			return common.NewYamlEncoder(&buff).Encode(k.doc)
 		},
 		func() error {
 			var x int

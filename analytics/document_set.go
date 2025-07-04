@@ -27,8 +27,8 @@ import (
 
 	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/fluent"
 	"github.com/rkosegi/yaml-toolkit/k8s"
-	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 const (
@@ -82,7 +82,7 @@ func WithTags(tag ...string) AddLayerOpt {
 func MergeTags() AddLayerOpt {
 	return func(_ *documentSet, _ string, context *docContext) {
 		context.mergeFn = func(newCtx *docContext, doc dom.ContainerBuilder) error {
-			context.tags = utils.Unique(append(context.tags, newCtx.tags...))
+			context.tags = common.Unique(append(context.tags, newCtx.tags...))
 			if context.doc == nil {
 				context.doc = newCtx.doc
 			}
@@ -152,7 +152,7 @@ func (ds *documentSet) AddDocumentFromReader(name string, r io.Reader, dec dom.D
 }
 
 func (ds *documentSet) AddDocumentFromFile(file string, dec dom.DecoderFunc, opts ...AddLayerOpt) error {
-	f, err := utils.FileOpener(file)
+	f, err := common.FileOpener(file)
 	if err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func (ds *documentSet) AddDocumentFromFile(file string, dec dom.DecoderFunc, opt
 	return ds.AddDocumentFromReader(file, f, dec, opts...)
 }
 
-func (ds *documentSet) AddDocumentsFromDirectory(pattern string, decProv common.FileDecoderProvider, opts ...AddLayerOpt) error {
+func (ds *documentSet) AddDocumentsFromDirectory(pattern string, decProv fluent.FileDecoderProvider, opts ...AddLayerOpt) error {
 	files, err := filepath.Glob(pattern)
 	if err != nil {
 		return err
@@ -176,7 +176,7 @@ func (ds *documentSet) AddDocumentsFromDirectory(pattern string, decProv common.
 	return nil
 }
 
-func (ds *documentSet) AddDocumentsFromManifest(manifest string, decProv common.FileDecoderProvider, opts ...AddLayerOpt) error {
+func (ds *documentSet) AddDocumentsFromManifest(manifest string, decProv fluent.FileDecoderProvider, opts ...AddLayerOpt) error {
 	m, err := k8s.ManifestFromFile(manifest)
 	if err != nil {
 		return err

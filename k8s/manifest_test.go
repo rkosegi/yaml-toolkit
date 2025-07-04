@@ -23,7 +23,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/rkosegi/yaml-toolkit/utils"
+	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -96,7 +96,7 @@ func TestInvalidWriteTo(t *testing.T) {
 	m, err := ManifestFromFile("../testdata/cm1.yaml")
 	assert.Nil(t, err)
 	assert.NotNil(t, m)
-	_, err = m.WriteTo(utils.FailingWriter())
+	_, err = m.WriteTo(common.FailingWriter())
 	assert.Error(t, err)
 }
 

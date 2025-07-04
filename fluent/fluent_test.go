@@ -60,3 +60,19 @@ func TestConfigHelperLoadInvalid(t *testing.T) {
 	NewConfigHelper[config]().Load("/tmp/this/should/not/exists")
 	t.Fatal("should panic")
 }
+
+func TestDefaultFileEncoderProvider(t *testing.T) {
+	for _, ext := range []string{"a.yaml", "b.yml", "c.json", "d.properties"} {
+		t.Log("file:", ext)
+		assert.NotNil(t, DefaultFileEncoderProvider(ext))
+	}
+	assert.Nil(t, DefaultFileEncoderProvider(".unknown"))
+}
+
+func TestDefaultFileDecoderProvider(t *testing.T) {
+	for _, ext := range []string{"a.yaml", "b.yml", "c.json", "d.properties"} {
+		t.Log("file:", ext)
+		assert.NotNil(t, DefaultFileDecoderProvider(ext))
+	}
+	assert.Nil(t, DefaultFileDecoderProvider(".unknown"))
+}

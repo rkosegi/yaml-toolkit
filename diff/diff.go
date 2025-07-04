@@ -21,8 +21,8 @@ import (
 	"sort"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/utils"
 )
 
 type ModificationType string
@@ -49,7 +49,7 @@ func (m *Modification) String() string {
 
 func flattenContainer(c dom.Container, path string, res *[]Modification) {
 	for k, n := range c.Children() {
-		sub := utils.ToPath(path, k)
+		sub := common.ToPath(path, k)
 		if n.IsContainer() {
 			flattenContainer(n.(dom.Container), sub, res)
 		} else if n.IsList() {
@@ -66,7 +66,7 @@ func flattenList(l dom.List, path string, res *[]Modification) {
 		if n.IsContainer() {
 			flattenContainer(n.(dom.Container), sub, res)
 		} else if n.IsList() {
-			flattenList(n.(dom.List), utils.ToListPath(path, i), res)
+			flattenList(n.(dom.List), ToListPath(path, i), res)
 		} else {
 			flattenLeaf(n.(dom.Leaf), sub, res)
 		}
@@ -125,16 +125,16 @@ func diff(left, right dom.Container, path string, res *[]Modification) {
 	for k, n := range left.Children() {
 		if n2 := right.Child(k); n2 != nil {
 			// already exists in right
-			handleExisting(n, n2, utils.ToPath(path, k), res)
+			handleExisting(n, n2, common.ToPath(path, k), res)
 		} else {
 			// not found in right Container,so flatten out Node into 1 or more ModAdds Modifications
-			flattenNode(n, utils.ToPath(path, k), res)
+			flattenNode(n, common.ToPath(path, k), res)
 		}
 	}
 	for k := range right.Children() {
 		if n2 := left.Child(k); n2 == nil {
 			// k is present in right, but missing in left
-			appendMod(ModDelete, utils.ToPath(path, k), nil, nil, res)
+			appendMod(ModDelete, common.ToPath(path, k), nil, nil, res)
 		}
 	}
 }
@@ -175,4 +175,14 @@ func OverlayDocs(left, right dom.OverlayDocument) map[string]*[]Modification {
 		}
 	}
 	return res
+}
+
+// ToListPath like ToPath, but for lists
+func ToListPath(path string, index int) string {
+	sub := fmt.Sprintf("[%d]", index)
+	if len(path) == 0 {
+		return sub
+	} else {
+		return path + sub
+	}
 }
