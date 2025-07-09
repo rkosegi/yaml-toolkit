@@ -36,10 +36,6 @@ func SearchEqual(in interface{}) SearchValueFunc {
 	}
 }
 
-// NodeMappingFunc maps internal Container value into external data representation.
-// Deprecated. Use NodeEncoderFunc
-type NodeMappingFunc func(Container) interface{}
-
 // NodeEncoderFunc maps internal Container value into external data representation
 type NodeEncoderFunc func(Container) interface{}
 
