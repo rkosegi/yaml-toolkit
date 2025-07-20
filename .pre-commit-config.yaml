@@ -24,7 +24,7 @@ repos:
           - --autofix
           - --indent=2
   - repo: https://github.com/golangci/golangci-lint
-    rev: v2.2.1
+    rev: v2.2.2
     hooks:
       - id: golangci-lint
   - repo: https://github.com/dnephin/pre-commit-golang
@@ -41,6 +41,6 @@ repos:
         args:
           - -c=.yamllint-config.yaml
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.27.2
+    rev: v8.28.0
     hooks:
       - id: gitleaks
