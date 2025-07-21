@@ -25,6 +25,7 @@ import (
 
 	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/path"
+	"github.com/rkosegi/yaml-toolkit/query"
 )
 
 var (
@@ -124,6 +125,10 @@ func (c *containerImpl) Child(name string) Node {
 		}
 	}
 	return c.children[name]
+}
+
+func (c *containerImpl) Query(qry query.Query) NodeList {
+	return decodeQueryResult(qry.Select(c.AsMap()))
 }
 
 func (c *containerImpl) Search(fn SearchValueFunc) []string {

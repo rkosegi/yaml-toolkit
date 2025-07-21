@@ -23,6 +23,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/path"
+	"github.com/rkosegi/yaml-toolkit/query"
 	"gopkg.in/yaml.v3"
 )
 
@@ -164,6 +165,9 @@ type Container interface {
 	// Walk walks all child Nodes in BFS manner, until provided function return false, or all Nodes are processed.
 	// TODO: I want to use DFS as well. Maybe use custom Opt?
 	Walk(fn NodeVisitorFn)
+
+	// Query queries this container and return matching child nodes.
+	Query(qry query.Query) NodeList
 
 	// deprecated, use Walk
 	// Search finds all paths where Node's value is equal to given value according to provided SearchValueFunc.

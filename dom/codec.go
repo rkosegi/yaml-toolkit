@@ -19,6 +19,7 @@ package dom
 import (
 	"reflect"
 
+	"github.com/rkosegi/yaml-toolkit/query"
 	"gopkg.in/yaml.v3"
 )
 
@@ -122,4 +123,60 @@ func decodeYamlNode(n *yaml.Node) Node {
 		return cb
 	}
 	return nil
+}
+
+func decodeValueToNode(in reflect.Value) Node {
+	switch in.Kind() {
+	case reflect.Pointer, reflect.Interface:
+		return decodeValueToNode(in.Elem())
+
+	case reflect.Struct:
+		out := ContainerNode()
+		it := in.Type()
+		for i := 0; i < it.NumField(); i++ {
+			if f := it.Field(i); f.IsExported() {
+				out.AddValue(f.Name, decodeValueToNode(in.Field(i)))
+			}
+		}
+		return out
+
+	case reflect.Slice, reflect.Array:
+		out := ListNode()
+		for i := range in.Len() {
+			out.Set(uint(i), decodeValueToNode(in.Index(i)))
+		}
+		return out
+
+	case reflect.Float32, reflect.Float64, reflect.String, reflect.Bool,
+		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return LeafNode(in.Interface())
+
+	case reflect.Map:
+		out := ContainerNode()
+		for _, k := range in.MapKeys() {
+			v := in.MapIndex(k)
+			if !v.IsZero() {
+				out.AddValue(k.String(), decodeValueToNode(v))
+			}
+		}
+		return out
+	}
+	return nil
+}
+
+func decodeAnyToNode(in any) Node {
+	return decodeValueToNode(reflect.ValueOf(in))
+}
+
+func decodeQueryResult(qr query.Result) NodeList {
+	qrl := len(qr)
+	if qrl == 0 {
+		return nil
+	}
+	res := make([]Node, qrl)
+	for i, item := range qr {
+		res[i] = decodeAnyToNode(item)
+	}
+	return res
 }

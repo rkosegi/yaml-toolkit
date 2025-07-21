@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/rkosegi/yaml-toolkit/path"
+	"github.com/rkosegi/yaml-toolkit/query"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -372,4 +373,24 @@ func TestContainerBuilderDelete(t *testing.T) {
 	assert.Equal(t, 3, a.Get(p).AsLeaf().Value())
 	a.Delete(p)
 	assert.Nil(t, a.Get(p))
+}
+
+type asIsQueryImpl struct{}
+
+func (a asIsQueryImpl) Select(data any) query.Result {
+	return query.Result{data}
+}
+
+type noneQueryImpl struct{}
+
+func (a noneQueryImpl) Select(_ any) query.Result { return nil }
+
+func TestContainerQuery(t *testing.T) {
+	a := getTestDoc(t, "doc1")
+	r := a.Query(&asIsQueryImpl{})
+
+	assert.NotNil(t, r)
+
+	r = a.Query(&noneQueryImpl{})
+	assert.Nil(t, r)
 }

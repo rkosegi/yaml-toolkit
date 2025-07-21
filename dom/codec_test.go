@@ -52,3 +52,50 @@ root:
 		Kind: yaml.AliasNode,
 	}))
 }
+
+func TestDecodeAnyToNode(t *testing.T) {
+	type testData1 struct {
+		A int
+		B struct {
+			B1 string
+			B2 float64
+			b3 int
+		}
+		c chan struct{}
+		D []int
+		M map[string]int
+	}
+	x1 := &testData1{
+		A: 13,
+		B: struct {
+			B1 string
+			B2 float64
+			b3 int
+		}{
+			B1: "abc",
+			B2: 3.5,
+		},
+		D: []int{4, 9, 3},
+		M: map[string]int{
+			"A": 1,
+		},
+	}
+	y1Src := `
+A: 13
+B:
+  B1: abc
+  B2: 3.5
+D: [4,9,3]
+M:
+  A: 1`
+
+	y1, err := b.FromReader(strings.NewReader(y1Src), DefaultYamlDecoder)
+	assert.NoError(t, err)
+	res := decodeAnyToNode(x1).(ContainerBuilder)
+	assert.NotNil(t, res)
+	assert.Equal(t, 13, res.Child("A").AsLeaf().Value())
+	assert.Equal(t, y1.Seal(), res.Seal())
+
+	// chan is not considered during decode
+	assert.Nil(t, decodeAnyToNode(make(chan struct{})))
+}
