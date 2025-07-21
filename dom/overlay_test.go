@@ -158,8 +158,8 @@ func TestOverlayLayerNames(t *testing.T) {
 
 func TestOverlayAdd(t *testing.T) {
 	d := NewOverlayDocument()
-	d.Add("layerX", b.Container().AddContainer("sub"))
-	c := b.Container()
+	d.Add("layerX", ContainerNode().AddContainer("sub"))
+	c := ContainerNode()
 	c.AddValue("sub1.sub2", LeafNode(123))
 	d.Add("layer1", c)
 	assert.Equal(t, 123, d.Layers()["layer1"].Children()["sub1.sub2"].(Leaf).Value())
