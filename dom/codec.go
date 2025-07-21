@@ -114,7 +114,7 @@ func decodeYamlNode(n *yaml.Node) Node {
 			return decodeYamlNode(n.Content[0])
 		}
 	case yaml.MappingNode:
-		cb := b.Container()
+		cb := ContainerNode()
 		l := len(n.Content)
 		for i := 0; i < l; i += 2 {
 			cb.AddValue(n.Content[i].Value, decodeYamlNode(n.Content[i+1]))

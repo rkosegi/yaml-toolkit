@@ -24,9 +24,9 @@ import (
 )
 
 func TestMergeSimple(t *testing.T) {
-	b1 := b.Container()
+	b1 := ContainerNode()
 	b1.AddValueAt("root.list", ListNode(LeafNode(123), LeafNode(456)))
-	b2 := b.Container()
+	b2 := ContainerNode()
 	b2.AddValueAt("root.list[2]", LeafNode(789))
 	m := &merger{}
 	m.init()
@@ -64,9 +64,9 @@ func TestMergeListsAppend(t *testing.T) {
 }
 
 func TestMergeContainerFromTwoLists(t *testing.T) {
-	c1 := b.Container()
+	c1 := ContainerNode()
 	c1.AddValue("prop1", LeafNode(123))
-	c2 := b.Container()
+	c2 := ContainerNode()
 	c2.AddValue("prop2", LeafNode("abc"))
 	m := &merger{}
 	m.init()

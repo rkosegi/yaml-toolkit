@@ -60,7 +60,7 @@ func TestBuilderFromJsonString(t *testing.T) {
 }
 
 func TestBuildAndSerialize(t *testing.T) {
-	builder := b.Container()
+	builder := ContainerNode()
 	builder.AddContainer("root").
 		AddContainer("level1").
 		AddContainer("level2").
@@ -84,7 +84,7 @@ func TestBuildAndSerialize(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	builder := b.Container()
+	builder := ContainerNode()
 	builder.AddContainer("root").
 		AddContainer("level1").
 		AddValue("leaf1", LeafNode("Hello"))
@@ -168,13 +168,13 @@ func TestRemoveAt(t *testing.T) {
 }
 
 func TestAddValueAt(t *testing.T) {
-	c := b.Container()
+	c := ContainerNode()
 	c.AddValueAt("test1.test2.test31", LeafNode("abc"))
 	c.AddValueAt("test1.test2.test32", LeafNode(123))
 	c.AddValueAt("test1.test2.test33", LeafNode(nil))
 	c.AddValueAt("test1.test2.test34", ListNode(
 		LeafNode("Hello"),
-		b.Container(),
+		ContainerNode(),
 		ListNode()),
 	)
 	assert.Equal(t, "abc", c.Lookup("test1.test2.test31").(Leaf).Value())
@@ -230,7 +230,7 @@ root:
 }
 
 func TestAddListAt(t *testing.T) {
-	root := b.Container().AddContainer("root")
+	root := ContainerNode().AddContainer("root")
 	root.AddValueAt("root.list[0]", LeafNode(123))
 	root.AddValueAt("root.sub.sub2[5]", LeafNode("abc"))
 	root.AddValueAt("root.sub.sub2[4].sub3", LeafNode(456))
@@ -325,8 +325,8 @@ func TestContainerClone(t *testing.T) {
 }
 
 func TestMergeContainers(t *testing.T) {
-	a := b.Container()
-	c := b.Container()
+	a := ContainerNode()
+	c := ContainerNode()
 	a.AddValueAt("l1.l2c", LeafNode(7))
 	a.AddValueAt("l1.l2d", LeafNode("0987"))
 	c.AddValueAt("l1.l2a", LeafNode("123"))
@@ -337,7 +337,7 @@ func TestMergeContainers(t *testing.T) {
 }
 
 func TestContainerBuilderSeal(t *testing.T) {
-	a := b.Container()
+	a := ContainerNode()
 	c := a.Seal()
 	_, isType := c.(ContainerBuilder)
 	assert.False(t, isType)
@@ -351,7 +351,7 @@ func TestContainerFactoryFrom(t *testing.T) {
 }
 
 func TestContainerBuilderSet(t *testing.T) {
-	a := b.Container()
+	a := ContainerNode()
 	p := path.NewBuilder().Append(path.Simple("a")).Append(path.Simple("b")).Build()
 	a.Set(p, LeafNode(1))
 	assert.Equal(t, 1, a.Child("a").AsContainer().Child("b").AsLeaf().Value())
