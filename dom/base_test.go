@@ -26,7 +26,7 @@ func TestCastAsSubtypes(t *testing.T) {
 	asContainer := func(n Node) { n.AsContainer() }
 	asLeaf := func(n Node) { n.AsLeaf() }
 	asList := func(n Node) { n.AsList() }
-	container := b.Container()
+	container := ContainerNode()
 	list := ListNode()
 	leafNode := nilLeaf
 	assert.NotNil(t, container.AsContainer())
