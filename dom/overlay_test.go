@@ -32,9 +32,9 @@ func TestPutAndLookup(t *testing.T) {
 	assert.Nil(t, d.Lookup("main", "abc"))
 	d.Put("main", "abc", LeafNode("123"))
 	assert.Nil(t, d.Lookup("main", ""))
-	assert.Equal(t, "123", d.Lookup("main", "abc").(Leaf).Value())
+	assert.Equal(t, "123", d.Lookup("main", "abc").AsLeaf().Value())
 	d.Put("main", "xyz.efg", LeafNode(42))
-	assert.Equal(t, 42, d.Lookup("main", "xyz.efg").(Leaf).Value())
+	assert.Equal(t, 42, d.Lookup("main", "xyz.efg").AsLeaf().Value())
 	assert.True(t, d.LookupAny("xyz").IsContainer())
 	assert.Nil(t, d.LookupAny("w"))
 	assert.Nil(t, d.LookupAny("xyz.efg.abc"))
@@ -73,7 +73,7 @@ func TestLoad(t *testing.T) {
 	d.Populate("layer-1", "key1.key12", &doc)
 	n := d.LookupAny("key1")
 	assert.True(t, n.IsContainer())
-	c1 := n.(Container).Child("key12")
+	c1 := n.AsContainer().Child("key12")
 	assert.True(t, c1.IsContainer())
 	assert.Equal(t, 1, len(d.Layers()))
 
@@ -102,14 +102,14 @@ func TestLoadLookupList(t *testing.T) {
 	d := NewOverlayDocument()
 	d.Put("", "key1.key2[0].key3", LeafNode("hello"))
 	n := d.LookupAny("key1.key2[0].key3")
-	assert.Equal(t, "hello", n.(Leaf).Value())
+	assert.Equal(t, "hello", n.AsLeaf().Value())
 }
 
 func TestFirstValidListItem(t *testing.T) {
 	assert.Equal(t, 456, firstValidListItem(1,
 		ListNode(),
 		ListNode(nilLeaf),
-		ListNode(LeafNode(123), LeafNode(456))).(Leaf).Value())
+		ListNode(LeafNode(123), LeafNode(456))).AsLeaf().Value())
 	assert.Equal(t, nilLeaf, firstValidListItem(2, ListNode()))
 }
 
@@ -140,7 +140,7 @@ func TestOverlayLayers(t *testing.T) {
 	d.Put("layer2", "root.other", LeafNode(5))
 	m := d.Layers()
 	assert.Equal(t, 2, len(m))
-	assert.Equal(t, 5, m["layer2"].Children()["root"].(Container).Children()["other"].(Leaf).Value())
+	assert.Equal(t, 5, m["layer2"].Children()["root"].AsContainer().Children()["other"].AsLeaf().Value())
 }
 
 func TestOverlayLayerNames(t *testing.T) {
@@ -162,7 +162,7 @@ func TestOverlayAdd(t *testing.T) {
 	c := ContainerNode()
 	c.AddValue("sub1.sub2", LeafNode(123))
 	d.Add("layer1", c)
-	assert.Equal(t, 123, d.Layers()["layer1"].Children()["sub1.sub2"].(Leaf).Value())
+	assert.Equal(t, 123, d.Layers()["layer1"].Children()["sub1.sub2"].AsLeaf().Value())
 }
 
 func TestOverlayWalk(t *testing.T) {
@@ -177,7 +177,7 @@ func TestOverlayWalk(t *testing.T) {
 	d.Walk(func(layer string, p path.Path, parent Node, node Node) bool {
 		t.Logf("layer=%s, path=%v, parent=%v, node=%v", layer, p, parent, node)
 		cnt++
-		if node.IsLeaf() && node.(Leaf).Value() == 1 {
+		if node.IsLeaf() && node.AsLeaf().Value() == 1 {
 			t.Logf("Hit false condition, terminating walk")
 			return false
 		}

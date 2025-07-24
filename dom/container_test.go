@@ -36,8 +36,8 @@ def: xyz
 	assert.True(t, doc.IsContainer())
 	assert.False(t, doc.IsLeaf())
 	assert.False(t, doc.SameAs(nilLeaf))
-	assert.Equal(t, "xyz", doc.Children()["def"].(Leaf).Value())
-	assert.Equal(t, 123, doc.Children()["abc"].(Leaf).Value())
+	assert.Equal(t, "xyz", doc.Children()["def"].AsLeaf().Value())
+	assert.Equal(t, 123, doc.Children()["abc"].AsLeaf().Value())
 }
 
 func TestBuilderFromInvalidYamlString(t *testing.T) {
@@ -55,8 +55,8 @@ func TestBuilderFromJsonString(t *testing.T) {
 `), DefaultJsonDecoder)
 	assert.Nil(t, err)
 	assert.True(t, doc.IsContainer())
-	assert.Equal(t, "xyz", doc.Children()["def"].(Leaf).Value())
-	assert.Equal(t, float64(123), doc.Children()["abc"].(Leaf).Value())
+	assert.Equal(t, "xyz", doc.Children()["def"].AsLeaf().Value())
+	assert.Equal(t, float64(123), doc.Children()["abc"].AsLeaf().Value())
 }
 
 func TestBuildAndSerialize(t *testing.T) {
@@ -106,8 +106,8 @@ func getTestDoc(t *testing.T, name string) ContainerBuilder {
 func TestBuilderFromFile(t *testing.T) {
 	doc := getTestDoc(t, "doc1")
 	assert.True(t, doc.IsContainer())
-	assert.Equal(t, "leaf1", doc.Child("level1").(Container).Child("level2a").(Container).Child("level3a").(Leaf).Value())
-	assert.Equal(t, 3, doc.Child("level1").(Container).Child("level2b").(Leaf).Value())
+	assert.Equal(t, "leaf1", doc.Child("level1").AsContainer().Child("level2a").AsContainer().Child("level3a").AsLeaf().Value())
+	assert.Equal(t, 3, doc.Child("level1").AsContainer().Child("level2b").AsLeaf().Value())
 }
 
 func TestLookup(t *testing.T) {
@@ -116,7 +116,7 @@ func TestLookup(t *testing.T) {
 	assert.Nil(t, doc.Lookup("level1a"))
 	assert.Nil(t, doc.Lookup(""))
 	assert.Nil(t, doc.Lookup("level1.level2b.level3"))
-	assert.Equal(t, "leaf1", doc.Lookup("level1.level2a.level3a").(Leaf).Value())
+	assert.Equal(t, "leaf1", doc.Lookup("level1.level2a.level3a").AsLeaf().Value())
 }
 
 func TestContainerAsMap(t *testing.T) {
@@ -148,7 +148,7 @@ func TestFromMap(t *testing.T) {
 		"test1.test2":  "abc",
 		"test1.test22": 123,
 	})
-	assert.Equal(t, "abc", c.Child("test1.test2").(Leaf).Value())
+	assert.Equal(t, "abc", c.Child("test1.test2").AsLeaf().Value())
 }
 
 func TestFromProperties(t *testing.T) {
@@ -157,8 +157,8 @@ func TestFromProperties(t *testing.T) {
 		"test1.test22": 123,
 	})
 	assert.Equal(t, 1, len(c.Children()))
-	assert.Equal(t, 2, len(c.Children()["test1"].(Container).Children()))
-	assert.Equal(t, "abc", c.Lookup("test1.test2").(Leaf).Value())
+	assert.Equal(t, 2, len(c.Children()["test1"].AsContainer().Children()))
+	assert.Equal(t, "abc", c.Lookup("test1.test2").AsLeaf().Value())
 }
 
 func TestRemoveAt(t *testing.T) {
@@ -183,7 +183,7 @@ func TestAddValueAt(t *testing.T) {
 		ContainerNode(),
 		ListNode()),
 	)
-	assert.Equal(t, "abc", c.Lookup("test1.test2.test31").(Leaf).Value())
+	assert.Equal(t, "abc", c.Lookup("test1.test2.test31").AsLeaf().Value())
 	var buff bytes.Buffer
 	err := c.Serialize(&buff, DefaultNodeEncoderFn, DefaultYamlEncoder)
 	assert.Nil(t, err)
@@ -197,7 +197,7 @@ level1: 123
 	assert.NotNil(t, c)
 	assert.Nil(t, err)
 	assert.NotNil(t, c.Child("leaf0"))
-	assert.Nil(t, c.Child("leaf0").(Leaf).Value())
+	assert.Nil(t, c.Child("leaf0").AsLeaf().Value())
 }
 
 func TestSearch(t *testing.T) {
@@ -228,8 +228,8 @@ root:
 `), DefaultYamlDecoder)
 	assert.NotNil(t, c)
 	assert.Nil(t, err)
-	assert.Equal(t, "abc", c.Lookup("root.list[0].item1").(Leaf).Value())
-	assert.Equal(t, 123, c.Lookup("root.list[1]").(Leaf).Value())
+	assert.Equal(t, "abc", c.Lookup("root.list[0].item1").AsLeaf().Value())
+	assert.Equal(t, 123, c.Lookup("root.list[1]").AsLeaf().Value())
 	assert.Nil(t, c.Lookup("root.list[2]"))
 	assert.Nil(t, c.Lookup("root.not-a-list[0]"))
 	assert.Nil(t, c.Lookup("root.not-exists-at-all[0]"))
@@ -241,8 +241,8 @@ func TestAddListAt(t *testing.T) {
 	root.AddValueAt("root.sub.sub2[5]", LeafNode("abc"))
 	root.AddValueAt("root.sub.sub2[4].sub3", LeafNode(456))
 
-	assert.Equal(t, 123, root.Lookup("root.list[0]").(Leaf).Value())
-	assert.Equal(t, "abc", root.Lookup("root.sub.sub2[5]").(Leaf).Value())
+	assert.Equal(t, 123, root.Lookup("root.list[0]").AsLeaf().Value())
+	assert.Equal(t, "abc", root.Lookup("root.sub.sub2[5]").AsLeaf().Value())
 }
 
 func TestCompact(t *testing.T) {
@@ -278,7 +278,7 @@ root:
 	assert.NotNil(t, c)
 	assert.NoError(t, err)
 	c.Walk(func(p path.Path, parent Node, node Node) bool {
-		if node.IsLeaf() && node.(Leaf).Value() == 123 {
+		if node.IsLeaf() && node.AsLeaf().Value() == 123 {
 			return false
 		}
 		return true
@@ -325,9 +325,9 @@ func TestContainerClone(t *testing.T) {
 	c := ContainerNode()
 	c.AddValueAt("a.b[1]", LeafNode("123"))
 	c.AddValueAt("a.x.y", LeafNode(123))
-	c2 := c.Clone().(Container)
-	assert.Equal(t, 123, c2.Lookup("a.x.y").(Leaf).Value())
-	assert.Equal(t, "123", c2.Lookup("a.b[1]").(Leaf).Value())
+	c2 := c.Clone().AsContainer()
+	assert.Equal(t, 123, c2.Lookup("a.x.y").AsLeaf().Value())
+	assert.Equal(t, "123", c2.Lookup("a.b[1]").AsLeaf().Value())
 }
 
 func TestMergeContainers(t *testing.T) {
@@ -338,8 +338,8 @@ func TestMergeContainers(t *testing.T) {
 	c.AddValueAt("l1.l2a", LeafNode("123"))
 	c.AddValueAt("l1.l2b", LeafNode("abc"))
 	d := c.Merge(a)
-	assert.Equal(t, 4, len(d.Lookup("l1").(Container).Children()))
-	assert.Equal(t, "abc", d.Lookup("l1.l2b").(Leaf).Value())
+	assert.Equal(t, 4, len(d.Lookup("l1").AsContainer().Children()))
+	assert.Equal(t, "abc", d.Lookup("l1.l2b").AsLeaf().Value())
 }
 
 func TestContainerBuilderSeal(t *testing.T) {

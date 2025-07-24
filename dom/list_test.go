@@ -38,14 +38,14 @@ func TestList(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, doc)
 	assert.False(t, doc.IsList())
-	l := doc.Child("root").(Container).Child("list").(List)
+	l := doc.Child("root").AsContainer().Child("list").(List)
 	assert.False(t, l.IsContainer())
 	assert.False(t, l.IsLeaf())
 	assert.True(t, l.IsList())
 	assert.Equal(t, 3, l.Size())
-	assert.Equal(t, 123, l.Items()[2].(Container).
-		Child("item3").(List).Items()[0].(Container).
-		Child("sub").(Leaf).Value())
+	assert.Equal(t, 123, l.Items()[2].AsContainer().
+		Child("item3").AsList().Items()[0].AsContainer().
+		Child("sub").AsLeaf().Value())
 	assert.False(t, l.SameAs(nilLeaf))
 }
 
@@ -53,14 +53,14 @@ func TestMutateList(t *testing.T) {
 	doc, err := b.FromReader(strings.NewReader(d), DefaultYamlDecoder)
 	assert.NoError(t, err)
 	assert.NotNil(t, doc)
-	l := doc.Child("root").(Container).Child("list").(ListBuilder)
+	l := doc.Child("root").AsContainer().Child("list").(ListBuilder)
 	assert.Equal(t, 3, l.Size())
 
 	l.MustSet(0, LeafNode(123))
 	l.MustSet(1, LeafNode("abc"))
 
-	assert.Equal(t, "abc", l.Items()[1].(Leaf).Value())
-	assert.Equal(t, 123, l.Items()[0].(Leaf).Value())
+	assert.Equal(t, "abc", l.Items()[1].AsLeaf().Value())
+	assert.Equal(t, 123, l.Items()[0].AsLeaf().Value())
 	l.Clear()
 	assert.Equal(t, 0, l.Size())
 	l.Set(0, LeafNode(123))

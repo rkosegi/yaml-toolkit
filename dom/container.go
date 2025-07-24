@@ -46,11 +46,11 @@ func flattenList(node List, path string, ret *map[string]Leaf) {
 	for i, item := range node.Items() {
 		p := fmt.Sprintf("%s[%d]", path, i)
 		if item.IsContainer() {
-			flattenContainer(item.(Container), p, ret)
+			flattenContainer(item.AsContainer(), p, ret)
 		} else if item.IsList() {
-			flattenList(item.(List), p, ret)
+			flattenList(item.AsList(), p, ret)
 		} else {
-			flattenLeaf(item.(Leaf), p, ret)
+			flattenLeaf(item.AsLeaf(), p, ret)
 		}
 	}
 }
@@ -59,11 +59,11 @@ func flattenContainer(node Container, path string, ret *map[string]Leaf) {
 	for k, n := range node.Children() {
 		p := common.ToPath(path, k)
 		if n.IsContainer() {
-			flattenContainer(n.(Container), p, ret)
+			flattenContainer(n.AsContainer(), p, ret)
 		} else if n.IsList() {
-			flattenList(n.(List), p, ret)
+			flattenList(n.AsList(), p, ret)
 		} else {
-			flattenLeaf(n.(Leaf), p, ret)
+			flattenLeaf(n.AsLeaf(), p, ret)
 		}
 	}
 }
@@ -87,7 +87,7 @@ func (c *containerImpl) Equals(node Node) bool {
 		return false
 	}
 	for k, v := range c.children {
-		other := node.(Container).Child(k)
+		other := node.AsContainer().Child(k)
 		if other == nil || !v.Equals(other) {
 			return false
 		}
@@ -166,7 +166,7 @@ func (c *containerImpl) Lookup(path string) Node {
 		if x == nil || !x.IsContainer() {
 			return nil
 		} else {
-			current = x.(Container)
+			current = x.AsContainer()
 		}
 	}
 	return current.Child(pc[len(pc)-1])

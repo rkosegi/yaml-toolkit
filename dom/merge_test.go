@@ -58,9 +58,9 @@ func TestMergeListsAppend(t *testing.T) {
 		),
 	)
 	assert.Equal(t, 3, l.Size())
-	assert.Equal(t, 123, l.Items()[0].(Leaf).Value())
-	assert.Equal(t, 456, l.Items()[1].(Leaf).Value())
-	assert.Equal(t, 789, l.Items()[2].(Leaf).Value())
+	assert.Equal(t, 123, l.Items()[0].AsLeaf().Value())
+	assert.Equal(t, 456, l.Items()[1].AsLeaf().Value())
+	assert.Equal(t, 789, l.Items()[2].AsLeaf().Value())
 }
 
 func TestMergeContainerFromTwoLists(t *testing.T) {
@@ -77,7 +77,7 @@ func TestMergeContainerFromTwoLists(t *testing.T) {
 func TestCoalesce(t *testing.T) {
 	assert.Equal(t, nilLeaf, coalesce(nilLeaf))
 	assert.Equal(t, 123, coalesce(nilLeaf,
-		LeafNode(123), nilLeaf).(Leaf).Value())
+		LeafNode(123), nilLeaf).AsLeaf().Value())
 }
 
 func TestMergeOverrideLeafValue(t *testing.T) {
@@ -100,5 +100,5 @@ root:
 	override, err := b.FromReader(strings.NewReader(d2), DefaultYamlDecoder)
 	assert.NoError(t, err)
 	result := orig.Merge(override)
-	assert.Equal(t, 2, result.Lookup("root.sub1.sub2.leaf").(Leaf).Value())
+	assert.Equal(t, 2, result.Lookup("root.sub1.sub2.leaf").AsLeaf().Value())
 }

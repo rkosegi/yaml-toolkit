@@ -46,7 +46,7 @@ func TestLeafEquals(t *testing.T) {
 
 func TestLeafClone(t *testing.T) {
 	l := LeafNode(10)
-	assert.Equal(t, 10, l.Clone().(Leaf).Value())
+	assert.Equal(t, 10, l.Clone().AsLeaf().Value())
 }
 
 func TestLeafAsAny(t *testing.T) {
