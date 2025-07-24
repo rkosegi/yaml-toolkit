@@ -125,6 +125,12 @@ func TestContainerAsMap(t *testing.T) {
 	assert.NotNil(t, fm["level1"])
 }
 
+func TestContainerAsAny(t *testing.T) {
+	fm := getTestDoc(t, "doc1").AsAny().(map[string]interface{})
+	assert.Equal(t, 1, len(fm))
+	assert.NotNil(t, fm["level1"])
+}
+
 func TestFlatten(t *testing.T) {
 	fm := getTestDoc(t, "doc1").Flatten()
 	assert.Equal(t, 5, len(fm))
