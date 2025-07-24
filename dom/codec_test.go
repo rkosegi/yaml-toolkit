@@ -40,8 +40,13 @@ root:
 	assert.NoError(t, err)
 	dn = YamlNodeDecoder()(&n)
 	assert.NotNil(t, dn)
-	assert.Equal(t, 1, dn.(Container).Child("root").(Container).Child("list1").(List).Size())
-	assert.Equal(t, "123", dn.(Container).Child("root").(Container).Child("list1").(List).Items()[0].(Container).Child("prop2").(Leaf).Value())
+	assert.Equal(t, 1, dn.AsContainer().
+		Child("root").AsContainer().
+		Child("list1").AsList().Size())
+	assert.Equal(t, "123", dn.AsContainer().
+		Child("root").AsContainer().
+		Child("list1").AsList().Items()[0].AsContainer().
+		Child("prop2").AsLeaf().Value())
 
 	assert.Nil(t, decodeYamlNode(&yaml.Node{
 		Kind: yaml.AliasNode,

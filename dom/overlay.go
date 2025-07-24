@@ -74,7 +74,7 @@ func (m *overlayDocument) Search(fn SearchValueFunc) Coordinates {
 func (m *overlayDocument) Layers() map[string]Container {
 	c := make(map[string]Container, len(m.names))
 	for n, v := range m.overlays {
-		c[n] = v.Clone().(Container)
+		c[n] = v.Clone().AsContainer()
 	}
 	return c
 }
@@ -94,7 +94,7 @@ func (m *overlayDocument) Add(overlay string, value Container) {
 
 func (m *overlayDocument) Put(overlay, path string, value Node) {
 	if value.IsContainer() {
-		for k, v := range value.(Container).Flatten() {
+		for k, v := range value.AsContainer().Flatten() {
 			m.Put(overlay, common.ToPath(path, k), v)
 		}
 	} else {
@@ -171,7 +171,7 @@ func hasValue(n Node) bool {
 	if n == nil || n == nilLeaf {
 		return false
 	}
-	if !n.IsList() && !n.IsContainer() && n.(Leaf).Value() == nil {
+	if !n.IsList() && !n.IsContainer() && n.AsLeaf().Value() == nil {
 		return false
 	}
 	return true

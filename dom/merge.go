@@ -67,7 +67,7 @@ func (mg *merger) mergeListsMeld(l1, l2 List) List {
 		n1 := l1.Items()[i]
 		n2 := l2.Items()[i]
 		if n1.IsContainer() && n2.IsContainer() {
-			l.Set(uint(i), mg.mergeContainers(n1.(Container), n2.(Container)))
+			l.Set(uint(i), mg.mergeContainers(n1.AsContainer(), n2.AsContainer()))
 		} else if n1.IsList() && n2.IsList() {
 			l.Set(uint(i), mg.listMergeFn(n1.(List), n2.(List)))
 		} else {
@@ -88,7 +88,7 @@ func (mg *merger) mergeContainers(c1, c2 Container) ContainerBuilder {
 	for k, v := range c2.Children() {
 		if n, exists := merged[k]; exists {
 			if n.IsContainer() && v.IsContainer() {
-				merged[k] = mg.mergeContainers(n.(Container), v.(Container))
+				merged[k] = mg.mergeContainers(n.AsContainer(), v.AsContainer())
 			} else if n.IsList() && v.IsList() {
 				merged[k] = mg.listMergeFn(n.(List), v.(List))
 			} else {

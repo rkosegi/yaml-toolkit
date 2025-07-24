@@ -30,11 +30,11 @@ func encodeListFn(n List) []interface{} {
 	res := make([]interface{}, n.Size())
 	for i, item := range n.Items() {
 		if item.IsContainer() {
-			res[i] = encodeContainerFn(item.(Container))
+			res[i] = encodeContainerFn(item.AsContainer())
 		} else if item.IsList() {
-			res[i] = encodeListFn(item.(List))
+			res[i] = encodeListFn(item.AsList())
 		} else {
-			res[i] = encodeLeafFn(item.(Leaf))
+			res[i] = encodeLeafFn(item.AsLeaf())
 		}
 	}
 	return res
@@ -42,13 +42,13 @@ func encodeListFn(n List) []interface{} {
 
 func encodeContainerFn(n Container) map[string]interface{} {
 	res := map[string]interface{}{}
-	for k, v := range n.(Container).Children() {
+	for k, v := range n.Children() {
 		if v.IsContainer() {
-			res[k] = encodeContainerFn(v.(Container))
+			res[k] = encodeContainerFn(v.AsContainer())
 		} else if v.IsList() {
-			res[k] = encodeListFn(v.(List))
+			res[k] = encodeListFn(v.AsList())
 		} else {
-			res[k] = encodeLeafFn(v.(Leaf))
+			res[k] = encodeLeafFn(v.AsLeaf())
 		}
 	}
 	return res

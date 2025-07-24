@@ -92,14 +92,14 @@ func applyToNode(targetNode Node, at path.Path, val Node) Node {
 		if c.IsNumeric() {
 			tgt = applyToList(unsealListIfNeeded(tgt.(List)), c, nextIsNum)
 		} else {
-			tgt = applyToContainer(unsealContainerIfNeeded(tgt.(Container)), c, nextIsNum)
+			tgt = applyToContainer(unsealContainerIfNeeded(tgt.AsContainer()), c, nextIsNum)
 		}
 	}
 	c := cp[lastIdx]
 	if c.IsNumeric() {
 		unsealListIfNeeded(tgt.(List)).Set(uint(c.NumericValue()), val)
 	} else {
-		unsealContainerIfNeeded(tgt.(Container)).AddValue(c.Value(), val)
+		unsealContainerIfNeeded(tgt.AsContainer()).AddValue(c.Value(), val)
 	}
 	return targetNode
 }

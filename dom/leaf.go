@@ -28,7 +28,7 @@ func (l *leaf) Clone() Node {
 }
 
 func (l *leaf) Equals(node Node) bool {
-	return node != nil && node.IsLeaf() && cmp.Equal(l.value, node.(Leaf).Value())
+	return node != nil && node.IsLeaf() && cmp.Equal(l.value, node.AsLeaf().Value())
 }
 
 func (l *leaf) SameAs(node Node) bool {
