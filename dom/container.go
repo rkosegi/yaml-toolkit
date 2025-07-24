@@ -78,6 +78,10 @@ func (c *containerImpl) AsMap() map[string]interface{} {
 	return encodeContainerFn(c)
 }
 
+func (c *containerImpl) AsAny() any {
+	return encodeContainerFn(c)
+}
+
 func (c *containerImpl) Equals(node Node) bool {
 	if node == nil || !node.IsContainer() {
 		return false

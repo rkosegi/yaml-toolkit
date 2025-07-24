@@ -47,6 +47,10 @@ func (l *leaf) AsLeaf() Leaf {
 	return l
 }
 
+func (l *leaf) AsAny() any {
+	return l.value
+}
+
 func LeafNode(val interface{}) Leaf {
 	ln := &leaf{value: val}
 	ln.desc = "leaf"

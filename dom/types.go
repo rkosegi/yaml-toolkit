@@ -114,6 +114,9 @@ type Node interface {
 	// AsList casts this Node to a List, panics if this Node is not a List.
 	AsList() List
 
+	// AsAny convert this Node's value to any
+	AsAny() any
+
 	// Desc returns human-readable description of runtime type, such as "list".
 	Desc() string
 }
@@ -150,6 +153,7 @@ type Container interface {
 	// Child returns single child Node by its name. If no such child exists, nil is returned.
 	Child(name string) Node
 
+	// deprecated, use AsAny
 	// AsMap converts recursively content of this container into map[string]interface{}
 	// Result consists from Go vanilla constructs only and thus could be directly used in Go templates.
 	AsMap() map[string]interface{}

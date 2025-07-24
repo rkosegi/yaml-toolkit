@@ -115,3 +115,12 @@ func TestListBuilderSeal(t *testing.T) {
 	_, isType := c.(ListBuilder)
 	assert.False(t, isType)
 }
+
+func TestListAsAny(t *testing.T) {
+	l := ListNode(LeafNode(10), LeafNode(20), LeafNode(30))
+	x := l.AsAny().([]interface{})
+	assert.Len(t, x, 3)
+	assert.Equal(t, 10, x[0])
+	assert.Equal(t, 20, x[1])
+	assert.Equal(t, 30, x[2])
+}

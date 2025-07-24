@@ -59,6 +59,10 @@ func (l *listImpl) AsList() List {
 	return l
 }
 
+func (l *listImpl) AsAny() any {
+	return encodeListFn(l)
+}
+
 func (l *listImpl) Equals(node Node) bool {
 	if node == nil || !node.IsList() {
 		return false
