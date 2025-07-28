@@ -91,11 +91,11 @@ M:
 
 	y1, err := b.FromReader(strings.NewReader(y1Src), DefaultYamlDecoder)
 	assert.NoError(t, err)
-	res := decodeAnyToNode(x1).(ContainerBuilder)
+	res := DecodeAnyToNode(x1).(ContainerBuilder)
 	assert.NotNil(t, res)
 	assert.Equal(t, 13, res.Child("A").AsLeaf().Value())
 	assert.Equal(t, y1.Seal(), res.Seal())
 
 	// chan is not considered during decode
-	assert.Nil(t, decodeAnyToNode(make(chan struct{})))
+	assert.Nil(t, DecodeAnyToNode(make(chan struct{})))
 }

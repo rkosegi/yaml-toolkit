@@ -165,10 +165,6 @@ func decodeValueToNode(in reflect.Value) Node {
 	return nil
 }
 
-func decodeAnyToNode(in any) Node {
-	return decodeValueToNode(reflect.ValueOf(in))
-}
-
 func decodeQueryResult(qr query.Result) NodeList {
 	qrl := len(qr)
 	if qrl == 0 {
@@ -176,7 +172,7 @@ func decodeQueryResult(qr query.Result) NodeList {
 	}
 	res := make([]Node, qrl)
 	for i, item := range qr {
-		res[i] = decodeAnyToNode(item)
+		res[i] = DecodeAnyToNode(item)
 	}
 	return res
 }
