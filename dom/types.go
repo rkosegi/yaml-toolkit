@@ -19,6 +19,7 @@ package dom
 import (
 	"encoding/json"
 	"io"
+	"reflect"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/common"
@@ -75,6 +76,11 @@ func DefaultNodeDecoderFn(m map[string]interface{}) Container {
 	cb := *initContainerBuilder()
 	decodeContainerFn(&m, &cb)
 	return &cb
+}
+
+// DecodeAnyToNode decodes any value to Node.
+func DecodeAnyToNode(in any) Node {
+	return decodeValueToNode(reflect.ValueOf(in))
 }
 
 // YamlNodeDecoder returns function that could be used to convert yaml.Node to Node.
