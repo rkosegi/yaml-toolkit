@@ -37,10 +37,10 @@ const (
 )
 
 type Modification struct {
-	Type     ModificationType
-	Path     string
-	Value    interface{}
-	OldValue interface{}
+	Type     ModificationType `yaml:"type"`
+	Path     string           `yaml:"path"`
+	Value    interface{}      `yaml:"value,omitempty"`
+	OldValue interface{}      `yaml:"oldValue,omitempty"`
 }
 
 func (m *Modification) String() string {
