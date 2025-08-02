@@ -98,4 +98,6 @@ M:
 
 	// chan is not considered during decode
 	assert.Nil(t, DecodeAnyToNode(make(chan struct{})))
+
+	assert.Equal(t, nilLeaf, DecodeAnyToNode(nil))
 }
