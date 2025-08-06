@@ -29,10 +29,6 @@ tests:
       - any-glob-to-any-file:
           - '**/*_test.go'
           - testdata/**
-schemas:
-  - changed-files:
-      - any-glob-to-any-file:
-          - schemas/*.json
 ci/config:
   - changed-files:
       - any-glob-to-any-file:
@@ -42,14 +38,22 @@ component/analytics:
   - changed-files:
       - any-glob-to-any-file:
           - analytics/*
-component/dom:
+component/common:
   - changed-files:
       - any-glob-to-any-file:
-          - dom/*
+          - common/*
 component/diff:
   - changed-files:
       - any-glob-to-any-file:
           - diff/*
+component/dom:
+  - changed-files:
+      - any-glob-to-any-file:
+          - dom/*
+component/fluent:
+  - changed-files:
+      - any-glob-to-any-file:
+          - fluent/*
 component/k8s:
   - changed-files:
       - any-glob-to-any-file:
@@ -62,11 +66,13 @@ component/path:
   - changed-files:
       - any-glob-to-any-file:
           - path/*
+          - jsonpath/*
+          - jmespath/*
 component/props:
   - changed-files:
       - any-glob-to-any-file:
           - props/*
-component/utils:
+component/transformer:
   - changed-files:
       - any-glob-to-any-file:
-          - utils/*
+          - xform/*
