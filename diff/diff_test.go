@@ -72,8 +72,8 @@ func TestDiffSimple1(t *testing.T) {
 	assertHasChange(t, Modification{
 		Type:     ModChange,
 		Path:     "leaf1",
-		Value:    456,
-		OldValue: "abc",
+		OldValue: 456,
+		Value:    "abc",
 	}, res)
 }
 
@@ -91,14 +91,14 @@ level1:
 	assertHasChange(t, Modification{
 		Type:     ModChange,
 		Path:     "leaf0",
-		Value:    1234,
-		OldValue: 123,
+		OldValue: 1234,
+		Value:    123,
 	}, res)
 	assertHasChange(t, Modification{
 		Type:     ModChange,
 		Path:     "level1.level2.leaf12",
-		Value:    456,
-		OldValue: "abcd",
+		OldValue: 456,
+		Value:    "abcd",
 	}, res)
 }
 
@@ -132,8 +132,8 @@ level1:
 	assertHasChange(t, Modification{
 		Type:     ModChange,
 		Path:     "leaf0",
-		Value:    1234,
-		OldValue: 123,
+		OldValue: 1234,
+		Value:    123,
 	}, res)
 }
 
@@ -164,8 +164,8 @@ level1:
 	assertHasChange(t, Modification{
 		Type:     ModChange,
 		Path:     "leaf0",
-		Value:    123,
-		OldValue: 1234,
+		Value:    1234,
+		OldValue: 123,
 	}, res)
 	assertHasChange(t, Modification{
 		Type: ModDelete,
@@ -192,7 +192,7 @@ level1:
 	assert.Equal(t, `another:
   container:
     leaf13: Hi
-leaf0: 123
+leaf0: 1234
 level1:
   level2:
     leaf12: abcd
@@ -314,8 +314,8 @@ func TestDiffOverlayDocuments(t *testing.T) {
 	assertHasChange(t, Modification{
 		Type:     ModChange,
 		Path:     "a.b.c",
-		OldValue: 1,
-		Value:    2,
+		OldValue: 2,
+		Value:    1,
 	}, res["layer1"])
 
 	assertHasChange(t, Modification{

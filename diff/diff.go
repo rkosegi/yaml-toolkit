@@ -96,7 +96,7 @@ func handleExisting(left, right dom.Node, path string, res *[]Modification) {
 	} else if left.IsLeaf() && right.IsLeaf() {
 		if !cmp.Equal(left.(dom.Leaf).Value(), right.(dom.Leaf).Value()) {
 			// update
-			appendMod(ModChange, path, right.(dom.Leaf).Value(), left.(dom.Leaf).Value(), res)
+			appendMod(ModChange, path, left.(dom.Leaf).Value(), right.(dom.Leaf).Value(), res)
 		}
 	} else {
 		// replace (del+add)
