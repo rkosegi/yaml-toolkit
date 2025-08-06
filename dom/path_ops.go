@@ -38,7 +38,7 @@ func applyToContainer(tgt ContainerBuilder, c path.Component, addList bool) Node
 func applyToList(tgt ListBuilder, c path.Component, addList bool) Node {
 	var x Node
 	if tgt.Size() > c.NumericValue() {
-		x = tgt.Items()[c.NumericValue()]
+		x = tgt.Get(c.NumericValue())
 	} else {
 		if addList {
 			x = ListNode()
@@ -136,7 +136,7 @@ func getFromNode(sourceNode Node, at path.Path) Node {
 	src = sourceNode
 	for _, pc := range at.Components() {
 		if pc.IsNumeric() {
-			src = src.AsList().Items()[pc.NumericValue()]
+			src = src.AsList().Get(pc.NumericValue())
 		} else {
 			src = src.AsContainer().Child(pc.Value())
 		}

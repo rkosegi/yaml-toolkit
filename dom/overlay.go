@@ -109,7 +109,7 @@ func ensurePath(node ContainerBuilder, pc []string) ContainerBuilder {
 	for _, component := range pc {
 		if listPathRe.MatchString(component) {
 			list, index, _ := ensureList(component, node)
-			if list.Items()[int(index)] == nilLeaf {
+			if list.Get(int(index)) == nilLeaf {
 				c := initContainerBuilder()
 				list.Set(index, c)
 				node = c
@@ -180,7 +180,7 @@ func hasValue(n Node) bool {
 func firstValidListItem(idx int, lists ...List) Node {
 	for _, list := range lists {
 		if list.Size() > idx {
-			return list.Items()[idx]
+			return list.Get(idx)
 		}
 	}
 	return nilLeaf

@@ -28,8 +28,8 @@ func TestRemoveListItem(t *testing.T) {
 	assert.Equal(t, 3, l.Size())
 	removeListItem(l, 1)
 	assert.Equal(t, 2, l.Size())
-	assert.Equal(t, 1, l.Items()[0].(dom.Leaf).Value())
-	assert.Equal(t, 3, l.Items()[1].(dom.Leaf).Value())
+	assert.Equal(t, 1, l.Get(0).AsLeaf().Value())
+	assert.Equal(t, 3, l.Get(1).AsLeaf().Value())
 }
 
 func TestInsertListItem(t *testing.T) {
@@ -37,5 +37,5 @@ func TestInsertListItem(t *testing.T) {
 	assert.Equal(t, 3, l.Size())
 	insertListItem(l, 3, dom.LeafNode("d"))
 	assert.Equal(t, 4, l.Size())
-	assert.Equal(t, "d", l.Items()[3].(dom.Leaf).Value())
+	assert.Equal(t, "d", l.Get(3).(dom.Leaf).Value())
 }

@@ -42,7 +42,7 @@ func TestMorpherCopyMerge(t *testing.T) {
 			return len(pc) > 1 && pc[1].NumericValue() != 2
 		}))).Result()
 
-	assert.Equal(t, "str leaf", res.Child("root").AsList().Items()[0].AsLeaf().Value())
+	assert.Equal(t, "str leaf", res.Child("root").AsList().Get(0).AsLeaf().Value())
 	assert.Equal(t, 2, len(res.Child("root").AsList().Items()))
 }
 

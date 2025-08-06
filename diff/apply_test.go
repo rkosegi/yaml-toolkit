@@ -70,7 +70,7 @@ list1:
 			Value: "abc",
 		},
 	})
-	assert.True(t, doc.Child("list1").(dom.List).Items()[1].IsList())
+	assert.True(t, doc.Child("list1").AsList().Get(1).IsList())
 }
 
 func TestApplyNoop(t *testing.T) {

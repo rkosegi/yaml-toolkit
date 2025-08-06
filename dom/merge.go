@@ -46,10 +46,10 @@ type merger struct {
 func mergeListsAppend(l1, l2 List) List {
 	l := initListBuilder()
 	for i := 0; i < l1.Size(); i++ {
-		l.Append(l1.Items()[i])
+		l.Append(l1.Get(i))
 	}
 	for i := 0; i < l2.Size(); i++ {
-		l.Append(l2.Items()[i])
+		l.Append(l2.Get(i))
 	}
 	return l
 }
@@ -64,8 +64,8 @@ func (mg *merger) mergeListsMeld(l1, l2 List) List {
 		l.Append(nilLeaf)
 	}
 	for i := 0; i < minLen; i++ {
-		n1 := l1.Items()[i]
-		n2 := l2.Items()[i]
+		n1 := l1.Get(i)
+		n2 := l2.Get(i)
 		if n1.IsContainer() && n2.IsContainer() {
 			l.Set(uint(i), mg.mergeContainers(n1.AsContainer(), n2.AsContainer()))
 		} else if n1.IsList() && n2.IsList() {
