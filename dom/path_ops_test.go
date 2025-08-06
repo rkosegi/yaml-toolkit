@@ -76,9 +76,9 @@ func TestApplyToWithEmptyPath(t *testing.T) {
 
 func TestRemoveChild(t *testing.T) {
 	lb := ListNode(LeafNode(1), LeafNode(2), LeafNode(3))
-	assert.Equal(t, 2, lb.Items()[1].AsLeaf().Value())
+	assert.Equal(t, 2, lb.Get(1).AsLeaf().Value())
 	removeChild(lb, path.NewBuilder().Append(path.Numeric(1)).Build().Last())
-	assert.Nil(t, lb.Items()[1])
+	assert.Nil(t, lb.Get(1))
 
 	assert.Len(t, lb.Items(), 3)
 	// this is effectively no-op, but proves that out of bound extends

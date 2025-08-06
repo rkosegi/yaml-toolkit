@@ -114,7 +114,7 @@ func (c *containerImpl) Child(name string) Node {
 					// index out of bounds
 					return nil
 				}
-				return l.Items()[index]
+				return l.Get(index)
 			} else {
 				// not a list
 				return nil

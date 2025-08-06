@@ -33,6 +33,10 @@ func (l *listImpl) IsList() bool {
 	return true
 }
 
+func (l *listImpl) Get(index int) Node {
+	return l.items[index]
+}
+
 func (l *listImpl) Items() []Node {
 	c := make([]Node, l.Size())
 	copy(c, l.items)

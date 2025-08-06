@@ -42,7 +42,7 @@ func TestMergeLists(t *testing.T) {
 		ListNode(ListNode()).(ListBuilder),
 	)
 	assert.Equal(t, 1, l.Size())
-	assert.Equal(t, 2, l.Items()[0].(List).Size())
+	assert.Equal(t, 2, l.Get(0).(List).Size())
 }
 
 func TestMergeListsAppend(t *testing.T) {
@@ -58,9 +58,9 @@ func TestMergeListsAppend(t *testing.T) {
 		),
 	)
 	assert.Equal(t, 3, l.Size())
-	assert.Equal(t, 123, l.Items()[0].AsLeaf().Value())
-	assert.Equal(t, 456, l.Items()[1].AsLeaf().Value())
-	assert.Equal(t, 789, l.Items()[2].AsLeaf().Value())
+	assert.Equal(t, 123, l.Get(0).AsLeaf().Value())
+	assert.Equal(t, 456, l.Get(1).AsLeaf().Value())
+	assert.Equal(t, 789, l.Get(2).AsLeaf().Value())
 }
 
 func TestMergeContainerFromTwoLists(t *testing.T) {

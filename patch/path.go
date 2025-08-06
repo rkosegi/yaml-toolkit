@@ -151,7 +151,7 @@ func (p Path) Eval(target dom.Container) (dom.NodeList, dom.Node) {
 			if idx, isIndex := ps.IsNumeric(); isIndex {
 				l := curr.(dom.List)
 				if len(l.Items()) > idx {
-					curr = l.Items()[idx]
+					curr = l.Get(idx)
 					res = append(res, curr)
 				} else {
 					// list index out of bounds

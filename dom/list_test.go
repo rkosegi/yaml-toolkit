@@ -43,8 +43,8 @@ func TestList(t *testing.T) {
 	assert.False(t, l.IsLeaf())
 	assert.True(t, l.IsList())
 	assert.Equal(t, 3, l.Size())
-	assert.Equal(t, 123, l.Items()[2].AsContainer().
-		Child("item3").AsList().Items()[0].AsContainer().
+	assert.Equal(t, 123, l.Get(2).AsContainer().
+		Child("item3").AsList().Get(0).AsContainer().
 		Child("sub").AsLeaf().Value())
 	assert.False(t, l.SameAs(nilLeaf))
 }
@@ -59,8 +59,8 @@ func TestMutateList(t *testing.T) {
 	l.MustSet(0, LeafNode(123))
 	l.MustSet(1, LeafNode("abc"))
 
-	assert.Equal(t, "abc", l.Items()[1].AsLeaf().Value())
-	assert.Equal(t, 123, l.Items()[0].AsLeaf().Value())
+	assert.Equal(t, "abc", l.Get(1).AsLeaf().Value())
+	assert.Equal(t, 123, l.Get(0).AsLeaf().Value())
 	l.Clear()
 	assert.Equal(t, 0, l.Size())
 	l.Set(0, LeafNode(123))
@@ -96,8 +96,9 @@ func TestListClone(t *testing.T) {
 	l := ListNode(LeafNode(1), LeafNode(2))
 	l2 := l.Clone().(List)
 	assert.Equal(t, l2.Size(), l.Size())
-	assert.Equal(t, l2.Items()[0], l.Items()[0])
-	assert.Equal(t, l2.Items()[1], l.Items()[1])
+	assert.Equal(t, l2.Get(0), l.Get(0))
+	assert.Equal(t, l2.Get(1), l.Get(1))
+	assert.True(t, l2.Equals(l))
 }
 
 func TestListAsSlice(t *testing.T) {
