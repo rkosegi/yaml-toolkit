@@ -90,8 +90,10 @@ func YamlNodeDecoder() func(n *yaml.Node) Node {
 	return decodeYamlNode
 }
 
+// deprecated
 // Serializable interface allows to persist data into provided io.Writer
 type Serializable interface {
+	// deprecated
 	// Serialize writes content into given writer, while encoding using provided EncoderFunc
 	Serialize(writer io.Writer, mappingFunc NodeEncoderFunc, encFn EncoderFunc) error
 }
@@ -241,10 +243,10 @@ var (
 
 // deprecated
 type ContainerFactory interface {
+	// deprecated
 	// FromReader creates ContainerBuilder pre-populated with data from provided io.Reader and DecoderFunc
 	FromReader(r io.Reader, fn DecoderFunc) (ContainerBuilder, error)
-	// FromMap creates ContainerBuilder pre-populated with data from provided map
-	FromMap(in map[string]interface{}) ContainerBuilder
+	// deprecated
 	// FromProperties is similar to FromMap except that keys are parsed into path before inserting into ContainerBuilder
 	FromProperties(in map[string]interface{}) ContainerBuilder
 	// deprecated

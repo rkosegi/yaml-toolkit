@@ -46,7 +46,7 @@ func TestDomEncoderFn(t *testing.T) {
 		"x.y.z": "Hi!",
 	}
 	var buff bytes.Buffer
-	c := dom.Builder().FromMap(m)
+	c := dom.DecodeAnyToNode(m)
 	err := DomEncoderFn(&buff, c)
 	assert.NoError(t, err)
 	assert.Contains(t, buff.String(), "a.b.c=1\n")

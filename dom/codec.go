@@ -79,21 +79,17 @@ func decodeListFn(v []interface{}, l ListBuilder) {
 
 func decodeContainerFn(current *map[string]interface{}, parent ContainerBuilder) {
 	for k, v := range *current {
-		if v == nil {
-			parent.AddValue(k, nilLeaf)
-		} else {
-			t := reflect.ValueOf(v)
-			switch t.Kind() {
-			case reflect.Map:
-				ref := v.(map[string]interface{})
-				decodeContainerFn(&ref, parent.AddContainer(k))
-			case reflect.Slice, reflect.Array:
-				decodeListFn(v.([]interface{}), parent.AddList(k))
-			case reflect.Float32, reflect.Float64, reflect.String, reflect.Bool,
-				reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-				reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-				parent.AddValue(k, decodeLeafFn(v))
-			}
+		t := reflect.ValueOf(v)
+		switch t.Kind() {
+		case reflect.Map:
+			ref := v.(map[string]interface{})
+			decodeContainerFn(&ref, parent.AddContainer(k))
+		case reflect.Slice, reflect.Array:
+			decodeListFn(v.([]interface{}), parent.AddList(k))
+		case reflect.Float32, reflect.Float64, reflect.String, reflect.Bool,
+			reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			parent.AddValue(k, decodeLeafFn(v))
 		}
 	}
 }
@@ -161,6 +157,8 @@ func decodeValueToNode(in reflect.Value) Node {
 			v := in.MapIndex(k)
 			if !v.IsZero() {
 				out.AddValue(k.String(), decodeValueToNode(v))
+			} else {
+				out.AddValue(k.String(), nilLeaf)
 			}
 		}
 		return out
