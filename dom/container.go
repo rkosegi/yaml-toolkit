@@ -336,15 +336,6 @@ type containerFactory struct {
 }
 
 // deprecated
-func (f *containerFactory) From(container Container) ContainerBuilder {
-	out := ContainerNode()
-	for k, v := range container.Flatten() {
-		out.AddValueAt(k, v)
-	}
-	return out
-}
-
-// deprecated
 func (f *containerFactory) FromProperties(in map[string]interface{}) ContainerBuilder {
 	x := ContainerNode()
 	for k, v := range in {

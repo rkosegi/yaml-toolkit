@@ -350,13 +350,6 @@ func TestContainerBuilderSeal(t *testing.T) {
 	assert.False(t, isType)
 }
 
-func TestContainerFactoryFrom(t *testing.T) {
-	doc := getTestDoc(t, "doc2")
-	out := b.From(doc)
-	assert.NotNil(t, out)
-	assert.True(t, out.Equals(doc))
-}
-
 func TestContainerBuilderSet(t *testing.T) {
 	a := ContainerNode()
 	p := path.NewBuilder().Append(path.Simple("a")).Append(path.Simple("b")).Build()
