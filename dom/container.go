@@ -336,15 +336,6 @@ type containerFactory struct {
 }
 
 // deprecated
-func (f *containerFactory) FromProperties(in map[string]interface{}) ContainerBuilder {
-	x := ContainerNode()
-	for k, v := range in {
-		x.AddValueAt(k, LeafNode(v))
-	}
-	return x
-}
-
-// deprecated
 func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBuilder, error) {
 	root := make(map[string]interface{})
 	if err := fn(r, &root); err != nil {
