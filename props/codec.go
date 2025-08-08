@@ -19,6 +19,7 @@ package props
 import (
 	"fmt"
 	"io"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -63,9 +64,12 @@ func DecoderFn(r io.Reader, x interface{}) error {
 	for k, v := range p.Map() {
 		m2[k] = v
 	}
+	out := make(map[string]interface{})
 	for k, v := range common.Unflatten(m2) {
-		(*(x.(*map[string]interface{})))[k] = v
+		out[k] = v
 	}
+	// maybe check if xv := reflect.ValueOf(x); xv.Kind() != reflect.Pointer || xv.IsNil() ??
+	reflect.ValueOf(x).Elem().Set(reflect.ValueOf(out))
 	return nil
 }
 
