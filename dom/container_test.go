@@ -152,16 +152,6 @@ func TestFromMap(t *testing.T) {
 	assert.Equal(t, "abc", c.Child("test1.test2").AsLeaf().Value())
 }
 
-func TestFromProperties(t *testing.T) {
-	c := b.FromProperties(map[string]interface{}{
-		"test1.test2":  "abc",
-		"test1.test22": 123,
-	})
-	assert.Equal(t, 1, len(c.Children()))
-	assert.Equal(t, 2, len(c.Children()["test1"].AsContainer().Children()))
-	assert.Equal(t, "abc", c.Lookup("test1.test2").AsLeaf().Value())
-}
-
 func TestRemoveAt(t *testing.T) {
 	c := DecodeAnyToNode(map[string]interface{}{
 		"test2":  "abc",

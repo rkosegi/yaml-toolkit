@@ -246,9 +246,6 @@ type ContainerFactory interface {
 	// deprecated
 	// FromReader creates ContainerBuilder pre-populated with data from provided io.Reader and DecoderFunc
 	FromReader(r io.Reader, fn DecoderFunc) (ContainerBuilder, error)
-	// deprecated
-	// FromProperties is similar to FromMap except that keys are parsed into path before inserting into ContainerBuilder
-	FromProperties(in map[string]interface{}) ContainerBuilder
 }
 
 // Coordinate is address of Node within OverlayDocument

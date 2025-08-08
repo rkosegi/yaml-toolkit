@@ -31,9 +31,17 @@ func TestIsPossiblePlaceholder(t *testing.T) {
 	assert.False(t, possiblyContainsPlaceholder("abcd"))
 }
 
+func FromProperties(in map[string]interface{}) dom.ContainerBuilder {
+	x := dom.ContainerNode()
+	for k, v := range in {
+		x.AddValueAt(k, dom.LeafNode(v))
+	}
+	return x
+}
+
 func TestResolvePlaceholders(t *testing.T) {
 	ds := NewDocumentSet()
-	assert.NoError(t, ds.AddUnnamedDocument(b.FromProperties(map[string]interface{}{
+	assert.NoError(t, ds.AddUnnamedDocument(FromProperties(map[string]interface{}{
 		"key1.key2.key31": "${key1.key2.key32}",
 		"key1.key2.key32": 3,
 		"key1.key2.key33": "${key1.key2.key34}",
