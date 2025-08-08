@@ -33,10 +33,10 @@ func TestMorpherCopyMerge(t *testing.T) {
 
 	data, err := os.ReadFile("../testdata/doc2.yaml")
 	assert.NoError(t, err)
-	doc, err := b.FromReader(bytes.NewReader(data), dom.DefaultYamlDecoder)
+	doc, err := dom.DecodeReader(bytes.NewReader(data), dom.DefaultYamlDecoder)
 	assert.NoError(t, err)
 
-	res := NewMorpher().Copy(doc, CopyModeMerge(
+	res := NewMorpher().Copy(doc.AsContainer(), CopyModeMerge(
 		CopyParamFilterFunc(func(p path.Path, parent dom.Node, node dom.Node) bool {
 			pc := p.Components()
 			return len(pc) > 1 && pc[1].NumericValue() != 2

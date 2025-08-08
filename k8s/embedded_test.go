@@ -170,6 +170,21 @@ func TestFailBeforeSave(t *testing.T) {
 	assert.Error(t, doc.Save())
 }
 
+func TestDecodeEmbeddedDoc(t *testing.T) {
+	var (
+		mf  Manifest
+		err error
+		cb  dom.ContainerBuilder
+	)
+	mf, err = ManifestFromBytes([]byte(`kind: ConfigMap
+data:
+  item: not a json`))
+	assert.NoError(t, err)
+	cb, err = DecodeEmbeddedDoc("item", dom.DefaultJsonDecoder)(mf)
+	assert.Error(t, err)
+	assert.Nil(t, cb)
+}
+
 func TestFailOnSave(t *testing.T) {
 	f, err := os.CreateTemp("", tempFilePattern)
 	defer func() {

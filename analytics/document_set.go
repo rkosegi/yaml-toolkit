@@ -40,7 +40,6 @@ var (
 )
 
 var (
-	b           = dom.Builder()
 	defaultOpts = []AddLayerOpt{
 		// give every document '*' tag by default, so it can be matched with user-supplied value
 		WithTags(wildcardTag),
@@ -144,11 +143,14 @@ func (ds *documentSet) AddUnnamedDocument(doc dom.ContainerBuilder, opts ...AddL
 }
 
 func (ds *documentSet) AddDocumentFromReader(name string, r io.Reader, dec dom.DecoderFunc, opts ...AddLayerOpt) error {
-	cb, err := b.FromReader(r, dec)
+	cb, err := dom.DecodeReader(r, dec)
 	if err != nil {
 		return err
 	}
-	return ds.AddDocument(name, cb, opts...)
+	if !cb.IsContainer() {
+		return fmt.Errorf("not a container: %s", cb.Desc())
+	}
+	return ds.AddDocument(name, cb.(dom.ContainerBuilder), opts...)
 }
 
 func (ds *documentSet) AddDocumentFromFile(file string, dec dom.DecoderFunc, opts ...AddLayerOpt) error {

@@ -26,7 +26,7 @@ import (
 )
 
 func TestApply(t *testing.T) {
-	doc, err := dom.Builder().FromReader(strings.NewReader(`
+	doc, err := dom.DecodeReader(strings.NewReader(`
 leaf0: 1234
 leafX: null
 level1:
@@ -35,7 +35,7 @@ level1:
 	if err != nil {
 		t.Fatal(err)
 	}
-	Apply(doc, []Modification{
+	Apply(doc.(dom.ContainerBuilder), []Modification{
 		{
 			Type:  ModAdd,
 			Path:  "level1.level22.leaf22",
@@ -43,7 +43,7 @@ level1:
 		},
 	})
 	var buf bytes.Buffer
-	err = doc.Serialize(&buf, dom.DefaultNodeEncoderFn, dom.DefaultYamlEncoder)
+	err = doc.AsContainer().Serialize(&buf, dom.DefaultNodeEncoderFn, dom.DefaultYamlEncoder)
 	assert.Nil(t, err)
 	assert.Equal(t, `leaf0: 1234
 leafX: null
@@ -55,7 +55,7 @@ level1:
 }
 
 func TestApplyListElements(t *testing.T) {
-	doc, err := dom.Builder().FromReader(strings.NewReader(`
+	doc, err := dom.DecodeReader(strings.NewReader(`
 leafX: null
 list1:
   - abc
@@ -63,18 +63,18 @@ list1:
 	if err != nil {
 		t.Fatal(err)
 	}
-	Apply(doc, []Modification{
+	Apply(doc.(dom.ContainerBuilder), []Modification{
 		{
 			Type:  ModAdd,
 			Path:  "list1[1][2][3].item_obj1.sub.sublist[1].efgh[0]",
 			Value: "abc",
 		},
 	})
-	assert.True(t, doc.Child("list1").AsList().Get(1).IsList())
+	assert.True(t, doc.AsContainer().Child("list1").AsList().Get(1).IsList())
 }
 
 func TestApplyNoop(t *testing.T) {
-	doc, err := dom.Builder().FromReader(strings.NewReader(`
+	doc, err := dom.DecodeReader(strings.NewReader(`
 leaf0: 1234
 level1:
   level2: 123
@@ -82,7 +82,7 @@ level1:
 	if err != nil {
 		t.Fatal(err)
 	}
-	Apply(doc, []Modification{
+	Apply(doc.(dom.ContainerBuilder), []Modification{
 		{
 			Type:  ModDelete,
 			Path:  "level1.level23.leaf22",
@@ -90,7 +90,7 @@ level1:
 		},
 	})
 	var buf bytes.Buffer
-	err = doc.Serialize(&buf, dom.DefaultNodeEncoderFn, dom.DefaultYamlEncoder)
+	err = doc.AsContainer().Serialize(&buf, dom.DefaultNodeEncoderFn, dom.DefaultYamlEncoder)
 	assert.Nil(t, err)
 	assert.Equal(t, `leaf0: 1234
 level1:

@@ -29,7 +29,7 @@ import (
 )
 
 func TestBuilderFromYamlString(t *testing.T) {
-	doc, err := b.FromReader(strings.NewReader(`
+	doc, err := DecodeReader(strings.NewReader(`
 abc: 123
 def: xyz
 `), DefaultYamlDecoder)
@@ -37,18 +37,18 @@ def: xyz
 	assert.True(t, doc.IsContainer())
 	assert.False(t, doc.IsLeaf())
 	assert.False(t, doc.SameAs(nilLeaf))
-	assert.Equal(t, "xyz", doc.Children()["def"].AsLeaf().Value())
-	assert.Equal(t, 123, doc.Children()["abc"].AsLeaf().Value())
+	assert.Equal(t, "xyz", doc.AsContainer().Children()["def"].AsLeaf().Value())
+	assert.Equal(t, 123, doc.AsContainer().Children()["abc"].AsLeaf().Value())
 }
 
-func TestBuilderFromInvalidYamlString(t *testing.T) {
-	doc, err := b.FromReader(strings.NewReader(`This is not a yaml`), DefaultYamlDecoder)
+func TestBuilderFromInvalidJsonString(t *testing.T) {
+	doc, err := DecodeReader(strings.NewReader(`This is not a json`), DefaultJsonDecoder)
 	assert.NotNil(t, err)
 	assert.Nil(t, doc)
 }
 
 func TestBuilderFromJsonString(t *testing.T) {
-	doc, err := b.FromReader(strings.NewReader(`
+	doc, err := DecodeReader(strings.NewReader(`
 {
 	"def": "xyz",
 	"abc": 123
@@ -56,8 +56,8 @@ func TestBuilderFromJsonString(t *testing.T) {
 `), DefaultJsonDecoder)
 	assert.Nil(t, err)
 	assert.True(t, doc.IsContainer())
-	assert.Equal(t, "xyz", doc.Children()["def"].AsLeaf().Value())
-	assert.Equal(t, float64(123), doc.Children()["abc"].AsLeaf().Value())
+	assert.Equal(t, "xyz", doc.AsContainer().Child("def").AsLeaf().Value())
+	assert.Equal(t, float64(123), doc.AsContainer().Children()["abc"].AsLeaf().Value())
 }
 
 func TestBuildAndSerialize(t *testing.T) {
@@ -99,9 +99,9 @@ func TestRemove(t *testing.T) {
 func getTestDoc(t *testing.T, name string) ContainerBuilder {
 	data, err := os.ReadFile("../testdata/" + name + ".yaml")
 	assert.NoError(t, err)
-	doc, err := b.FromReader(bytes.NewReader(data), DefaultYamlDecoder)
+	doc, err := DecodeReader(bytes.NewReader(data), DefaultYamlDecoder)
 	assert.NoError(t, err)
-	return doc
+	return doc.(ContainerBuilder)
 }
 
 func TestBuilderFromFile(t *testing.T) {
@@ -181,18 +181,18 @@ func TestAddValueAt(t *testing.T) {
 }
 
 func TestFromReaderNullLeaf(t *testing.T) {
-	c, err := Builder().FromReader(strings.NewReader(`
+	c, err := DecodeReader(strings.NewReader(`
 leaf0: null
 level1: 123
 `), DefaultYamlDecoder)
 	assert.NotNil(t, c)
 	assert.Nil(t, err)
-	assert.NotNil(t, c.Child("leaf0"))
-	assert.Nil(t, c.Child("leaf0").AsLeaf().Value())
+	assert.NotNil(t, c.AsContainer().Child("leaf0"))
+	assert.Nil(t, c.AsContainer().Child("leaf0").AsLeaf().Value())
 }
 
 func TestSearch(t *testing.T) {
-	c, err := Builder().FromReader(strings.NewReader(`
+	c, err := DecodeReader(strings.NewReader(`
 leaf0: null
 level1: 123
 path.to.element1: Hi
@@ -200,16 +200,16 @@ path.to.element2: Hi
 `), DefaultYamlDecoder)
 	assert.NotNil(t, c)
 	assert.Nil(t, err)
-	assert.Nil(t, c.Search(SearchEqual(456)))
-	assert.Equal(t, []string{"level1"}, c.Search(SearchEqual(123)))
-	x := c.Search(SearchEqual("Hi"))
+	assert.Nil(t, c.AsContainer().Search(SearchEqual(456)))
+	assert.Equal(t, []string{"level1"}, c.AsContainer().Search(SearchEqual(123)))
+	x := c.AsContainer().Search(SearchEqual("Hi"))
 	assert.Equal(t, 2, len(x))
 	assert.True(t, slices.Contains(x, "path.to.element1"))
 	assert.True(t, slices.Contains(x, "path.to.element2"))
 }
 
 func TestLookupList(t *testing.T) {
-	c, err := Builder().FromReader(strings.NewReader(`
+	c, err := DecodeReader(strings.NewReader(`
 root:
   list:
     - item1: abc
@@ -219,11 +219,11 @@ root:
 `), DefaultYamlDecoder)
 	assert.NotNil(t, c)
 	assert.Nil(t, err)
-	assert.Equal(t, "abc", c.Lookup("root.list[0].item1").AsLeaf().Value())
-	assert.Equal(t, 123, c.Lookup("root.list[1]").AsLeaf().Value())
-	assert.Nil(t, c.Lookup("root.list[2]"))
-	assert.Nil(t, c.Lookup("root.not-a-list[0]"))
-	assert.Nil(t, c.Lookup("root.not-exists-at-all[0]"))
+	assert.Equal(t, "abc", c.AsContainer().Lookup("root.list[0].item1").AsLeaf().Value())
+	assert.Equal(t, 123, c.AsContainer().Lookup("root.list[1]").AsLeaf().Value())
+	assert.Nil(t, c.AsContainer().Lookup("root.list[2]"))
+	assert.Nil(t, c.AsContainer().Lookup("root.not-a-list[0]"))
+	assert.Nil(t, c.AsContainer().Lookup("root.not-exists-at-all[0]"))
 }
 
 func TestAddListAt(t *testing.T) {
@@ -237,7 +237,7 @@ func TestAddListAt(t *testing.T) {
 }
 
 func TestCompact(t *testing.T) {
-	c, err := Builder().FromReader(strings.NewReader(`
+	c, err := DecodeReader(strings.NewReader(`
 root:
   level2:
     leaf1: 123
@@ -250,13 +250,13 @@ root:
 		Append(path.Simple("level2")).
 		Append(path.Simple("orphan")).
 		Build()
-	assert.NotNil(t, c.Get(p))
-	c.Walk(CompactFn)
-	assert.Nil(t, c.Get(p))
+	assert.NotNil(t, c.AsContainer().Get(p))
+	c.AsContainer().Walk(CompactFn)
+	assert.Nil(t, c.AsContainer().Get(p))
 }
 
 func TestWalk(t *testing.T) {
-	c, err := Builder().FromReader(strings.NewReader(`
+	c, err := DecodeReader(strings.NewReader(`
 root:
   level1:
     level2a:
@@ -268,14 +268,14 @@ root:
 `), DefaultYamlDecoder)
 	assert.NotNil(t, c)
 	assert.NoError(t, err)
-	c.Walk(func(p path.Path, parent Node, node Node) bool {
+	c.AsContainer().Walk(func(p path.Path, parent Node, node Node) bool {
 		if node.IsLeaf() && node.AsLeaf().Value() == 123 {
 			return false
 		}
 		return true
 	})
 
-	x, err := Builder().FromReader(strings.NewReader(`
+	x, err := DecodeReader(strings.NewReader(`
 root:
   level1c:
     - value:
@@ -287,7 +287,7 @@ root:
 	assert.NotNil(t, x)
 	assert.NoError(t, err)
 	cnt1, cnt2 := 0, 0
-	x.Walk(func(p path.Path, parent Node, node Node) bool {
+	x.AsContainer().Walk(func(p path.Path, parent Node, node Node) bool {
 		if node.IsList() {
 			cnt1++
 		}
