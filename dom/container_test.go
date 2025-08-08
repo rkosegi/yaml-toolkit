@@ -149,18 +149,6 @@ func TestFromMap(t *testing.T) {
 	assert.Equal(t, "abc", c.Child("test1.test2").AsLeaf().Value())
 }
 
-func TestRemoveAt(t *testing.T) {
-	c := DecodeAnyToNode(map[string]interface{}{
-		"test2":  "abc",
-		"test22": 123,
-		"testC":  "Hi",
-	}).(ContainerBuilder)
-	c.RemoveAt("non-existing.another")
-	assert.NotNil(t, c.Child("test22"))
-	c.RemoveAt("test22")
-	assert.Nil(t, c.Child("test22"))
-}
-
 func TestAddValueAt(t *testing.T) {
 	c := ContainerNode()
 	c.AddValueAt("test1.test2.test31", LeafNode("abc"))

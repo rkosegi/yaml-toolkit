@@ -231,10 +231,6 @@ type ContainerBuilder interface {
 	// AddValueAt adds Node into this Container at given path.
 	// Child nodes are creates as needed.
 	AddValueAt(path string, value Node) ContainerBuilder
-
-	// deprecated, use Delete(path)
-	// RemoveAt removes child Node at given path.
-	RemoveAt(path string) ContainerBuilder
 }
 
 var (
