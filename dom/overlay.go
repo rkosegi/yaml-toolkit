@@ -18,7 +18,6 @@ package dom
 
 import (
 	"fmt"
-	"io"
 	"slices"
 	"strings"
 
@@ -184,10 +183,6 @@ func firstValidListItem(idx int, lists ...List) Node {
 		}
 	}
 	return nilLeaf
-}
-
-func (m *overlayDocument) Serialize(writer io.Writer, mappingFunc NodeEncoderFunc, encFn EncoderFunc) error {
-	return encFn(writer, mappingFunc(m.Merged()))
 }
 
 func (m *overlayDocument) Walk(fn OverlayVisitorFn) {

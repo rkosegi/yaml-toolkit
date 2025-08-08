@@ -28,6 +28,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestContainerEncodeDecode(t *testing.T) {
+	x := getTestDoc(t, "doc1")
+	assert.Equal(t, x.AsAny(), DefaultNodeEncoderFn(x))
+}
+
 func TestBuilderFromYamlString(t *testing.T) {
 	doc, err := DecodeReader(strings.NewReader(`
 abc: 123
@@ -68,8 +73,7 @@ func TestBuildAndSerialize(t *testing.T) {
 		AddContainer("level3").
 		AddValue("leaf1", LeafNode("Hello"))
 	var buf bytes.Buffer
-	err := builder.Serialize(&buf, DefaultNodeEncoderFn, DefaultJsonEncoder)
-	assert.Nil(t, err)
+	assert.NoError(t, EncodeToWriter(builder, DefaultJsonEncoder, &buf))
 	assert.Equal(t, `{
   "root": {
     "level1": {
@@ -91,8 +95,7 @@ func TestRemove(t *testing.T) {
 		AddValue("leaf1", LeafNode("Hello"))
 	builder.Remove("root")
 	var buf bytes.Buffer
-	err := builder.Serialize(&buf, DefaultNodeEncoderFn, DefaultJsonEncoder)
-	assert.Nil(t, err)
+	assert.NoError(t, EncodeToWriter(builder, DefaultJsonEncoder, &buf))
 	assert.Equal(t, "{}\n", buf.String())
 }
 
@@ -176,8 +179,17 @@ func TestAddValueAt(t *testing.T) {
 	)
 	assert.Equal(t, "abc", c.Lookup("test1.test2.test31").AsLeaf().Value())
 	var buff bytes.Buffer
-	err := c.Serialize(&buff, DefaultNodeEncoderFn, DefaultYamlEncoder)
-	assert.Nil(t, err)
+	assert.NoError(t, EncodeToWriter(c, DefaultYamlEncoder, &buff))
+	assert.Equal(t, `test1:
+  test2:
+    test31: abc
+    test32: 123
+    test33: null
+    test34:
+      - Hello
+      - {}
+      - []
+`, buff.String())
 }
 
 func TestFromReaderNullLeaf(t *testing.T) {

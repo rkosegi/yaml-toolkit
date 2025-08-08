@@ -18,7 +18,6 @@ package dom
 
 import (
 	"fmt"
-	"io"
 	"regexp"
 	"strconv"
 	"strings"
@@ -151,10 +150,6 @@ func (c *containerImpl) SameAs(node Node) bool {
 func (c *containerImpl) Children() map[string]Node {
 	c.ensureChildren()
 	return c.children
-}
-
-func (c *containerImpl) Serialize(writer io.Writer, mappingFunc NodeEncoderFunc, encFn EncoderFunc) error {
-	return encFn(writer, mappingFunc(c))
 }
 
 func (c *containerImpl) Lookup(path string) Node {

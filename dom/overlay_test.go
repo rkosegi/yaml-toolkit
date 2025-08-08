@@ -51,10 +51,10 @@ func TestSerialize(t *testing.T) {
 	c.AddValue("test3", LeafNode("no"))
 	d.Put("", "key2", c)
 	var buf bytes.Buffer
-	assert.Nil(t, d.Serialize(&buf, DefaultNodeEncoderFn, DefaultYamlEncoder))
+	assert.NoError(t, encodeToWriter(d.Merged(), DefaultYamlEncoder, &buf))
 	assert.True(t, buf.Len() > 0)
 	buf.Reset()
-	assert.Nil(t, d.Serialize(&buf, DefaultNodeEncoderFn, DefaultYamlEncoder))
+	assert.Nil(t, EncodeToWriter(d.Merged(), DefaultYamlEncoder, &buf))
 	assert.True(t, buf.Len() > 0)
 }
 
@@ -78,12 +78,14 @@ func TestLoad(t *testing.T) {
 	assert.Equal(t, 1, len(d.Layers()))
 
 	var buf bytes.Buffer
-	assert.Nil(t, d.Serialize(&buf, DefaultNodeEncoderFn, DefaultYamlEncoder))
-	var node yaml.Node
-	err = yaml.NewDecoder(&buf).Decode(&node)
+	assert.NoError(t, EncodeToWriter(d.Merged(), DefaultYamlEncoder, &buf))
+	x, err := decodeFromReader(&buf, DefaultYamlDecoder)
 	assert.NoError(t, err)
-	assert.Equal(t, "key1", node.Content[0].Content[0].Value)
-	assert.Equal(t, "level2b", node.Content[0].Content[1].Content[3].Content[1].Content[4].Value)
+	assert.True(t, x.IsContainer())
+	assert.Equal(t, 12, x.AsContainer().
+		Child("key1").AsContainer().
+		Child("key11").AsContainer().
+		Child("a").AsLeaf().Value())
 }
 
 func TestLoad2(t *testing.T) {
