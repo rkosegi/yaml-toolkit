@@ -31,7 +31,6 @@ import (
 var (
 	listPathRe = regexp.MustCompile("\\[\\d+]$")
 	nilLeaf    = LeafNode(nil)
-	b          = &containerFactory{}
 )
 
 type containerImpl struct {
@@ -329,25 +328,6 @@ func (c *containerBuilderImpl) RemoveAt(path string) ContainerBuilder {
 		node.Remove(p)
 	}
 	return c
-}
-
-// deprecated
-type containerFactory struct {
-}
-
-// deprecated
-func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBuilder, error) {
-	root := make(map[string]interface{})
-	if err := fn(r, &root); err != nil {
-		return nil, err
-	} else {
-		return DecodeAnyToNode(root).(ContainerBuilder), nil
-	}
-}
-
-// deprecated
-func Builder() ContainerFactory {
-	return b
 }
 
 // ContainerNode creates new ContainerBuilder

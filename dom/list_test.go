@@ -34,11 +34,11 @@ root:
         msg: Hello`
 
 func TestList(t *testing.T) {
-	doc, err := b.FromReader(strings.NewReader(d), DefaultYamlDecoder)
+	doc, err := DecodeReader(strings.NewReader(d), DefaultYamlDecoder)
 	assert.NoError(t, err)
 	assert.NotNil(t, doc)
 	assert.False(t, doc.IsList())
-	l := doc.Child("root").AsContainer().Child("list").(List)
+	l := doc.AsContainer().Child("root").AsContainer().Child("list").(List)
 	assert.False(t, l.IsContainer())
 	assert.False(t, l.IsLeaf())
 	assert.True(t, l.IsList())
@@ -50,10 +50,10 @@ func TestList(t *testing.T) {
 }
 
 func TestMutateList(t *testing.T) {
-	doc, err := b.FromReader(strings.NewReader(d), DefaultYamlDecoder)
+	doc, err := DecodeReader(strings.NewReader(d), DefaultYamlDecoder)
 	assert.NoError(t, err)
 	assert.NotNil(t, doc)
-	l := doc.Child("root").AsContainer().Child("list").(ListBuilder)
+	l := doc.AsContainer().Child("root").AsContainer().Child("list").(ListBuilder)
 	assert.Equal(t, 3, l.Size())
 
 	l.MustSet(0, LeafNode(123))

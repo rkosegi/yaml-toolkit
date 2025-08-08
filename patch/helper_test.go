@@ -22,12 +22,8 @@ import (
 	"github.com/rkosegi/yaml-toolkit/dom"
 )
 
-var (
-	b = dom.Builder()
-)
-
 func makeTestContainer() dom.ContainerBuilder {
-	c, _ := b.FromReader(strings.NewReader(`
+	c, _ := dom.DecodeReader(strings.NewReader(`
 root:
   list:
     - item1
@@ -38,5 +34,5 @@ root:
   sub1:
     prop: 456
 `), dom.DefaultYamlDecoder)
-	return c
+	return c.(dom.ContainerBuilder)
 }

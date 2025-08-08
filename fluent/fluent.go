@@ -28,8 +28,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var b = dom.Builder()
-
 // ConfigHelper allows to load, mutate and save configuration object
 type ConfigHelper[T any] interface {
 	// Add adds any object.
@@ -90,7 +88,7 @@ func (c *configHelper[T]) Load(file string) ConfigHelper[T] {
 	var (
 		f   io.ReadCloser
 		err error
-		cb  dom.ContainerBuilder
+		cb  dom.Node
 	)
 	fdp := DefaultFileDecoderProvider(file)
 	f, err = common.FileOpener(file)
@@ -98,7 +96,7 @@ func (c *configHelper[T]) Load(file string) ConfigHelper[T] {
 	defer func() {
 		_ = f.Close()
 	}()
-	cb, err = b.FromReader(f, fdp)
+	cb, err = dom.DecodeReader(f, fdp)
 	panicIfError(err)
 	return c.Add(cb)
 }

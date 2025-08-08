@@ -17,6 +17,7 @@ limitations under the License.
 package dom
 
 import (
+	"io"
 	"reflect"
 
 	"github.com/rkosegi/yaml-toolkit/query"
@@ -164,6 +165,17 @@ func decodeValueToNode(in reflect.Value) Node {
 		return out
 	}
 	return nil
+}
+
+func decodeFromReader(r io.Reader, decFn DecoderFunc) (Node, error) {
+	var (
+		x   interface{}
+		err error
+	)
+	if err = decFn(r, &x); err != nil {
+		return nil, err
+	}
+	return DecodeAnyToNode(x), nil
 }
 
 func decodeQueryResult(qr query.Result) NodeList {

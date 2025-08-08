@@ -93,8 +93,14 @@ func DecodeEmbeddedDoc(item string, decFn dom.DecoderFunc) DecodeInternalFn {
 	return func(m Manifest) (cb dom.ContainerBuilder, err error) {
 		e := m.StringData().Get(item)
 		if e != nil {
-			if cb, err = dom.Builder().FromReader(strings.NewReader(*e), decFn); err != nil {
+			var x dom.Node
+			if x, err = dom.DecodeReader(strings.NewReader(*e), decFn); err != nil {
 				return nil, err
+			}
+			if x.IsContainer() {
+				cb = x.(dom.ContainerBuilder)
+			} else {
+				return nil, fmt.Errorf("not a container: %s", x.Desc())
 			}
 		} else {
 			cb = dom.ContainerNode()
@@ -244,5 +250,3 @@ func (b *builderImpl) Open() (Document, error) {
 		enc:  b.ienc,
 	}, nil
 }
-
-var _ Builder = &builderImpl{}

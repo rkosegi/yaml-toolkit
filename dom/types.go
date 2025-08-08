@@ -83,6 +83,20 @@ func DecodeAnyToNode(in any) Node {
 	return decodeValueToNode(reflect.ValueOf(in))
 }
 
+// DecodeReader decodes io.Reader into Node using provided DecoderFunc.
+func DecodeReader(r io.Reader, decFn DecoderFunc) (Node, error) {
+	return decodeFromReader(r, decFn)
+}
+
+// MustDecodeReader decodes io.Reader into Node using provided DecoderFunc.
+func MustDecodeReader(r io.Reader, decFn DecoderFunc) Node {
+	if node, err := decodeFromReader(r, decFn); err != nil {
+		panic(err)
+	} else {
+		return node
+	}
+}
+
 // YamlNodeDecoder returns function that could be used to convert yaml.Node to Node.
 // There are few limitations with decoding nodes this way, e.g. leaf values are coerced to string in
 // current implementation
@@ -240,13 +254,6 @@ var (
 		return true
 	}
 )
-
-// deprecated
-type ContainerFactory interface {
-	// deprecated
-	// FromReader creates ContainerBuilder pre-populated with data from provided io.Reader and DecoderFunc
-	FromReader(r io.Reader, fn DecoderFunc) (ContainerBuilder, error)
-}
 
 // Coordinate is address of Node within OverlayDocument
 type Coordinate interface {

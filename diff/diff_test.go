@@ -51,15 +51,15 @@ func assertHasChange(t *testing.T, mod Modification, mods *[]Modification) {
 }
 
 func diffStrDocs(t *testing.T, doc1, doc2 string) *[]Modification {
-	cleft, err := dom.Builder().FromReader(strings.NewReader(doc1), dom.DefaultYamlDecoder)
+	cleft, err := dom.DecodeReader(strings.NewReader(doc1), dom.DefaultYamlDecoder)
 	if err != nil {
 		t.Fatal(err)
 	}
-	cright, err := dom.Builder().FromReader(strings.NewReader(doc2), dom.DefaultYamlDecoder)
+	cright, err := dom.DecodeReader(strings.NewReader(doc2), dom.DefaultYamlDecoder)
 	if err != nil {
 		t.Fatal(err)
 	}
-	return Diff(cleft, cright)
+	return Diff(cleft.AsContainer(), cright.AsContainer())
 }
 
 func TestDiffSimple1(t *testing.T) {
@@ -138,7 +138,7 @@ level1:
 }
 
 func TestDiffReplaceAndApply(t *testing.T) {
-	cleft, err := dom.Builder().FromReader(strings.NewReader(`
+	cleft, err := dom.DecodeReader(strings.NewReader(`
 leaf0: 1234
 level1:
   level2: 123
@@ -149,7 +149,7 @@ another:
 	if err != nil {
 		t.Fatal(err)
 	}
-	cright, err := dom.Builder().FromReader(strings.NewReader(`leaf0: 123
+	cright, err := dom.DecodeReader(strings.NewReader(`leaf0: 123
 leaf1: 456
 level1:
   level2:
@@ -157,7 +157,7 @@ level1:
 	if err != nil {
 		t.Fatal(err)
 	}
-	res := Diff(cleft, cright)
+	res := Diff(cleft.AsContainer(), cright.AsContainer())
 
 	assert.Equal(t, 5, len(*res))
 
@@ -185,9 +185,9 @@ level1:
 		Type: ModDelete,
 		Path: "leaf1",
 	}, res)
-	Apply(cright, *res)
+	Apply(cright.(dom.ContainerBuilder), *res)
 	var buf bytes.Buffer
-	err = cright.Serialize(&buf, dom.DefaultNodeEncoderFn, dom.DefaultYamlEncoder)
+	err = cright.AsContainer().Serialize(&buf, dom.DefaultNodeEncoderFn, dom.DefaultYamlEncoder)
 	assert.Nil(t, err)
 	assert.Equal(t, `another:
   container:

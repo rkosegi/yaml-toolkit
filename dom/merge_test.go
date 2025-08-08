@@ -95,10 +95,10 @@ root:
     sub2:
       leaf: 2
 `
-	orig, err := b.FromReader(strings.NewReader(d1), DefaultYamlDecoder)
+	orig, err := DecodeReader(strings.NewReader(d1), DefaultYamlDecoder)
 	assert.NoError(t, err)
-	override, err := b.FromReader(strings.NewReader(d2), DefaultYamlDecoder)
+	override, err := DecodeReader(strings.NewReader(d2), DefaultYamlDecoder)
 	assert.NoError(t, err)
-	result := orig.Merge(override)
+	result := orig.(ContainerBuilder).Merge(override.AsContainer())
 	assert.Equal(t, 2, result.Lookup("root.sub1.sub2.leaf").AsLeaf().Value())
 }
