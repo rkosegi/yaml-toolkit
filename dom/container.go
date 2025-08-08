@@ -345,11 +345,6 @@ func (f *containerFactory) From(container Container) ContainerBuilder {
 }
 
 // deprecated
-func (f *containerFactory) FromMap(in map[string]interface{}) ContainerBuilder {
-	return DefaultNodeDecoderFn(in).(ContainerBuilder)
-}
-
-// deprecated
 func (f *containerFactory) FromProperties(in map[string]interface{}) ContainerBuilder {
 	x := ContainerNode()
 	for k, v := range in {
@@ -364,7 +359,7 @@ func (f *containerFactory) FromReader(r io.Reader, fn DecoderFunc) (ContainerBui
 	if err := fn(r, &root); err != nil {
 		return nil, err
 	} else {
-		return f.FromMap(root), nil
+		return DecodeAnyToNode(root).(ContainerBuilder), nil
 	}
 }
 

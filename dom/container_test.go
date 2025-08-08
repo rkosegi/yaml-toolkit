@@ -145,10 +145,10 @@ func TestFlatten2(t *testing.T) {
 }
 
 func TestFromMap(t *testing.T) {
-	c := b.FromMap(map[string]interface{}{
+	c := DecodeAnyToNode(map[string]interface{}{
 		"test1.test2":  "abc",
 		"test1.test22": 123,
-	})
+	}).AsContainer()
 	assert.Equal(t, "abc", c.Child("test1.test2").AsLeaf().Value())
 }
 
@@ -163,11 +163,11 @@ func TestFromProperties(t *testing.T) {
 }
 
 func TestRemoveAt(t *testing.T) {
-	c := b.FromMap(map[string]interface{}{
+	c := DecodeAnyToNode(map[string]interface{}{
 		"test2":  "abc",
 		"test22": 123,
 		"testC":  "Hi",
-	})
+	}).(ContainerBuilder)
 	c.RemoveAt("non-existing.another")
 	assert.NotNil(t, c.Child("test22"))
 	c.RemoveAt("test22")

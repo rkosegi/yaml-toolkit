@@ -64,7 +64,7 @@ func TestFindCommonOnlyOne(t *testing.T) {
 func TestDeduplicate(t *testing.T) {
 	dd := NewDeduplicator()
 	ds := NewDocumentSet()
-	d := dom.Builder().FromMap(map[string]interface{}{
+	d := dom.DecodeAnyToNode(map[string]interface{}{
 		"url":     "http://prod.myapp.tld",
 		"timeout": 15000,
 		"mounts": []interface{}{
@@ -73,7 +73,7 @@ func TestDeduplicate(t *testing.T) {
 				"path": "/tmp",
 			},
 		},
-	})
+	}).(dom.ContainerBuilder)
 
 	assert.NoError(t, ds.AddDocument("prod", d))
 	assert.NoError(t, ds.AddDocument("qa", f.NewMorpher().
