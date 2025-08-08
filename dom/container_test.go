@@ -123,12 +123,6 @@ func TestLookup(t *testing.T) {
 	assert.Equal(t, "leaf1", doc.Lookup("level1.level2a.level3a").AsLeaf().Value())
 }
 
-func TestContainerAsMap(t *testing.T) {
-	fm := getTestDoc(t, "doc1").AsMap()
-	assert.Equal(t, 1, len(fm))
-	assert.NotNil(t, fm["level1"])
-}
-
 func TestContainerAsAny(t *testing.T) {
 	fm := getTestDoc(t, "doc1").AsAny().(map[string]interface{})
 	assert.Equal(t, 1, len(fm))

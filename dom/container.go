@@ -73,10 +73,6 @@ func (c *containerImpl) Flatten() map[string]Leaf {
 	return ret
 }
 
-func (c *containerImpl) AsMap() map[string]interface{} {
-	return encodeContainerFn(c)
-}
-
 func (c *containerImpl) AsAny() any {
 	return encodeContainerFn(c)
 }
@@ -126,7 +122,7 @@ func (c *containerImpl) Child(name string) Node {
 }
 
 func (c *containerImpl) Query(qry query.Query) NodeList {
-	return decodeQueryResult(qry.Select(c.AsMap()))
+	return decodeQueryResult(qry.Select(c.AsAny()))
 }
 
 func (c *containerImpl) Search(fn SearchValueFunc) []string {

@@ -185,11 +185,6 @@ type Container interface {
 	// Query queries this container and return matching child nodes.
 	Query(qry query.Query) NodeList
 
-	// deprecated, use AsAny
-	// AsMap converts recursively content of this container into map[string]interface{}
-	// Result consists from Go vanilla constructs only and thus could be directly used in Go templates.
-	AsMap() map[string]interface{}
-
 	// deprecated, use Walk
 	// Search finds all paths where Node's value is equal to given value according to provided SearchValueFunc.
 	// If no match is found, nil is returned.
