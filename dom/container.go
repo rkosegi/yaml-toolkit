@@ -298,8 +298,6 @@ func (c *containerBuilderImpl) ancestorOf(path string, create bool) (ContainerBu
 		if x == nil || !x.IsContainer() {
 			if create {
 				node = c.addChild(node, p)
-			} else {
-				return nil, ""
 			}
 		} else {
 			node = x.(ContainerBuilder)
@@ -311,13 +309,6 @@ func (c *containerBuilderImpl) ancestorOf(path string, create bool) (ContainerBu
 func (c *containerBuilderImpl) AddValueAt(path string, value Node) ContainerBuilder {
 	node, p := c.ancestorOf(path, true)
 	node.AddValue(p, value)
-	return c
-}
-
-func (c *containerBuilderImpl) RemoveAt(path string) ContainerBuilder {
-	if node, p := c.ancestorOf(path, false); node != nil {
-		node.Remove(p)
-	}
 	return c
 }
 
