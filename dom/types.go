@@ -68,6 +68,7 @@ func DefaultJsonEncoder(w io.Writer, v interface{}) error {
 	return e.Encode(v)
 }
 
+// deprecated, no longer needed as every Node implements AsAny.
 func DefaultNodeEncoderFn(n Container) interface{} {
 	return encodeContainerFn(n)
 }
@@ -88,6 +89,11 @@ func DecodeReader(r io.Reader, decFn DecoderFunc) (Node, error) {
 	return decodeFromReader(r, decFn)
 }
 
+// EncodeToWriter encodes Node into io.Writer using provided  EncoderFunc
+func EncodeToWriter(n Node, encFn EncoderFunc, w io.Writer) error {
+	return encodeToWriter(n, encFn, w)
+}
+
 // MustDecodeReader decodes io.Reader into Node using provided DecoderFunc.
 func MustDecodeReader(r io.Reader, decFn DecoderFunc) Node {
 	if node, err := decodeFromReader(r, decFn); err != nil {
@@ -102,14 +108,6 @@ func MustDecodeReader(r io.Reader, decFn DecoderFunc) Node {
 // current implementation
 func YamlNodeDecoder() func(n *yaml.Node) Node {
 	return decodeYamlNode
-}
-
-// deprecated
-// Serializable interface allows to persist data into provided io.Writer
-type Serializable interface {
-	// deprecated
-	// Serialize writes content into given writer, while encoding using provided EncoderFunc
-	Serialize(writer io.Writer, mappingFunc NodeEncoderFunc, encFn EncoderFunc) error
 }
 
 // Node is elemental unit of document. At runtime, it could be either Leaf, List or Container.
@@ -171,17 +169,11 @@ type NodeList []Node
 // Container is element that has zero or more child Nodes
 type Container interface {
 	Node
-	Serializable
 	// Children returns mapping between child name and its corresponding Node
 	Children() map[string]Node
 
 	// Child returns single child Node by its name. If no such child exists, nil is returned.
 	Child(name string) Node
-
-	// deprecated, use AsAny
-	// AsMap converts recursively content of this container into map[string]interface{}
-	// Result consists from Go vanilla constructs only and thus could be directly used in Go templates.
-	AsMap() map[string]interface{}
 
 	// Get gets value at given path.
 	Get(p path.Path) Node
@@ -193,13 +185,20 @@ type Container interface {
 	// Query queries this container and return matching child nodes.
 	Query(qry query.Query) NodeList
 
+	// deprecated, use AsAny
+	// AsMap converts recursively content of this container into map[string]interface{}
+	// Result consists from Go vanilla constructs only and thus could be directly used in Go templates.
+	AsMap() map[string]interface{}
+
 	// deprecated, use Walk
 	// Search finds all paths where Node's value is equal to given value according to provided SearchValueFunc.
 	// If no match is found, nil is returned.
 	Search(fn SearchValueFunc) []string
+
 	// deprecated, use Get()
 	// Lookup attempts to find child Node at given path
 	Lookup(path string) Node
+
 	// deprecated
 	// Flatten flattens this Container into list of leaves
 	// returned map can break structure since it uses naive property syntax to serialize keys.
@@ -290,7 +289,6 @@ type OverlayVisitorFn func(layer string, p path.Path, parent Node, node Node) bo
 // OverlayDocument represents multiple documents layered over each other.
 // It allows lookup across all layers while respecting precedence
 type OverlayDocument interface {
-	Serializable
 	// Lookup lookups data in given overlay and path
 	// if no node is present at any level, nil is returned
 	Lookup(overlay, path string) Node

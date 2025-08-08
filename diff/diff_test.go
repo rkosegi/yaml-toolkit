@@ -187,8 +187,7 @@ level1:
 	}, res)
 	Apply(cright.(dom.ContainerBuilder), *res)
 	var buf bytes.Buffer
-	err = cright.AsContainer().Serialize(&buf, dom.DefaultNodeEncoderFn, dom.DefaultYamlEncoder)
-	assert.Nil(t, err)
+	assert.NoError(t, dom.EncodeToWriter(cright, dom.DefaultYamlEncoder, &buf))
 	assert.Equal(t, `another:
   container:
     leaf13: Hi

@@ -56,6 +56,10 @@ func encodeContainerFn(n Container) map[string]interface{} {
 	return res
 }
 
+func encodeToWriter(n Node, encFn EncoderFunc, w io.Writer) error {
+	return encFn(w, n.AsAny())
+}
+
 func decodeLeafFn(v interface{}) Leaf {
 	return LeafNode(v)
 }
