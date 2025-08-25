@@ -43,6 +43,7 @@ func TestConfigHelper(t *testing.T) {
 	})
 
 	cfg := NewConfigHelper[config]().
+		Add(nil).
 		Add(defCfg).
 		Load("../testdata/cfg1.yaml").
 		Mutate(func(cb dom.ContainerBuilder) {

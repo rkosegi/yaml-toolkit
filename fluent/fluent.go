@@ -76,6 +76,9 @@ func dom2gen[T any](c dom.Container) *T {
 }
 
 func (c *configHelper[T]) Add(doc any) ConfigHelper[T] {
+	if doc == nil {
+		return c
+	}
 	if dc, ok := doc.(dom.Container); ok {
 		c.c = c.c.Merge(dc)
 	} else {
