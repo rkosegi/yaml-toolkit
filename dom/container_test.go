@@ -28,11 +28,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestContainerEncodeDecode(t *testing.T) {
-	x := getTestDoc(t, "doc1")
-	assert.Equal(t, x.AsAny(), DefaultNodeEncoderFn(x))
-}
-
 func TestBuilderFromYamlString(t *testing.T) {
 	doc, err := DecodeReader(strings.NewReader(`
 abc: 123

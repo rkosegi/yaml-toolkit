@@ -68,11 +68,6 @@ func DefaultJsonEncoder(w io.Writer, v interface{}) error {
 	return e.Encode(v)
 }
 
-// deprecated, no longer needed as every Node implements AsAny.
-func DefaultNodeEncoderFn(n Container) interface{} {
-	return encodeContainerFn(n)
-}
-
 func DefaultNodeDecoderFn(m map[string]interface{}) Container {
 	cb := *initContainerBuilder()
 	decodeContainerFn(&m, &cb)

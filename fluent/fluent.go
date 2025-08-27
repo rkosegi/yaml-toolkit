@@ -70,7 +70,7 @@ func dom2gen[T any](c dom.Container) *T {
 		buf bytes.Buffer
 		t   T
 	)
-	panicIfError(yaml.NewEncoder(&buf).Encode(dom.DefaultNodeEncoderFn(c)))
+	panicIfError(yaml.NewEncoder(&buf).Encode(c.AsAny()))
 	panicIfError(yaml.NewDecoder(&buf).Decode(&t))
 	return &t
 }
@@ -111,7 +111,7 @@ func (c *configHelper[T]) Save(file string) ConfigHelper[T] {
 	defer func() {
 		_ = f.Close()
 	}()
-	panicIfError(fep(f, dom.DefaultNodeEncoderFn(c.c)))
+	panicIfError(fep(f, c.c.AsAny()))
 	return c
 }
 
