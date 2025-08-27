@@ -34,6 +34,7 @@ root:
       prop3: 3.3
       prop4: true
       prop5: false
+      prop6: null
 `
 	var (
 		dn  Node
@@ -53,7 +54,6 @@ root:
 		assert.Equal(t, 123, l.Get(0).AsContainer().
 			Child("prop2").AsLeaf().Value())
 	})
-
 	t.Run("parse float", func(t *testing.T) {
 		assert.Equal(t, 3.3, l.Get(0).AsContainer().
 			Child("prop3").AsLeaf().Value())
@@ -63,6 +63,10 @@ root:
 			Child("prop4").AsLeaf().Value())
 		assert.Equal(t, false, l.Get(0).AsContainer().
 			Child("prop5").AsLeaf().Value())
+	})
+	t.Run("parse null", func(t *testing.T) {
+		assert.Equal(t, nil, l.Get(0).AsContainer().
+			Child("prop6").AsLeaf().Value())
 	})
 
 	assert.Nil(t, decodeYamlNode(&yaml.Node{

@@ -118,6 +118,8 @@ func DecodeYamlScalarNode(in *yaml.Node) interface{} {
 		if out, err := strconv.ParseBool(in.Value); err == nil {
 			return out
 		}
+	case "!!null":
+		return nil
 	}
 	return in.Value
 }
