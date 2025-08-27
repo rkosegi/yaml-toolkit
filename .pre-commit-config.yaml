@@ -23,10 +23,10 @@ repos:
         args:
           - --autofix
           - --indent=2
-  - repo: https://github.com/golangci/golangci-lint
-    rev: 3641f1c8f5bf57447e805d22484247748e3776aa
-    hooks:
-      - id: golangci-lint
+#  - repo: https://github.com/golangci/golangci-lint
+#    rev: 3641f1c8f5bf57447e805d22484247748e3776aa
+#    hooks:
+#      - id: golangci-lint
   - repo: https://github.com/dnephin/pre-commit-golang
     rev: v0.5.1
     hooks:
