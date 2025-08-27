@@ -31,6 +31,9 @@ root:
   list1:
     - item1: abc
       prop2: 123
+      prop3: 3.3
+      prop4: true
+      prop5: false
 `
 	var (
 		dn  Node
@@ -41,17 +44,50 @@ root:
 	assert.NoError(t, err)
 	dn = YamlNodeDecoder()(&n)
 	assert.NotNil(t, dn)
-	assert.Equal(t, 1, dn.AsContainer().
+	l := dn.AsContainer().
 		Child("root").AsContainer().
-		Child("list1").AsList().Size())
-	assert.Equal(t, "123", dn.AsContainer().
-		Child("root").AsContainer().
-		Child("list1").AsList().Get(0).AsContainer().
-		Child("prop2").AsLeaf().Value())
+		Child("list1").AsList()
+	assert.Equal(t, 1, l.Size())
+
+	t.Run("parse int", func(t *testing.T) {
+		assert.Equal(t, 123, l.Get(0).AsContainer().
+			Child("prop2").AsLeaf().Value())
+	})
+
+	t.Run("parse float", func(t *testing.T) {
+		assert.Equal(t, 3.3, l.Get(0).AsContainer().
+			Child("prop3").AsLeaf().Value())
+	})
+	t.Run("parse bool", func(t *testing.T) {
+		assert.Equal(t, true, l.Get(0).AsContainer().
+			Child("prop4").AsLeaf().Value())
+		assert.Equal(t, false, l.Get(0).AsContainer().
+			Child("prop5").AsLeaf().Value())
+	})
 
 	assert.Nil(t, decodeYamlNode(&yaml.Node{
 		Kind: yaml.AliasNode,
 	}))
+}
+
+func getYamlNodeFromTextForTest(t *testing.T, text string) *yaml.Node {
+	var out yaml.Node
+	assert.NoError(t, yaml.NewDecoder(strings.NewReader(text)).Decode(&out))
+	return &out
+}
+
+func TestDecodeYamlNodeScalar(t *testing.T) {
+	dec := YamlNodeDecoder()
+	t.Run("decode number should yield int", func(t *testing.T) {
+		o := dec(getYamlNodeFromTextForTest(t, "1"))
+		assert.NotNil(t, o)
+		assert.Equal(t, 1, o.AsLeaf().Value())
+	})
+	t.Run("decode string should yield string", func(t *testing.T) {
+		o := dec(getYamlNodeFromTextForTest(t, "abcd"))
+		assert.NotNil(t, o)
+		assert.Equal(t, "abcd", o.AsLeaf().Value())
+	})
 }
 
 func TestDecodeAnyToNode(t *testing.T) {
