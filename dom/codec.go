@@ -19,6 +19,7 @@ package dom
 import (
 	"io"
 	"reflect"
+	"strconv"
 
 	"github.com/rkosegi/yaml-toolkit/query"
 	"gopkg.in/yaml.v3"
@@ -99,12 +100,32 @@ func decodeContainerFn(current *map[string]interface{}, parent ContainerBuilder)
 	}
 }
 
+// DecodeYamlScalarNode attempts to convert scalar value (string) to more specific type.
+// This method mimics (in very simplified way) what yaml decoder does
+// see e.g. gopkg.in/yaml.v3@v3.0.1/decode.go:565
+// notable difference is that any error is silently dropped and fallback to plain string value is used
+func DecodeYamlScalarNode(in *yaml.Node) interface{} {
+	switch in.ShortTag() {
+	case "!!int":
+		if out, err := strconv.Atoi(in.Value); err == nil {
+			return out
+		}
+	case "!!float":
+		if out, err := strconv.ParseFloat(in.Value, 64); err == nil {
+			return out
+		}
+	case "!!bool":
+		if out, err := strconv.ParseBool(in.Value); err == nil {
+			return out
+		}
+	}
+	return in.Value
+}
+
 func decodeYamlNode(n *yaml.Node) Node {
 	switch n.Kind {
 	case yaml.ScalarNode:
-		// TODO: leaf is always string unless more elaborate approach is taken, but good for now
-		// see e.g. gopkg.in/yaml.v3@v3.0.1/decode.go:565
-		return LeafNode(n.Value)
+		return LeafNode(DecodeYamlScalarNode(n))
 	case yaml.SequenceNode:
 		lb := ListNode()
 		for _, x := range n.Content {
