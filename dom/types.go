@@ -217,11 +217,6 @@ type ContainerBuilder interface {
 	// If no such node exist, this function is no-op.
 	// Upon success, this function return this ContainerBuilder to allow chaining.
 	Delete(p path.Path) ContainerBuilder
-
-	// deprecated, use Set(path, node)
-	// AddValueAt adds Node into this Container at given path.
-	// Child nodes are creates as needed.
-	AddValueAt(path string, value Node) ContainerBuilder
 }
 
 var (

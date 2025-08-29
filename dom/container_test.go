@@ -135,34 +135,6 @@ func TestFromMap(t *testing.T) {
 	assert.Equal(t, "abc", c.Child("test1.test2").AsLeaf().Value())
 }
 
-func TestAddValueAt(t *testing.T) {
-	c := ContainerNode()
-	c.AddValueAt("test1.test2.test31", LeafNode("abc"))
-	c.AddValueAt("test1.test2.test32", LeafNode(123))
-	c.AddValueAt("test1.test2.test33", LeafNode(nil))
-	c.AddValueAt("test1.test2.test34", ListNode(
-		LeafNode("Hello"),
-		ContainerNode(),
-		ListNode()),
-	)
-	assert.Equal(t, "abc", c.Child("test1").
-		AsContainer().Child("test2").
-		AsContainer().Child("test31").
-		AsLeaf().Value())
-	var buff bytes.Buffer
-	assert.NoError(t, EncodeToWriter(c, DefaultYamlEncoder, &buff))
-	assert.Equal(t, `test1:
-  test2:
-    test31: abc
-    test32: 123
-    test33: null
-    test34:
-      - Hello
-      - {}
-      - []
-`, buff.String())
-}
-
 func TestFromReaderNullLeaf(t *testing.T) {
 	c, err := DecodeReader(strings.NewReader(`
 leaf0: null
