@@ -23,9 +23,12 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/props"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
+
+var pp = props.NewPathParser()
 
 func leavesEqual(l1, l2 interface{}) bool {
 	if l1 == nil && l2 == nil {
@@ -284,10 +287,10 @@ func TestDiffOverlayDocuments(t *testing.T) {
 	)
 	left := dom.NewOverlayDocument()
 	cb = dom.ContainerNode()
-	cb.AddValueAt("a.b.c", dom.LeafNode(1))
+	cb.Set(pp.MustParse("a.b.c"), dom.LeafNode(1))
 	left.Add("layer1", cb)
 	cb = dom.ContainerNode()
-	cb.AddValueAt("a.b.d", dom.LeafNode("xyz"))
+	cb.Set(pp.MustParse("a.b.d"), dom.LeafNode("xyz"))
 	left.Add("layer2", cb)
 	cb = dom.ContainerNode()
 	cb.AddValue("something", dom.LeafNode("A"))
@@ -295,7 +298,7 @@ func TestDiffOverlayDocuments(t *testing.T) {
 
 	right := dom.NewOverlayDocument()
 	cb = dom.ContainerNode()
-	cb.AddValueAt("a.b.c", dom.LeafNode(2))
+	cb.Set(pp.MustParse("a.b.c"), dom.LeafNode(2))
 	right.Add("layer1", cb)
 	cb = dom.ContainerNode()
 	cb.AddValue("hello", dom.LeafNode("Hi!"))
@@ -309,7 +312,7 @@ func TestDiffOverlayDocuments(t *testing.T) {
 		t.Logf("%s: %v", k, v)
 	}
 
-	assert.Equal(t, 4, len(res))
+	assert.Len(t, res, 4)
 	assertHasChange(t, Modification{
 		Type:     ModChange,
 		Path:     "a.b.c",

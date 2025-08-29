@@ -34,7 +34,7 @@ func TestIsPossiblePlaceholder(t *testing.T) {
 func FromProperties(in map[string]interface{}) dom.ContainerBuilder {
 	x := dom.ContainerNode()
 	for k, v := range in {
-		x.AddValueAt(k, dom.LeafNode(v))
+		x.Set(pp.MustParse(k), dom.LeafNode(v))
 	}
 	return x
 }

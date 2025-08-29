@@ -23,7 +23,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/rkosegi/yaml-toolkit/path"
+	. "github.com/rkosegi/yaml-toolkit/path"
 	"github.com/rkosegi/yaml-toolkit/query"
 	"github.com/stretchr/testify/assert"
 )
@@ -178,8 +178,8 @@ func TestSearch(t *testing.T) {
 	c, err := DecodeReader(strings.NewReader(`
 leaf0: null
 level1: 123
-path.to.element1: Hi
-path.to.element2: Hi
+to.element1: Hi
+to.element2: Hi
 `), DefaultYamlDecoder)
 	assert.NotNil(t, c)
 	assert.Nil(t, err)
@@ -187,15 +187,17 @@ path.to.element2: Hi
 	assert.Equal(t, []string{"level1"}, c.AsContainer().Search(SearchEqual(123)))
 	x := c.AsContainer().Search(SearchEqual("Hi"))
 	assert.Equal(t, 2, len(x))
-	assert.True(t, slices.Contains(x, "path.to.element1"))
-	assert.True(t, slices.Contains(x, "path.to.element2"))
+	assert.True(t, slices.Contains(x, "to.element1"))
+	assert.True(t, slices.Contains(x, "to.element2"))
 }
 
 func TestAddListAt(t *testing.T) {
+	p0 := NewBuilder(Simple("root")).Build()
+	p1 := NewBuilder(Simple("root"), Simple("sub")).Build()
 	root := ContainerNode().AddContainer("root")
-	root.AddValueAt("root.list[0]", LeafNode(123))
-	root.AddValueAt("root.sub.sub2[5]", LeafNode("abc"))
-	root.AddValueAt("root.sub.sub2[4].sub3", LeafNode(456))
+	root.Set(ChildOf(p0, Simple("list"), Numeric(0)), LeafNode(123))
+	root.Set(ChildOf(p1, Simple("sub2"), Numeric(5)), LeafNode("abc"))
+	root.Set(ChildOf(p1, Simple("sub2"), Numeric(4), Simple("sub3")), LeafNode(456))
 
 	assert.Equal(t, 123, root.Child("root").
 		AsContainer().Child("list").
@@ -215,11 +217,7 @@ root:
 `), DefaultYamlDecoder)
 	assert.NotNil(t, c)
 	assert.NoError(t, err)
-	p := path.NewBuilder().
-		Append(path.Simple("root")).
-		Append(path.Simple("level2")).
-		Append(path.Simple("orphan")).
-		Build()
+	p := NewBuilder(Simple("root"), Simple("level2"), Simple("orphan")).Build()
 	assert.NotNil(t, c.AsContainer().Get(p))
 	c.AsContainer().Walk(CompactFn)
 	assert.Nil(t, c.AsContainer().Get(p))
@@ -238,7 +236,7 @@ root:
 `), DefaultYamlDecoder)
 	assert.NotNil(t, c)
 	assert.NoError(t, err)
-	c.AsContainer().Walk(func(p path.Path, parent Node, node Node) bool {
+	c.AsContainer().Walk(func(p Path, parent Node, node Node) bool {
 		if node.IsLeaf() && node.AsLeaf().Value() == 123 {
 			return false
 		}
@@ -257,7 +255,7 @@ root:
 	assert.NotNil(t, x)
 	assert.NoError(t, err)
 	cnt1, cnt2 := 0, 0
-	x.AsContainer().Walk(func(p path.Path, parent Node, node Node) bool {
+	x.AsContainer().Walk(func(p Path, parent Node, node Node) bool {
 		if node.IsList() {
 			cnt1++
 		}
@@ -271,10 +269,11 @@ root:
 }
 
 func TestContainerEquals(t *testing.T) {
+	p1 := NewBuilder(Simple("a"), Simple("b"), Numeric(1)).Build()
 	c := ContainerNode()
-	c.AddValueAt("a.b[1]", LeafNode("123"))
+	c.Set(p1, LeafNode("123"))
 	c2 := ContainerNode()
-	c2.AddValueAt("a.b[1]", LeafNode("123"))
+	c2.Set(p1, LeafNode("123"))
 
 	assert.False(t, c.Equals(nil))
 	assert.False(t, c.Equals(LeafNode(2)))
@@ -284,8 +283,8 @@ func TestContainerEquals(t *testing.T) {
 
 func TestContainerClone(t *testing.T) {
 	c := ContainerNode()
-	c.AddValueAt("a.b[1]", LeafNode("123"))
-	c.AddValueAt("a.x.y", LeafNode(123))
+	c.Set(NewBuilder(Simple("a"), Simple("b"), Numeric(1)).Build(), LeafNode("123"))
+	c.Set(NewBuilder(Simple("a"), Simple("x"), Simple("y")).Build(), LeafNode(123))
 	c2 := c.Clone().AsContainer()
 	assert.Equal(t, 123, c2.Child("a").
 		AsContainer().Child("x").
@@ -297,12 +296,13 @@ func TestContainerClone(t *testing.T) {
 }
 
 func TestMergeContainers(t *testing.T) {
+	p := NewBuilder(Simple("l1")).Build()
 	a := ContainerNode()
 	c := ContainerNode()
-	a.AddValueAt("l1.l2c", LeafNode(7))
-	a.AddValueAt("l1.l2d", LeafNode("0987"))
-	c.AddValueAt("l1.l2a", LeafNode("123"))
-	c.AddValueAt("l1.l2b", LeafNode("abc"))
+	a.Set(ChildOf(p, Simple("l2c")), LeafNode(7))
+	a.Set(ChildOf(p, Simple("l2d")), LeafNode("0987"))
+	c.Set(ChildOf(p, Simple("l2a")), LeafNode("123"))
+	c.Set(ChildOf(p, Simple("l2b")), LeafNode("abc"))
 	d := c.Merge(a)
 	assert.Equal(t, 4, len(d.Child("l1").AsContainer().Children()))
 	assert.Equal(t, "abc", d.Child("l1").AsContainer().Child("l2b").AsLeaf().Value())
@@ -317,17 +317,14 @@ func TestContainerBuilderSeal(t *testing.T) {
 
 func TestContainerBuilderSet(t *testing.T) {
 	a := ContainerNode()
-	p := path.NewBuilder().Append(path.Simple("a")).Append(path.Simple("b")).Build()
+	p := NewBuilder(Simple("a"), Simple("b")).Build()
 	a.Set(p, LeafNode(1))
 	assert.Equal(t, 1, a.Child("a").AsContainer().Child("b").AsLeaf().Value())
 }
 
 func TestContainerBuilderDelete(t *testing.T) {
 	a := getTestDoc(t, "doc1")
-	p := path.NewBuilder().
-		Append(path.Simple("level1")).
-		Append(path.Simple("level2b")).
-		Build()
+	p := NewBuilder(Simple("level1"), Simple("level2b")).Build()
 	assert.Equal(t, 3, a.Get(p).AsLeaf().Value())
 	a.Delete(p)
 	assert.Nil(t, a.Get(p))

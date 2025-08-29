@@ -40,8 +40,9 @@ func buildPath(pc []Component) Path {
 }
 
 // NewBuilder creates new Builder
-func NewBuilder() Builder {
-	return &builder{}
+func NewBuilder(pc ...Component) Builder {
+	b := &builder{}
+	return b.Append(pc...)
 }
 
 // ParentOf returns Path with last component stripped out.
