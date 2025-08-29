@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/path"
@@ -229,33 +228,6 @@ func (c *containerBuilderImpl) add(name string, child Node) {
 
 func (c *containerBuilderImpl) AddValue(name string, value Node) ContainerBuilder {
 	c.add(name, value)
-	return c
-}
-
-func (c *containerBuilderImpl) addChild(parent ContainerBuilder, name string) ContainerBuilder {
-	return parent.AddContainer(name)
-}
-
-func (c *containerBuilderImpl) ancestorOf(path string, create bool) (ContainerBuilder, string) {
-	var node ContainerBuilder
-	node = c
-	cp := strings.Split(path, ".")
-	for _, p := range cp[0 : len(cp)-1] {
-		x := node.Child(p)
-		if x == nil || !x.IsContainer() {
-			if create {
-				node = c.addChild(node, p)
-			}
-		} else {
-			node = x.(ContainerBuilder)
-		}
-	}
-	return node, cp[len(cp)-1]
-}
-
-func (c *containerBuilderImpl) AddValueAt(path string, value Node) ContainerBuilder {
-	node, p := c.ancestorOf(path, true)
-	node.AddValue(p, value)
 	return c
 }
 
