@@ -100,5 +100,8 @@ root:
 	override, err := DecodeReader(strings.NewReader(d2), DefaultYamlDecoder)
 	assert.NoError(t, err)
 	result := orig.(ContainerBuilder).Merge(override.AsContainer())
-	assert.Equal(t, 2, result.Lookup("root.sub1.sub2.leaf").AsLeaf().Value())
+	assert.Equal(t, 2, result.Child("root").
+		AsContainer().Child("sub1").
+		AsContainer().Child("sub2").
+		AsContainer().Child("leaf").AsLeaf().Value())
 }

@@ -98,26 +98,6 @@ func (c *containerImpl) ensureChildren() {
 
 func (c *containerImpl) Child(name string) Node {
 	c.ensureChildren()
-	if listPathRe.MatchString(name) {
-		idx := listPathRe.FindStringIndex(name)
-		index, _ := strconv.Atoi(name[idx[0]+1 : idx[1]-1])
-		name2 := name[0:idx[0]]
-		if n, ok := c.children[name2]; ok {
-			if l, ok := n.(List); ok {
-				if index > l.Size()-1 {
-					// index out of bounds
-					return nil
-				}
-				return l.Get(index)
-			} else {
-				// not a list
-				return nil
-			}
-		} else {
-			// child not exists
-			return nil
-		}
-	}
 	return c.children[name]
 }
 
@@ -146,25 +126,6 @@ func (c *containerImpl) SameAs(node Node) bool {
 func (c *containerImpl) Children() map[string]Node {
 	c.ensureChildren()
 	return c.children
-}
-
-func (c *containerImpl) Lookup(path string) Node {
-	if path == "" {
-		return nil
-	}
-	c.ensureChildren()
-	pc := strings.Split(path, ".")
-	var current Container
-	current = c
-	for _, p := range pc[0 : len(pc)-1] {
-		x := current.Child(p)
-		if x == nil || !x.IsContainer() {
-			return nil
-		} else {
-			current = x.AsContainer()
-		}
-	}
-	return current.Child(pc[len(pc)-1])
 }
 
 func (c *containerImpl) Get(p path.Path) Node {

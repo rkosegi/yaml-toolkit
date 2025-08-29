@@ -23,7 +23,7 @@ type Builder interface {
 	// Append adds path component to the end of path.
 	// Builder state is cloned before adding component, so original builder instance is different from
 	// returned one.
-	Append(c Component) Builder
+	Append(c ...Component) Builder
 
 	// Build creates Path using current state.
 	// Subsequent invocation of this function will always produce new Path instance, but with same content.

@@ -67,15 +67,17 @@ func TestPatchOpAdd(t *testing.T) {
 	assert.NoError(t, err)
 
 	c = makeTestContainer()
-	assert.Equal(t, 4, c.Lookup("root.list").(dom.List).Size())
+	assert.Equal(t, 4, c.Child("root").AsContainer().Child("list").AsList().Size())
 	err = Do(&OpObj{
 		Op:    OpAdd,
 		Path:  MustParsePath("/root/list/2"),
 		Value: dom.LeafNode(1),
 	}, c)
 	assert.NoError(t, err)
-	assert.Equal(t, 5, c.Lookup("root.list").(dom.List).Size())
-	assert.Equal(t, 1, c.Lookup("root.list[2]").(dom.Leaf).Value())
+	assert.Equal(t, 5, c.Child("root").
+		AsContainer().Child("list").AsList().Size())
+	assert.Equal(t, 1, c.Child("root").
+		AsContainer().Child("list").AsList().Get(2).AsLeaf().Value())
 }
 
 func TestPatchOpRemove(t *testing.T) {
@@ -83,35 +85,47 @@ func TestPatchOpRemove(t *testing.T) {
 		c   dom.ContainerBuilder
 		err error
 	)
-	c = makeTestContainer()
-	err = Do(&OpObj{
-		Op:   OpRemove,
-		Path: MustParsePath("/not/exists/10"),
-	}, c)
-	assert.Error(t, err)
-	assert.Equal(t, 4, len(c.Lookup("root.list").(dom.List).Items()))
-	err = Do(&OpObj{
-		Op:   OpRemove,
-		Path: MustParsePath("/root/list/0"),
-	}, c)
-	assert.NoError(t, err)
-	assert.Equal(t, 3, len(c.Lookup("root.list").(dom.List).Items()))
+	t.Run("non-existent path", func(t *testing.T) {
+		c = makeTestContainer()
+		err = Do(&OpObj{
+			Op:   OpRemove,
+			Path: MustParsePath("/not/exists/10"),
+		}, c)
+		assert.Error(t, err)
+		assert.Equal(t, 4, len(c.Child("root").
+			AsContainer().Child("list").AsList().Items()))
+	})
+	t.Run("valid case - remove list item at 0 index", func(t *testing.T) {
+		c = makeTestContainer()
+		err = Do(&OpObj{
+			Op:   OpRemove,
+			Path: MustParsePath("/root/list/0"),
+		}, c)
+		assert.NoError(t, err)
+		assert.Len(t, c.Child("root").AsContainer().Child("list").AsList().Items(), 3)
+	})
 
-	c = makeTestContainer()
-	err = Do(&OpObj{
-		Op:   OpRemove,
-		Path: MustParsePath("/root/list/2"),
-	}, c)
-	assert.NoError(t, err)
-	assert.Equal(t, 3, len(c.Lookup("root.list").(dom.List).Items()))
-	assert.Equal(t, "item4", c.Lookup("root.list[2]").(dom.Leaf).Value())
+	t.Run("valid case - remove list item in the middle", func(t *testing.T) {
+		c = makeTestContainer()
+		err = Do(&OpObj{
+			Op:   OpRemove,
+			Path: MustParsePath("/root/list/2"),
+		}, c)
+		assert.NoError(t, err)
+		assert.Len(t, c.Child("root").AsContainer().Child("list").AsList().Items(), 3)
+		assert.Equal(t, "item4", c.Child("root").
+			AsContainer().Child("list").AsList().Get(2).(dom.Leaf).Value())
 
-	err = Do(&OpObj{
-		Op:   OpRemove,
-		Path: MustParsePath("/root/list"),
-	}, c)
-	assert.NoError(t, err)
-	assert.Nil(t, c.Lookup("root.list"))
+	})
+
+	t.Run("valid case - remove whole list", func(t *testing.T) {
+		err = Do(&OpObj{
+			Op:   OpRemove,
+			Path: MustParsePath("/root/list"),
+		}, c)
+		assert.NoError(t, err)
+		assert.Nil(t, c.Child("root").AsContainer().Child("list"))
+	})
 }
 
 func TestPatchOpReplace(t *testing.T) {
@@ -120,55 +134,71 @@ func TestPatchOpReplace(t *testing.T) {
 		err error
 	)
 	c = makeTestContainer()
-	// value missing
-	err = Do(&OpObj{
-		Op:   OpReplace,
-		Path: emptyPath,
-	}, c)
-	assert.Error(t, err)
-	err = Do(&OpObj{
-		Op:    OpReplace,
-		Path:  MustParsePath("/root/sub1"),
-		Value: dom.LeafNode("abc"),
-	}, c)
-	assert.NoError(t, err)
-	assert.Equal(t, "abc", c.Lookup("root.sub1").(dom.Leaf).Value())
-	err = Do(&OpObj{
-		Op:    OpReplace,
-		Path:  MustParsePath("/root/non-existent/path"),
-		Value: dom.LeafNode("abc"),
-	}, c)
-	assert.Error(t, err)
-	assert.Equal(t, 4, len(c.Lookup("root.list").(dom.List).Items()))
-	err = Do(&OpObj{
-		Op:    OpReplace,
-		Path:  MustParsePath("/root/list/1"),
-		Value: dom.LeafNode("abc"),
-	}, c)
-	assert.NoError(t, err)
-	assert.Equal(t, 4, len(c.Lookup("root.list").(dom.List).Items()))
-	assert.Equal(t, "abc", c.Lookup("root.list[1]").(dom.Leaf).Value())
+	t.Run("missing value", func(t *testing.T) {
+		assert.Error(t, Do(&OpObj{
+			Op:   OpReplace,
+			Path: emptyPath,
+		}, c))
+	})
+	t.Run("valid case - leaf", func(t *testing.T) {
+		err = Do(&OpObj{
+			Op:    OpReplace,
+			Path:  MustParsePath("/root/sub1"),
+			Value: dom.LeafNode("abc"),
+		}, c)
+		assert.NoError(t, err)
+		assert.Equal(t, "abc", c.Child("root").
+			AsContainer().Child("sub1").AsLeaf().Value())
+	})
+	t.Run("non-existent path", func(t *testing.T) {
+		c = makeTestContainer()
+		err = Do(&OpObj{
+			Op:    OpReplace,
+			Path:  MustParsePath("/root/non-existent/path"),
+			Value: dom.LeafNode("abc"),
+		}, c)
+		assert.Error(t, err)
+		assert.Equal(t, 4, len(c.Child("root").AsContainer().Child("list").AsList().Items()))
+	})
+	t.Run("valid case - list item", func(t *testing.T) {
+		err = Do(&OpObj{
+			Op:    OpReplace,
+			Path:  MustParsePath("/root/list/1"),
+			Value: dom.LeafNode("abc"),
+		}, c)
+		assert.NoError(t, err)
+		assert.Equal(t, 4, len(c.Child("root").AsContainer().Child("list").AsList().Items()))
+		assert.Equal(t, "abc", c.Child("root").AsContainer().Child("list").
+			AsList().Get(1).AsLeaf().Value())
+	})
 }
 
 func TestPatchOpMove(t *testing.T) {
 	var err error
-	// missing "from"
-	err = Do(&OpObj{
-		Op:    OpMove,
-		Path:  MustParsePath("/root/sub1/prop2"),
-		Value: dom.LeafNode(1),
-	}, makeTestContainer())
-	assert.Error(t, err)
-	f := MustParsePath("/root/sub1/prop")
-	c := makeTestContainer()
-	err = Do(&OpObj{
-		Op:   OpMove,
-		Path: MustParsePath("/root/sub1/prop2"),
-		From: &f,
-	}, c)
-	assert.NoError(t, err)
-	assert.Nil(t, c.Lookup("root.sub1.prop"))
-	assert.Equal(t, 456, c.Lookup("root.sub1.prop2").(dom.Leaf).Value())
+	t.Run("missing from", func(t *testing.T) {
+		assert.Error(t, Do(&OpObj{
+			Op:    OpMove,
+			Path:  MustParsePath("/root/sub1/prop2"),
+			Value: dom.LeafNode(1),
+		}, makeTestContainer()))
+	})
+
+	t.Run("valid case", func(t *testing.T) {
+		f := MustParsePath("/root/sub1/prop")
+		c := makeTestContainer()
+		err = Do(&OpObj{
+			Op:   OpMove,
+			Path: MustParsePath("/root/sub1/prop2"),
+			From: &f,
+		}, c)
+		assert.NoError(t, err)
+		assert.Nil(t, c.Child("root").
+			AsContainer().Child("sub1").
+			AsContainer().Child("prop"))
+		assert.Equal(t, 456, c.Child("root").
+			AsContainer().Child("sub1").
+			AsContainer().Child("prop2").AsLeaf().Value())
+	})
 }
 
 func TestPatchOpCopy(t *testing.T) {
@@ -177,61 +207,69 @@ func TestPatchOpCopy(t *testing.T) {
 		c   dom.ContainerBuilder
 		f   Path
 	)
-	// missing "from"
-	err = Do(&OpObj{
-		Op:    OpCopy,
-		Path:  MustParsePath("/root/sub1/prop2"),
-		Value: dom.LeafNode(1),
-	}, makeTestContainer())
-	assert.Error(t, err)
-	f = MustParsePath("/root/sub1/prop")
-	c = makeTestContainer()
-	err = Do(&OpObj{
-		Op:   OpCopy,
-		Path: MustParsePath("/root/sub1/prop2"),
-		From: &f,
-	}, c)
-	assert.NoError(t, err)
-	assert.Equal(t, 456, c.Lookup("root.sub1.prop").(dom.Leaf).Value())
-	assert.Equal(t, 456, c.Lookup("root.sub1.prop2").(dom.Leaf).Value())
-	f = MustParsePath("/root/sub10/prop10")
-	c = makeTestContainer()
-	err = Do(&OpObj{
-		Op:   OpCopy,
-		Path: MustParsePath("/root/sub1/prop2"),
-		From: &f,
-	}, c)
-	assert.Error(t, err)
+	t.Run("missing from", func(t *testing.T) {
+		err = Do(&OpObj{
+			Op:    OpCopy,
+			Path:  MustParsePath("/root/sub1/prop2"),
+			Value: dom.LeafNode(1),
+		}, makeTestContainer())
+		assert.Error(t, err)
+	})
+	t.Run("valid case", func(t *testing.T) {
+		f = MustParsePath("/root/sub1/prop")
+		c = makeTestContainer()
+		err = Do(&OpObj{
+			Op:   OpCopy,
+			Path: MustParsePath("/root/sub1/prop2"),
+			From: &f,
+		}, c)
+		assert.NoError(t, err)
+		assert.Equal(t, 456, c.Child("root").
+			AsContainer().Child("sub1").
+			AsContainer().Child("prop").AsLeaf().Value())
+		assert.Equal(t, 456, c.Child("root").
+			AsContainer().Child("sub1").
+			AsContainer().Child("prop2").AsLeaf().Value())
+	})
+	t.Run("non-existent path", func(t *testing.T) {
+		f = MustParsePath("/root/sub10/prop10")
+		c = makeTestContainer()
+		err = Do(&OpObj{
+			Op:   OpCopy,
+			Path: MustParsePath("/root/sub1/prop2"),
+			From: &f,
+		}, c)
+		assert.Error(t, err)
+	})
 }
 
 func TestPatchOpTest(t *testing.T) {
-	var err error
-	// missing value
-	err = Do(&OpObj{
-		Op:    OpTest,
-		Path:  emptyPath,
-		Value: nil,
-	}, makeTestContainer())
-	assert.Error(t, err)
-	// positive case
-	err = Do(&OpObj{
-		Op:    OpTest,
-		Path:  MustParsePath("/root/list/0"),
-		Value: dom.LeafNode("item1"),
-	}, makeTestContainer())
-	assert.NoError(t, err)
-	// value mismatch
-	err = Do(&OpObj{
-		Op:    OpTest,
-		Path:  MustParsePath("/root/list/0"),
-		Value: dom.LeafNode("item2"),
-	}, makeTestContainer())
-	assert.Error(t, err)
-	// unresolvable path
-	err = Do(&OpObj{
-		Op:    OpTest,
-		Path:  MustParsePath("/root/list1/0"),
-		Value: dom.LeafNode("item2"),
-	}, makeTestContainer())
-	assert.Error(t, err)
+	t.Run("missing value", func(t *testing.T) {
+		assert.Error(t, Do(&OpObj{
+			Op:    OpTest,
+			Path:  emptyPath,
+			Value: nil,
+		}, makeTestContainer()))
+	})
+	t.Run("positive case", func(t *testing.T) {
+		assert.NoError(t, Do(&OpObj{
+			Op:    OpTest,
+			Path:  MustParsePath("/root/list/0"),
+			Value: dom.LeafNode("item1"),
+		}, makeTestContainer()))
+	})
+	t.Run("value mismatch", func(t *testing.T) {
+		assert.Error(t, Do(&OpObj{
+			Op:    OpTest,
+			Path:  MustParsePath("/root/list/0"),
+			Value: dom.LeafNode("item2"),
+		}, makeTestContainer()))
+	})
+	t.Run("unresolvable path", func(t *testing.T) {
+		assert.Error(t, Do(&OpObj{
+			Op:    OpTest,
+			Path:  MustParsePath("/root/list1/0"),
+			Value: dom.LeafNode("item2"),
+		}, makeTestContainer()))
+	})
 }

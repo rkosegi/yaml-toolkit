@@ -27,17 +27,19 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func TestPutAndLookup(t *testing.T) {
-	d := NewOverlayDocument()
-	assert.Nil(t, d.Lookup("main", "abc"))
-	d.Put("main", "abc", LeafNode("123"))
-	assert.Nil(t, d.Lookup("main", ""))
-	assert.Equal(t, "123", d.Lookup("main", "abc").AsLeaf().Value())
-	d.Put("main", "xyz.efg", LeafNode(42))
-	assert.Equal(t, 42, d.Lookup("main", "xyz.efg").AsLeaf().Value())
-	assert.True(t, d.LookupAny("xyz").IsContainer())
-	assert.Nil(t, d.LookupAny("w"))
-	assert.Nil(t, d.LookupAny("xyz.efg.abc"))
+func TestPutAndGet(t *testing.T) {
+	od := NewOverlayDocument()
+	assert.Nil(t, od.Get("main", path.NewBuilder().Append(path.Simple("abc")).Build()))
+	od.Put("main", "abc", LeafNode("123"))
+	assert.Nil(t, od.Get("main", path.NewBuilder().Append(path.Simple("")).Build()))
+	assert.Equal(t, "123", od.Get("main", path.NewBuilder().Append(path.Simple("abc")).Build()).AsLeaf().Value())
+	od.Put("main", "xyz.efg", LeafNode(42))
+
+	p1 := path.NewBuilder().Append(path.Simple("xyz"), path.Simple("efg")).Build()
+	assert.Equal(t, 42, od.Get("main", p1).AsLeaf().Value())
+	assert.True(t, od.GetAny(path.NewBuilder().Append(path.Simple("xyz")).Build()).IsContainer())
+	assert.Nil(t, od.GetAny(path.NewBuilder().Append(path.Simple("w")).Build()))
+	assert.Nil(t, od.GetAny(path.ChildOf(p1, path.Simple("abc"))))
 }
 
 func TestSerialize(t *testing.T) {
@@ -71,7 +73,7 @@ func TestLoad(t *testing.T) {
 		"a": 12,
 	})
 	d.Populate("layer-1", "key1.key12", &doc)
-	n := d.LookupAny("key1")
+	n := d.GetAny(path.NewBuilder().Append(path.Simple("key1")).Build())
 	assert.True(t, n.IsContainer())
 	c1 := n.AsContainer().Child("key12")
 	assert.True(t, c1.IsContainer())
@@ -100,10 +102,15 @@ func TestLoad2(t *testing.T) {
 	assert.Equal(t, 5, len(props))
 }
 
-func TestLoadLookupList(t *testing.T) {
-	d := NewOverlayDocument()
-	d.Put("", "key1.key2[0].key3", LeafNode("hello"))
-	n := d.LookupAny("key1.key2[0].key3")
+func TestLoadGetList(t *testing.T) {
+	od := NewOverlayDocument()
+	od.Put("", "key1.key2[0].key3", LeafNode("hello"))
+	p := path.NewBuilder().
+		Append(path.Simple("key1")).
+		Append(path.Simple("key2")).
+		Append(path.Numeric(0)).
+		Append(path.Simple("key3")).Build()
+	n := od.GetAny(p)
 	assert.Equal(t, "hello", n.AsLeaf().Value())
 }
 
