@@ -150,16 +150,16 @@ func (m *overlayDocument) Populate(overlay, path string, data *map[string]interf
 	decodeContainerFn(data, current)
 }
 
-func (m *overlayDocument) Lookup(overlay, path string) Node {
+func (m *overlayDocument) Get(overlay string, p path.Path) Node {
 	if !slices.Contains(m.names, overlay) {
 		return nil
 	}
-	return m.overlays[overlay].Lookup(path)
+	return m.overlays[overlay].Get(p)
 }
 
-func (m *overlayDocument) LookupAny(path string) Node {
+func (m *overlayDocument) GetAny(p path.Path) Node {
 	for _, name := range m.names {
-		if n := m.Lookup(name, path); n != nil {
+		if n := m.Get(name, p); n != nil {
 			return n
 		}
 	}

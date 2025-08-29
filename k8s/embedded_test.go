@@ -115,7 +115,9 @@ func TestLoadEmbeddedProps(t *testing.T) {
 	d, err := Properties("../testdata/secret3.yaml")
 	assert.Nil(t, err)
 	assert.NotNil(t, d)
-	assert.Equal(t, "123", d.Document().Lookup("prop2.level2.level3").(dom.Leaf).Value())
+	assert.Equal(t, "123", d.Document().Child("prop2").
+		AsContainer().Child("level2").
+		AsContainer().Child("level3").(dom.Leaf).Value())
 
 	f, err := os.CreateTemp("", tempFilePattern)
 	defer func() {

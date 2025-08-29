@@ -167,7 +167,7 @@ type Container interface {
 	// Children returns mapping between child name and its corresponding Node
 	Children() map[string]Node
 
-	// Child returns single child Node by its name. If no such child exists, nil is returned.
+	// Child returns immediate child Node by its name. If no such child exists, nil is returned.
 	Child(name string) Node
 
 	// Get gets value at given path.
@@ -184,10 +184,6 @@ type Container interface {
 	// Search finds all paths where Node's value is equal to given value according to provided SearchValueFunc.
 	// If no match is found, nil is returned.
 	Search(fn SearchValueFunc) []string
-
-	// deprecated, use Get()
-	// Lookup attempts to find child Node at given path
-	Lookup(path string) Node
 
 	// deprecated
 	// Flatten flattens this Container into list of leaves
@@ -275,12 +271,14 @@ type OverlayVisitorFn func(layer string, p path.Path, parent Node, node Node) bo
 // OverlayDocument represents multiple documents layered over each other.
 // It allows lookup across all layers while respecting precedence
 type OverlayDocument interface {
-	// Lookup lookups data in given overlay and path
+	// Get lookups data in given overlay and path
 	// if no node is present at any level, nil is returned
-	Lookup(overlay, path string) Node
-	// LookupAny lookups data in all overlays (in creation order) and path.
-	// if no node is present at any level, nil is returned
-	LookupAny(path string) Node
+	Get(overlay string, p path.Path) Node
+
+	// GetAny lookups data in all overlays (in creation order) and path.
+	// if no node is present at any overlay, nil is returned
+	GetAny(p path.Path) Node
+
 	// Search finds all occurrences of given value in all layers using custom SearchValueFunc
 	Search(fn SearchValueFunc) Coordinates
 	// Populate puts dictionary into overlay at given path

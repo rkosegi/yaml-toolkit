@@ -26,10 +26,10 @@ func (b *builder) Build() Path {
 	return buildPath(b.components)
 }
 
-func (b *builder) Append(c Component) Builder {
+func (b *builder) Append(c ...Component) Builder {
 	cs := make([]Component, len(b.components))
 	copy(cs, b.components)
-	cs = append(b.components, c)
+	cs = append(b.components, c...)
 	return &builder{components: cs}
 }
 

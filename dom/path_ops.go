@@ -135,6 +135,9 @@ func getFromNode(sourceNode Node, at path.Path) Node {
 	var src Node
 	src = sourceNode
 	for _, pc := range at.Components() {
+		if src.IsLeaf() {
+			return nil
+		}
 		if pc.IsNumeric() {
 			src = src.AsList().Get(pc.NumericValue())
 		} else {

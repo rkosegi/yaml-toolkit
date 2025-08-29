@@ -33,10 +33,12 @@ type placeholderResolver struct {
 	placeholderMatcherFn       common.StringPredicateFn
 }
 
+var pp = props.NewPathParser()
+
 func (pr *placeholderResolver) Resolve(doc dom.OverlayDocument) *PlaceholderResolutionReport {
 	c := doc.Merged()
 	resolver := props.Builder().LookupFunc(func(key string) *string {
-		if v := c.Lookup(key); v != nil {
+		if v := c.Get(pp.MustParse(key)); v != nil {
 			x := fmt.Sprintf("%v", v.(dom.Leaf).Value())
 			return &x
 		}
