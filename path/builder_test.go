@@ -23,12 +23,8 @@ import (
 )
 
 func TestBuilder(t *testing.T) {
-	b := NewBuilder().
-		Append(Simple("root")).
-		Append(Numeric(1)).
-		Append(AfterLast())
+	b := NewBuilder(Simple("root"), Numeric(1), AfterLast())
 	p := b.Build()
-
 	pc := p.Components()
 
 	assert.False(t, p.IsEmpty())
@@ -53,13 +49,12 @@ func TestPathGetLastEmpty(t *testing.T) {
 func TestParentOf(t *testing.T) {
 	// parent of empty path is nil
 	assert.Nil(t, ParentOf(NewBuilder().Build()))
-	assert.Len(t, ParentOf(NewBuilder().Append(Simple("a")).
-		Append(Simple("b")).Build()).Components(), 1)
-	assert.Equal(t, emptyPath, ParentOf(NewBuilder().Append(Simple("A")).Build()))
+	assert.Len(t, ParentOf(NewBuilder(Simple("a"), Simple("b")).Build()).Components(), 1)
+	assert.Equal(t, emptyPath, ParentOf(NewBuilder(Simple("A")).Build()))
 }
 
 func TestChildOf(t *testing.T) {
-	np := ChildOf(NewBuilder().Append(Simple("a")).Build(), Simple("b"), Simple("c"))
+	np := ChildOf(NewBuilder(Simple("a")).Build(), Simple("b"), Simple("c"))
 	assert.Len(t, np.Components(), 3)
 	assert.Equal(t, "c", np.Last().Value())
 }
@@ -76,11 +71,11 @@ func TestPathString(t *testing.T) {
 		},
 		{
 			exp: `["a","b"]`,
-			p:   NewBuilder().Append(Simple("a")).Append(Simple("b")).Build(),
+			p:   NewBuilder(Simple("a"), Simple("b")).Build(),
 		},
 		{
 			exp: `["a",0,3]`,
-			p:   NewBuilder().Append(Simple("a")).Append(Numeric(0)).Append(Numeric(3)).Build(),
+			p:   NewBuilder(Simple("a"), Numeric(0), Numeric(3)).Build(),
 		},
 	} {
 		assert.Equal(t, tc.exp, tc.p.String())

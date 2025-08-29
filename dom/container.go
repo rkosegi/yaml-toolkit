@@ -213,8 +213,6 @@ func ensureList(name string, parent ContainerBuilder) (ListBuilder, uint, string
 	var list ListBuilder
 	if l := parent.Child(name2); l == nil {
 		list = parent.AddList(name2)
-	} else {
-		list = l.(ListBuilder)
 	}
 	for i := 0; i <= index; i++ {
 		if list.Size() <= i {
@@ -226,12 +224,7 @@ func ensureList(name string, parent ContainerBuilder) (ListBuilder, uint, string
 
 func (c *containerBuilderImpl) add(name string, child Node) {
 	c.ensureChildren()
-	if listPathRe.MatchString(name) {
-		list, index, _ := ensureList(name, c)
-		list.Set(index, child)
-	} else {
-		c.children[name] = child
-	}
+	c.children[name] = child
 }
 
 func (c *containerBuilderImpl) AddValue(name string, value Node) ContainerBuilder {
@@ -240,14 +233,7 @@ func (c *containerBuilderImpl) AddValue(name string, value Node) ContainerBuilde
 }
 
 func (c *containerBuilderImpl) addChild(parent ContainerBuilder, name string) ContainerBuilder {
-	if listPathRe.MatchString(name) {
-		list, index, _ := ensureList(name, parent)
-		x := initContainerBuilder()
-		list.Set(index, x)
-		return x
-	} else {
-		return parent.AddContainer(name)
-	}
+	return parent.AddContainer(name)
 }
 
 func (c *containerBuilderImpl) ancestorOf(path string, create bool) (ContainerBuilder, string) {

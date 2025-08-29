@@ -25,6 +25,7 @@ import (
 
 	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/props"
 )
 
 type doc struct {
@@ -33,6 +34,8 @@ type doc struct {
 	m    Manifest
 	enc  EncodeInternalFn
 }
+
+var pp = props.NewPathParser()
 
 func (e *doc) Document() dom.ContainerBuilder {
 	return e.cb
@@ -124,7 +127,7 @@ func DecodeEmbeddedProps() DecodeInternalFn {
 	return func(m Manifest) (dom.ContainerBuilder, error) {
 		c := dom.ContainerNode()
 		for _, k := range m.StringData().List() {
-			c.AddValueAt(k, dom.LeafNode(*m.StringData().Get(k)))
+			c.Set(pp.MustParse(k), dom.LeafNode(*m.StringData().Get(k)))
 		}
 		return c, nil
 	}

@@ -20,14 +20,16 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMergeSimple(t *testing.T) {
 	b1 := ContainerNode()
-	b1.AddValueAt("root.list", ListNode(LeafNode(123), LeafNode(456)))
+	p1 := path.NewBuilder().Append(path.Simple("root"), path.Simple("list")).Build()
+	b1.Set(p1, ListNode(LeafNode(123), LeafNode(456)))
 	b2 := ContainerNode()
-	b2.AddValueAt("root.list[2]", LeafNode(789))
+	b2.Set(path.ChildOf(p1, path.Numeric(2)), LeafNode(789))
 	m := &merger{}
 	m.init()
 	c := m.mergeContainers(b1, b2)

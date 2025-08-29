@@ -23,13 +23,16 @@ import (
 
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/path"
+	"github.com/rkosegi/yaml-toolkit/props"
 	"github.com/stretchr/testify/assert"
 )
+
+var pp = props.NewPathParser()
 
 func TestMorpherCopyMerge(t *testing.T) {
 	d := dom.ContainerNode()
 	d.AddValue("a", dom.LeafNode(1))
-	d.AddValueAt("b", dom.LeafNode(2))
+	d.Set(pp.MustParse("b"), dom.LeafNode(2))
 
 	data, err := os.ReadFile("../testdata/doc2.yaml")
 	assert.NoError(t, err)

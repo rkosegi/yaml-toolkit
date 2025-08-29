@@ -99,6 +99,9 @@ func applyToNode(targetNode Node, at path.Path, val Node) Node {
 	if c.IsNumeric() {
 		unsealListIfNeeded(tgt.(List)).Set(uint(c.NumericValue()), val)
 	} else {
+		if !tgt.IsContainer() {
+			tgt = ContainerNode()
+		}
 		unsealContainerIfNeeded(tgt.AsContainer()).AddValue(c.Value(), val)
 	}
 	return targetNode
