@@ -17,11 +17,9 @@ limitations under the License.
 package dom
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 
-	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/rkosegi/yaml-toolkit/query"
 )
@@ -36,39 +34,19 @@ type containerImpl struct {
 	children map[string]Node
 }
 
-func flattenLeaf(node Leaf, path string, ret *map[string]Leaf) {
-	(*ret)[path] = node
+// SimplePathAsString just delegates to fmt.Stringer() implemented by path.Path
+func SimplePathAsString(p path.Path) string {
+	return p.String()
 }
 
-func flattenList(node List, path string, ret *map[string]Leaf) {
-	for i, item := range node.Items() {
-		p := fmt.Sprintf("%s[%d]", path, i)
-		if item.IsContainer() {
-			flattenContainer(item.AsContainer(), p, ret)
-		} else if item.IsList() {
-			flattenList(item.AsList(), p, ret)
-		} else {
-			flattenLeaf(item.AsLeaf(), p, ret)
-		}
-	}
-}
-
-func flattenContainer(node Container, path string, ret *map[string]Leaf) {
-	for k, n := range node.Children() {
-		p := common.ToPath(path, k)
-		if n.IsContainer() {
-			flattenContainer(n.AsContainer(), p, ret)
-		} else if n.IsList() {
-			flattenList(n.AsList(), p, ret)
-		} else {
-			flattenLeaf(n.AsLeaf(), p, ret)
-		}
-	}
-}
-
-func (c *containerImpl) Flatten() map[string]Leaf {
+func (c *containerImpl) Flatten(keyFn PathToStringFunc) map[string]Leaf {
 	ret := make(map[string]Leaf)
-	flattenContainer(c, "", &ret)
+	c.Walk(func(p path.Path, parent Node, node Node) bool {
+		if node.IsLeaf() {
+			ret[keyFn(p)] = node.AsLeaf()
+		}
+		return true
+	}, WalkOptDFS())
 	return ret
 }
 
@@ -104,16 +82,6 @@ func (c *containerImpl) Query(qry query.Query) NodeList {
 	return decodeQueryResult(qry.Select(c.AsAny()))
 }
 
-func (c *containerImpl) Search(fn SearchValueFunc) []string {
-	var r []string
-	for k, v := range c.Flatten() {
-		if fn(v.Value()) {
-			r = append(r, k)
-		}
-	}
-	return r
-}
-
 func (c *containerImpl) IsContainer() bool {
 	return true
 }
@@ -140,8 +108,8 @@ func (c *containerImpl) Clone() Node {
 	return c2
 }
 
-func (c *containerImpl) Walk(fn NodeVisitorFn) {
-	walkContainer(path.NewBuilder(), c, fn)
+func (c *containerImpl) Walk(fn NodeVisitorFn, opts ...WalkOpt) {
+	walkStart(fn, c, opts...)
 }
 
 func (c *containerImpl) AsContainer() Container {

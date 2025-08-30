@@ -55,10 +55,21 @@ type overlayDocument struct {
 	overlays map[string]ContainerBuilder
 }
 
-func (m *overlayDocument) Search(fn SearchValueFunc) Coordinates {
+func (m *overlayDocument) Search(fn SearchValueFunc, keyFn PathToStringFunc) Coordinates {
 	var r Coordinates
+
+	sfn := func(c Container, fn SearchValueFunc) []string {
+		var x []string
+		for k, v := range c.Flatten(keyFn) {
+			if fn(v.Value()) {
+				x = append(x, k)
+			}
+		}
+		return x
+	}
+
 	for _, l := range m.names {
-		if paths := m.overlays[l].Search(fn); paths != nil {
+		if paths := sfn(m.overlays[l], fn); len(paths) > 0 {
 			for _, p := range paths {
 				r = append(r, &coordinate{
 					path:  p,
@@ -93,7 +104,7 @@ func (m *overlayDocument) Add(overlay string, value Container) {
 
 func (m *overlayDocument) Put(overlay, path string, value Node) {
 	if value.IsContainer() {
-		for k, v := range value.AsContainer().Flatten() {
+		for k, v := range value.AsContainer().Flatten(SimplePathAsString) {
 			m.Put(overlay, common.ToPath(path, k), v)
 		}
 	} else {
@@ -185,11 +196,11 @@ func firstValidListItem(idx int, lists ...List) Node {
 	return nilLeaf
 }
 
-func (m *overlayDocument) Walk(fn OverlayVisitorFn) {
+func (m *overlayDocument) Walk(fn OverlayVisitorFn, opts ...WalkOpt) {
 	for _, n := range m.names {
-		walkContainer(path.NewBuilder(), m.overlays[n], func(p path.Path, parent Node, node Node) bool {
+		walkStart(func(p path.Path, parent Node, node Node) bool {
 			return fn(n, p, parent, node)
-		})
+		}, m.overlays[n], opts...)
 	}
 }
 

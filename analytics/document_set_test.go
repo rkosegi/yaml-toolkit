@@ -28,8 +28,8 @@ import (
 func TestDocumentSetAdd(t *testing.T) {
 	ds := NewDocumentSet()
 	assert.NoError(t, ds.AddPropertiesFromManifest("../testdata/secret3.yaml", WithTags("prop1")))
-	assert.Equal(t, 2, len(ds.TaggedSubset("prop1").Merged().Flatten()))
-	assert.Equal(t, 0, len(ds.TaggedSubset("unknown").Merged().Flatten()))
+	assert.Equal(t, 2, len(ds.TaggedSubset("prop1").Merged().Flatten(ps.Serialize)))
+	assert.Equal(t, 0, len(ds.TaggedSubset("unknown").Merged().Flatten(ps.Serialize)))
 	assert.Error(t, ds.AddPropertiesFromManifest("../testdata/non-existent-manifest-file.yaml"))
 	assert.NoError(t, ds.AddDocumentFromFile("../testdata/doc2.yaml", dom.DefaultYamlDecoder))
 	assert.NoError(t, ds.AddDocumentsFromManifest("../testdata/cm2.yaml", fluent.DefaultFileDecoderProvider))

@@ -19,7 +19,6 @@ package dom
 import (
 	"bytes"
 	"os"
-	"slices"
 	"strings"
 	"testing"
 
@@ -116,15 +115,16 @@ func TestContainerAsAny(t *testing.T) {
 }
 
 func TestFlatten(t *testing.T) {
-	fm := getTestDoc(t, "doc1").Flatten()
-	assert.Equal(t, 5, len(fm))
-	assert.NotNil(t, fm["level1.level2b"])
-}
-
-func TestFlatten2(t *testing.T) {
-	fm := getTestDoc(t, "doc2").Flatten()
-	assert.Equal(t, 5, len(fm))
-	assert.Equal(t, LeafNode(1), fm["root[2][0]"])
+	t.Run("doc1", func(t *testing.T) {
+		fm := getTestDoc(t, "doc1").Flatten(SimplePathAsString)
+		assert.Equal(t, 5, len(fm))
+		assert.NotNil(t, fm[`["level1","level2b"]`])
+	})
+	t.Run("doc2", func(t *testing.T) {
+		fm := getTestDoc(t, "doc2").Flatten(SimplePathAsString)
+		assert.Equal(t, 5, len(fm))
+		assert.Equal(t, LeafNode(1), fm[`["root",2,0]`])
+	})
 }
 
 func TestFromMap(t *testing.T) {
@@ -144,23 +144,6 @@ level1: 123
 	assert.Nil(t, err)
 	assert.NotNil(t, c.AsContainer().Child("leaf0"))
 	assert.Nil(t, c.AsContainer().Child("leaf0").AsLeaf().Value())
-}
-
-func TestSearch(t *testing.T) {
-	c, err := DecodeReader(strings.NewReader(`
-leaf0: null
-level1: 123
-to.element1: Hi
-to.element2: Hi
-`), DefaultYamlDecoder)
-	assert.NotNil(t, c)
-	assert.Nil(t, err)
-	assert.Nil(t, c.AsContainer().Search(SearchEqual(456)))
-	assert.Equal(t, []string{"level1"}, c.AsContainer().Search(SearchEqual(123)))
-	x := c.AsContainer().Search(SearchEqual("Hi"))
-	assert.Equal(t, 2, len(x))
-	assert.True(t, slices.Contains(x, "to.element1"))
-	assert.True(t, slices.Contains(x, "to.element2"))
 }
 
 func TestAddListAt(t *testing.T) {

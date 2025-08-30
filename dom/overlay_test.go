@@ -98,7 +98,7 @@ func TestLoad2(t *testing.T) {
 	err = yaml.NewDecoder(bytes.NewReader(data)).Decode(&doc)
 	assert.Nil(t, err)
 	d.Populate("layer-1", "", &doc)
-	props := d.Merged().Flatten()
+	props := d.Merged().Flatten(SimplePathAsString)
 	assert.Equal(t, 5, len(props))
 }
 
@@ -134,12 +134,12 @@ func TestHasValue(t *testing.T) {
 func TestOverlaySearch(t *testing.T) {
 	d := NewOverlayDocument()
 	d.Put("first", "root.second", LeafNode(1))
-	res := d.Search(SearchEqual(1))
+	res := d.Search(SearchEqual(1), SimplePathAsString)
 	t.Log(res.String())
 	assert.Equal(t, 1, len(res))
 	assert.Equal(t, "first", res[0].Layer())
-	assert.Equal(t, "root.second", res[0].Path())
-	res = d.Search(SearchEqual(2))
+	assert.Equal(t, `["root","second"]`, res[0].Path())
+	res = d.Search(SearchEqual(2), SimplePathAsString)
 	assert.Equal(t, 0, len(res))
 }
 

@@ -18,34 +18,91 @@ package dom
 
 import "github.com/rkosegi/yaml-toolkit/path"
 
+type walkContainerFn func(ctx *walkCtx, pb path.Builder, parent Container)
+type walkListFn func(ctx *walkCtx, pb path.Builder, parent List)
+
+type walkCtx struct {
+	cFn walkContainerFn
+	lFn walkListFn
+	vFn NodeVisitorFn
+}
+
 // NodeVisitorFn is function that is called for each child Node within the parent Node.
 // Returning false from this function will terminate iteration.
 type NodeVisitorFn func(p path.Path, parent Node, node Node) bool
 
-func walkList(pb path.Builder, l List, fn NodeVisitorFn) {
+// WalkOpt is function that allows customization of walk process
+type WalkOpt func(ctx *walkCtx)
+
+// WalkOptDFS will use https://en.wikipedia.org/wiki/Depth-first_search to traverse Container.
+func WalkOptDFS() WalkOpt {
+	return func(ctx *walkCtx) {
+		ctx.cFn = walkContainerDfs
+		ctx.lFn = walkListDfs
+	}
+}
+
+// WalkOptBFS will use https://en.wikipedia.org/wiki/Breadth-first_search to traverse Container.
+func WalkOptBFS() WalkOpt {
+	return func(ctx *walkCtx) {
+		ctx.cFn = walkContainerBfs
+		ctx.lFn = walkListBfs
+	}
+}
+
+func walkStart(fn NodeVisitorFn, c Container, opts ...WalkOpt) {
+	ctx := &walkCtx{vFn: fn}
+	// BFS is default
+	WalkOptBFS()(ctx)
+	for _, opt := range opts {
+		opt(ctx)
+	}
+	ctx.cFn(ctx, path.NewBuilder(), c)
+}
+
+func walkListBfs(ctx *walkCtx, pb path.Builder, l List) {
 	for idx, item := range l.Items() {
-		if !fn(pb.Append(path.Numeric(idx)).Build(), l, item) {
+		if !ctx.vFn(pb.Append(path.Numeric(idx)).Build(), l, item) {
 			return
 		}
-		if item.IsContainer() {
-			walkContainer(pb.Append(path.Numeric(idx)), item.AsContainer(), fn)
-		} else if item.IsList() {
-			walkList(pb.Append(path.Numeric(idx)), item.AsList(), fn)
+		walkDown(ctx, item, pb.Append(path.Numeric(idx)))
+	}
+}
+
+func walkListDfs(ctx *walkCtx, pb path.Builder, l List) {
+	for idx, item := range l.Items() {
+		x := pb.Append(path.Numeric(idx))
+		walkDown(ctx, item, x)
+		if !ctx.vFn(x.Build(), l, item) {
+			return
 		}
 	}
 }
 
-func walkContainer(pb path.Builder, c Container, fn NodeVisitorFn) {
+func walkDown(ctx *walkCtx, n Node, p path.Builder) {
+	if n.IsContainer() {
+		ctx.cFn(ctx, p, n.AsContainer())
+	} else if n.IsList() {
+		ctx.lFn(ctx, p, n.AsList())
+	}
+}
+
+func walkContainerBfs(ctx *walkCtx, pb path.Builder, c Container) {
 	for k, v := range c.Children() {
 		x := pb.Append(path.Simple(k))
-		// BFS
-		if !fn(x.Build(), c, v) {
+		if !ctx.vFn(x.Build(), c, v) {
 			return
 		}
-		if v.IsContainer() {
-			walkContainer(x, v.AsContainer(), fn)
-		} else if v.IsList() {
-			walkList(x, v.AsList(), fn)
+		walkDown(ctx, v, x)
+	}
+}
+
+func walkContainerDfs(ctx *walkCtx, pb path.Builder, c Container) {
+	for k, v := range c.Children() {
+		x := pb.Append(path.Simple(k))
+		walkDown(ctx, v, x)
+		if !ctx.vFn(x.Build(), c, v) {
+			return
 		}
 	}
 }

@@ -36,7 +36,7 @@ func (i *impactAnalysis) ResolveDocumentSet(ds DocumentSet, keys []string) map[s
 }
 
 func (i *impactAnalysis) resolveKey(od dom.OverlayDocument, key string) dom.Coordinates {
-	if x := od.Search(i.placeholderMatcherFn(key)); x != nil {
+	if x := od.Search(i.placeholderMatcherFn(key), ps.Serialize); x != nil {
 		return x
 	}
 	return nil

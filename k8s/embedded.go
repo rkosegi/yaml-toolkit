@@ -135,7 +135,7 @@ func DecodeEmbeddedProps() DecodeInternalFn {
 
 func EncodeEmbeddedProps() EncodeInternalFn {
 	return func(m Manifest, node dom.ContainerBuilder) error {
-		for k, v := range node.Flatten() {
+		for k, v := range node.Flatten(dom.SimplePathAsString) {
 			m.StringData().Update(k, fmt.Sprintf("%v", v.Value()))
 		}
 		return nil

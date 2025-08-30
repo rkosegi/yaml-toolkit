@@ -33,7 +33,7 @@ func TestMergeSimple(t *testing.T) {
 	m := &merger{}
 	m.init()
 	c := m.mergeContainers(b1, b2)
-	assert.Equal(t, 3, len(c.Flatten()))
+	assert.Equal(t, 3, len(c.Flatten(SimplePathAsString)))
 }
 
 func TestMergeLists(t *testing.T) {

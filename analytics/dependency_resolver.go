@@ -91,11 +91,11 @@ func (dr *dependencyResolver) Resolve(srcDoc dom.OverlayDocument,
 	)
 
 	m := make(map[string]dom.Coordinates)
-	for k := range srcDoc.Merged().Flatten() {
+	for k := range srcDoc.Merged().Flatten(ps.Serialize) {
 		if dr.keyFilterFn(k) {
 			allKeys = append(allKeys, k)
 			for _, d := range append([]dom.OverlayDocument{srcDoc}, refDocs...) {
-				if x := d.Search(dr.placeholderMatcherFn(k)); x != nil {
+				if x := d.Search(dr.placeholderMatcherFn(k), ps.Serialize); x != nil {
 					used = append(used, k)
 					dr.onPlaceholderEncounteredFn(k, x)
 					m[k] = append(m[k], x...)
