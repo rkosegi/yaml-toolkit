@@ -33,7 +33,10 @@ type placeholderResolver struct {
 	placeholderMatcherFn       common.StringPredicateFn
 }
 
-var pp = props.NewPathParser()
+var (
+	pp = props.NewPathParser()
+	ps = props.NewPathSerializer()
+)
 
 func (pr *placeholderResolver) Resolve(doc dom.OverlayDocument) *PlaceholderResolutionReport {
 	c := doc.Merged()
@@ -48,13 +51,13 @@ func (pr *placeholderResolver) Resolve(doc dom.OverlayDocument) *PlaceholderReso
 	failedKeys := make([]string, 0)
 	actualValues := make(map[string]interface{})
 	coordsMap := make(map[string]dom.Coordinates)
-	for k, v := range c.Flatten() {
+	for k, v := range c.Flatten(ps.Serialize) {
 		if pr.keyFilterFn(k) {
 			if ph := fmt.Sprintf("%v", v.Value()); pr.placeholderMatcherFn(ph) {
 				pr.onPlaceholderEncounteredFn(k, ph)
 				p2 := resolver.Resolve(ph)
 				if ph == p2 {
-					coords := doc.Search(dom.SearchEqual(ph))
+					coords := doc.Search(dom.SearchEqual(ph), ps.Serialize)
 					pr.onResolutionFailureFn(k, ph, coords)
 					if !slices.Contains(failedKeys, ph) {
 						failedKeys = append(failedKeys, k)

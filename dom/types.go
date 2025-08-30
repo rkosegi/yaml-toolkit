@@ -28,6 +28,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// PathToStringFunc is used to transform path.Path to string
+type PathToStringFunc func(path path.Path) string
+
 // SearchValueFunc is used to search for value within document
 type SearchValueFunc func(val interface{}) bool
 
@@ -173,23 +176,18 @@ type Container interface {
 	// Get gets value at given path.
 	Get(p path.Path) Node
 
-	// Walk walks all child Nodes in BFS manner, until provided function return false, or all Nodes are processed.
-	// TODO: I want to use DFS as well. Maybe use custom Opt?
-	Walk(fn NodeVisitorFn)
+	// Walk walks all child Nodes, until provided function return false, or all Nodes are processed.
+	// By default, tree is walked using BFS, but this can be changed by passing WalkOptDFS() option.
+	Walk(fn NodeVisitorFn, opts ...WalkOpt)
 
 	// Query queries this container and return matching child nodes.
 	Query(qry query.Query) NodeList
 
-	// deprecated, use Walk
-	// Search finds all paths where Node's value is equal to given value according to provided SearchValueFunc.
-	// If no match is found, nil is returned.
-	Search(fn SearchValueFunc) []string
-
-	// deprecated
-	// Flatten flattens this Container into list of leaves
-	// returned map can break structure since it uses naive property syntax to serialize keys.
-	// Just try to add child Node anywhere with name that contains "."
-	Flatten() map[string]Leaf
+	// Flatten flattens this Container recursively into map,
+	// where key is computed using provided function from path and value is actual Leaf Node.
+	// Caller can use a SimplePathAsString function which just delegates to Path.String(),
+	// any of path path.Serializer or a custom function which takes path.Path and transforms it to string.
+	Flatten(PathToStringFunc) map[string]Leaf
 }
 
 // ContainerBuilder is mutable extension of Container
@@ -274,8 +272,9 @@ type OverlayDocument interface {
 	// if no node is present at any overlay, nil is returned
 	GetAny(p path.Path) Node
 
-	// Search finds all occurrences of given value in all layers using custom SearchValueFunc
-	Search(fn SearchValueFunc) Coordinates
+	// Search finds all occurrences of given value in all layers using custom SearchValueFunc.
+	// keyFn is used to transform path.Path to string.
+	Search(fn SearchValueFunc, keyFn PathToStringFunc) Coordinates
 	// Populate puts dictionary into overlay at given path
 	Populate(overlay, path string, data *map[string]interface{})
 	// Add adds elements from given Container into root of given layer
@@ -290,6 +289,5 @@ type OverlayDocument interface {
 	// LayerNames returns copy of list of all layer names, in insertion order
 	LayerNames() []string
 	// Walk walks every layer in this document and visits every node in BFS manner.
-	// TODO: I want to use DFS as well. Maybe use custom Opt?
-	Walk(fn OverlayVisitorFn)
+	Walk(fn OverlayVisitorFn, opts ...WalkOpt)
 }
