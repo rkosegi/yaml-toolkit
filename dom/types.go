@@ -275,12 +275,20 @@ type OverlayDocument interface {
 	// Search finds all occurrences of given value in all layers using custom SearchValueFunc.
 	// keyFn is used to transform path.Path to string.
 	Search(fn SearchValueFunc, keyFn PathToStringFunc) Coordinates
+
 	// Populate puts dictionary into overlay at given path
+	// Deprecated, same can be achieved with proper encoder and Set()
 	Populate(overlay, path string, data *map[string]interface{})
 	// Add adds elements from given Container into root of given layer
 	Add(overlay string, value Container)
 	// Put puts Node value into overlay at given path
+	// Deprecated, use Set
 	Put(overlay, path string, value Node)
+
+	// Set sets node at given path in given overlay.
+	// Overlay is allocated as needed, child nodes are creates as needed as well.
+	Set(overlay string, p path.Path, value Node)
+
 	// Merged returns read-only, merged view of all overlays
 	Merged(option ...MergeOption) Container
 	// Layers returns a copy of mapping between layer name and its associated Container.

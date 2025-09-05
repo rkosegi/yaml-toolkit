@@ -102,6 +102,10 @@ func (m *overlayDocument) Add(overlay string, value Container) {
 	}
 }
 
+func (m *overlayDocument) Set(overlay string, p path.Path, value Node) {
+	m.ensureOverlay(overlay).Set(p, value)
+}
+
 func (m *overlayDocument) Put(overlay, path string, value Node) {
 	if value.IsContainer() {
 		for k, v := range value.AsContainer().Flatten(SimplePathAsString) {

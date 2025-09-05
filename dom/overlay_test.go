@@ -201,3 +201,21 @@ func TestOverlayWalk(t *testing.T) {
 	})
 	assert.Equal(t, 9, cnt)
 }
+
+func TestOverlaySet(t *testing.T) {
+	od := NewOverlayDocument()
+	od.Set("test", path.NewBuilder(
+		path.Simple("root"),
+		path.Simple("sub"),
+		path.Simple("list"),
+		path.Numeric(3)).Build(), LeafNode(1))
+
+	assert.Equal(t, 1, len(od.Layers()))
+	c := od.Layers()["test"]
+	assert.Len(t, c.Children(), 1)
+	assert.Equal(t, 1, c.Child("root").
+		AsContainer().Child("sub").
+		AsContainer().Child("list").
+		AsList().Get(3).
+		AsLeaf().Value())
+}
