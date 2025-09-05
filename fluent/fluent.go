@@ -101,6 +101,9 @@ func (c *configHelper[T]) Load(file string) ConfigHelper[T] {
 	}()
 	cb, err = dom.DecodeReader(f, fdp)
 	panicIfError(err)
+	if !cb.IsContainer() {
+		return c
+	}
 	return c.Add(cb)
 }
 

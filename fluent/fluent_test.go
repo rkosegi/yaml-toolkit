@@ -42,16 +42,28 @@ func TestConfigHelper(t *testing.T) {
 		_ = os.RemoveAll(tmpDir)
 	})
 
-	cfg := NewConfigHelper[config]().
-		Add(nil).
-		Add(defCfg).
-		Load("../testdata/cfg1.yaml").
-		Mutate(func(cb dom.ContainerBuilder) {
-			cb.AddValue("host", dom.LeafNode("localhost"))
-		}).
-		Save(path.Join(tmpDir, "config.yaml")).
-		Result()
-	assert.Equal(t, "localhost", cfg.Host)
+	t.Run("load normal config", func(t *testing.T) {
+		cfg := NewConfigHelper[config]().
+			Add(nil).
+			Add(defCfg).
+			Load("../testdata/cfg1.yaml").
+			Mutate(func(cb dom.ContainerBuilder) {
+				cb.AddValue("host", dom.LeafNode("localhost"))
+			}).
+			Save(path.Join(tmpDir, "config.yaml")).
+			Result()
+		assert.Equal(t, "localhost", cfg.Host)
+	})
+
+	t.Run("load empty YAML file", func(t *testing.T) {
+		cfg := NewConfigHelper[config]().
+			Add(defCfg).
+			Load("../testdata/empty_doc.yaml").
+			Save(path.Join(tmpDir, "config.yaml")).
+			Result()
+		assert.Equal(t, "/tmp/x", cfg.Path)
+	})
+
 }
 
 func TestConfigHelperLoadInvalid(t *testing.T) {
