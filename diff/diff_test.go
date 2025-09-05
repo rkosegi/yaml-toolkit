@@ -23,12 +23,9 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/dom"
-	"github.com/rkosegi/yaml-toolkit/props"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
-
-var pp = props.NewPathParser()
 
 func leavesEqual(l1, l2 interface{}) bool {
 	if l1 == nil && l2 == nil {

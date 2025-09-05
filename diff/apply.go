@@ -17,71 +17,20 @@ limitations under the License.
 package diff
 
 import (
-	"strings"
-
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/props"
 )
 
-func applyList(l dom.ListBuilder, idxes []int) dom.ContainerBuilder {
-	if len(idxes) == 1 {
-		c := dom.ContainerNode()
-		l.Set(uint(idxes[0]), c)
-		return c
-	} else {
-		sub := dom.ListNode()
-		l.Set(uint(idxes[0]), sub)
-		return applyList(sub, idxes[1:])
-	}
-}
+var pp = props.NewPathParser()
 
 func applySingle(node dom.ContainerBuilder, mod Modification) {
-	pc := strings.Split(mod.Path, ".")
-	current := node
 	switch mod.Type {
 	case ModAdd, ModChange:
-		for _, c := range pc[0 : len(pc)-1] {
-			if n, idxes, ok := props.ParseListPathComponent(c); ok {
-				current = applyListItem(current, n, idxes)
-			} else {
-				current = applyNonListItem(current, c)
-			}
-		}
-		current.AddValue(pc[len(pc)-1], dom.LeafNode(mod.Value))
+		node.Set(pp.MustParse(mod.Path), dom.LeafNode(mod.Value))
 
 	case ModDelete:
-		for _, c := range pc[0 : len(pc)-1] {
-			x := current.Child(c)
-			if x == nil || !x.IsContainer() {
-				return
-			} else {
-				current = x.(dom.ContainerBuilder)
-			}
-		}
-		current.Remove(pc[len(pc)-1])
+		node.Delete(pp.MustParse(mod.Path))
 	}
-}
-
-func applyNonListItem(current dom.ContainerBuilder, c string) dom.ContainerBuilder {
-	x := current.Child(c)
-	if x == nil || !x.IsContainer() {
-		current = current.AddContainer(c)
-	} else {
-		current = x.(dom.ContainerBuilder)
-	}
-	return current
-}
-
-func applyListItem(current dom.ContainerBuilder, n string, idxes []int) dom.ContainerBuilder {
-	var l dom.ListBuilder
-	x := current.Child(n)
-	if x == nil || !x.IsList() {
-		l = current.AddList(n)
-	} else {
-		l = x.(dom.ListBuilder)
-	}
-	current = applyList(l, idxes)
-	return current
 }
 
 func Apply(node dom.ContainerBuilder, mods []Modification) {
