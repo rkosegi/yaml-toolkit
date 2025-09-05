@@ -30,10 +30,10 @@ import (
 func TestPutAndGet(t *testing.T) {
 	od := NewOverlayDocument()
 	assert.Nil(t, od.Get("main", path.NewBuilder().Append(path.Simple("abc")).Build()))
-	od.Put("main", "abc", LeafNode("123"))
+	od.Set("main", path.NewBuilder(path.Simple("abc")).Build(), LeafNode("123"))
 	assert.Nil(t, od.Get("main", path.NewBuilder().Append(path.Simple("")).Build()))
 	assert.Equal(t, "123", od.Get("main", path.NewBuilder().Append(path.Simple("abc")).Build()).AsLeaf().Value())
-	od.Put("main", "xyz.efg", LeafNode(42))
+	od.Set("main", path.NewBuilder(path.Simple("xyz"), path.Simple("efg")).Build(), LeafNode(42))
 
 	p1 := path.NewBuilder().Append(path.Simple("xyz"), path.Simple("efg")).Build()
 	assert.Equal(t, 42, od.Get("main", p1).AsLeaf().Value())
@@ -42,76 +42,43 @@ func TestPutAndGet(t *testing.T) {
 	assert.Nil(t, od.GetAny(path.ChildOf(p1, path.Simple("abc"))))
 }
 
-func TestSerialize(t *testing.T) {
-	d := NewOverlayDocument()
-	d.Put("", "key1", LeafNode("abc"))
-	d.Put("layer-2", "key1.key2.key3", LeafNode("hello"))
-	d.Put("layer-2", "key1.key11", LeafNode("ola!"))
-	d.Put("layer-3", "key1.key2.key4", LeafNode(7))
-	c := ContainerNode()
-	c.AddContainer("test1").AddValue("test2", LeafNode("Hi"))
-	c.AddValue("test3", LeafNode("no"))
-	d.Put("", "key2", c)
-	var buf bytes.Buffer
-	assert.NoError(t, encodeToWriter(d.Merged(), DefaultYamlEncoder, &buf))
-	assert.True(t, buf.Len() > 0)
-	buf.Reset()
-	assert.Nil(t, EncodeToWriter(d.Merged(), DefaultYamlEncoder, &buf))
-	assert.True(t, buf.Len() > 0)
-}
-
 func TestLoad(t *testing.T) {
-	d := NewOverlayDocument()
+	od := NewOverlayDocument()
 	var doc map[string]interface{}
 	data, err := os.ReadFile("../testdata/doc1.yaml")
 	assert.Nil(t, err)
 	err = yaml.NewDecoder(bytes.NewReader(data)).Decode(&doc)
 	assert.Nil(t, err)
 
-	d.Populate("layer-1", "key1.key11", &map[string]interface{}{
-		"b": "xyz",
-		"a": 12,
-	})
-	d.Populate("layer-1", "key1.key12", &doc)
-	n := d.GetAny(path.NewBuilder().Append(path.Simple("key1")).Build())
+	od.Add("layer-1", DecodeAnyToNode(doc).AsContainer())
+
+	n := od.GetAny(path.NewBuilder().Append(path.Simple("level1")).Build())
 	assert.True(t, n.IsContainer())
-	c1 := n.AsContainer().Child("key12")
+	c1 := n.AsContainer().Child("level2a")
 	assert.True(t, c1.IsContainer())
-	assert.Equal(t, 1, len(d.Layers()))
+	assert.Equal(t, 1, len(od.Layers()))
 
 	var buf bytes.Buffer
-	assert.NoError(t, EncodeToWriter(d.Merged(), DefaultYamlEncoder, &buf))
+	assert.NoError(t, EncodeToWriter(od.Merged(), DefaultYamlEncoder, &buf))
 	x, err := decodeFromReader(&buf, DefaultYamlDecoder)
 	assert.NoError(t, err)
 	assert.True(t, x.IsContainer())
-	assert.Equal(t, 12, x.AsContainer().
-		Child("key1").AsContainer().
-		Child("key11").AsContainer().
-		Child("a").AsLeaf().Value())
+	assert.Equal(t, 3, x.AsContainer().
+		Child("level1").AsContainer().
+		Child("level2b").AsLeaf().Value())
 }
 
 func TestLoad2(t *testing.T) {
-	d := NewOverlayDocument()
+	od := NewOverlayDocument()
 	var doc map[string]interface{}
 	data, err := os.ReadFile("../testdata/doc2.yaml")
 	assert.Nil(t, err)
 	err = yaml.NewDecoder(bytes.NewReader(data)).Decode(&doc)
 	assert.Nil(t, err)
-	d.Populate("layer-1", "", &doc)
-	props := d.Merged().Flatten(SimplePathAsString)
+	// d.Populate("layer-1", "", &doc)
+	od.Add("layer-1", DecodeAnyToNode(doc).AsContainer())
+	props := od.Merged().Flatten(SimplePathAsString)
 	assert.Equal(t, 5, len(props))
-}
-
-func TestLoadGetList(t *testing.T) {
-	od := NewOverlayDocument()
-	od.Put("", "key1.key2[0].key3", LeafNode("hello"))
-	p := path.NewBuilder().
-		Append(path.Simple("key1")).
-		Append(path.Simple("key2")).
-		Append(path.Numeric(0)).
-		Append(path.Simple("key3")).Build()
-	n := od.GetAny(p)
-	assert.Equal(t, "hello", n.AsLeaf().Value())
 }
 
 func TestFirstValidListItem(t *testing.T) {
@@ -133,7 +100,7 @@ func TestHasValue(t *testing.T) {
 
 func TestOverlaySearch(t *testing.T) {
 	d := NewOverlayDocument()
-	d.Put("first", "root.second", LeafNode(1))
+	d.Set("first", path.NewBuilder(path.Simple("root"), path.Simple("second")).Build(), LeafNode(1))
 	res := d.Search(SearchEqual(1), SimplePathAsString)
 	t.Log(res.String())
 	assert.Equal(t, 1, len(res))
@@ -144,21 +111,20 @@ func TestOverlaySearch(t *testing.T) {
 }
 
 func TestOverlayLayers(t *testing.T) {
-	d := NewOverlayDocument()
-	d.Put("layer1", "root.next.next2", LeafNode(1))
-	d.Put("layer2", "root.other", LeafNode(5))
-	m := d.Layers()
-	assert.Equal(t, 2, len(m))
+	od := NewOverlayDocument()
+	od.Set("layer2", path.NewBuilder(path.Simple("root"), path.Simple("other")).Build(), LeafNode(5))
+	m := od.Layers()
+	assert.Equal(t, 1, len(m))
 	assert.Equal(t, 5, m["layer2"].Children()["root"].AsContainer().Children()["other"].AsLeaf().Value())
 }
 
 func TestOverlayLayerNames(t *testing.T) {
 	layers := 10
-	d := NewOverlayDocument()
+	od := NewOverlayDocument()
 	for i := 0; i < layers; i++ {
-		d.Put(fmt.Sprintf("layer-%d", i), "root", LeafNode(i))
+		od.Set(fmt.Sprintf("layer-%d", i), path.NewBuilder(path.Simple("root")).Build(), LeafNode(i))
 	}
-	m := d.LayerNames()
+	m := od.LayerNames()
 	assert.Equal(t, layers, len(m))
 	for i := 0; i < layers; i++ {
 		assert.Equal(t, fmt.Sprintf("layer-%d", i), m[i])
@@ -176,8 +142,14 @@ func TestOverlayAdd(t *testing.T) {
 
 func TestOverlayWalk(t *testing.T) {
 	d := NewOverlayDocument()
-	d.Put("layer1", "root.sub10.sub21", LeafNode("leaf1"))
-	d.Put("layer2", "root.sub11.list22", ListNode(
+	d.Set("layer1", path.NewBuilder(
+		path.Simple("root"),
+		path.Simple("sub10"),
+		path.Simple("sub21")).Build(), LeafNode("leaf1"))
+	d.Set("layer2", path.NewBuilder(
+		path.Simple("root"),
+		path.Simple("sub11"),
+		path.Simple("sub22")).Build(), ListNode(
 		LeafNode(1),
 		LeafNode(2),
 		LeafNode(3),

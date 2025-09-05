@@ -71,12 +71,6 @@ func DefaultJsonEncoder(w io.Writer, v interface{}) error {
 	return e.Encode(v)
 }
 
-func DefaultNodeDecoderFn(m map[string]interface{}) Container {
-	cb := *initContainerBuilder()
-	decodeContainerFn(&m, &cb)
-	return &cb
-}
-
 // DecodeAnyToNode decodes any value to Node.
 func DecodeAnyToNode(in any) Node {
 	return decodeValueToNode(reflect.ValueOf(in))
@@ -276,14 +270,8 @@ type OverlayDocument interface {
 	// keyFn is used to transform path.Path to string.
 	Search(fn SearchValueFunc, keyFn PathToStringFunc) Coordinates
 
-	// Populate puts dictionary into overlay at given path
-	// Deprecated, same can be achieved with proper encoder and Set()
-	Populate(overlay, path string, data *map[string]interface{})
 	// Add adds elements from given Container into root of given layer
 	Add(overlay string, value Container)
-	// Put puts Node value into overlay at given path
-	// Deprecated, use Set
-	Put(overlay, path string, value Node)
 
 	// Set sets node at given path in given overlay.
 	// Overlay is allocated as needed, child nodes are creates as needed as well.
