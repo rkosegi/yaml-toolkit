@@ -75,7 +75,7 @@ func DecoderFn(r io.Reader, x interface{}) error {
 
 var listPropRe = regexp.MustCompile(`.*(\[\d+])+`)
 
-func ParseListPathComponent(path string) (string, []int, bool) {
+func parseListPathComponent(path string) (string, []int, bool) {
 	if !listPropRe.MatchString(path) {
 		return "", nil, false
 	}

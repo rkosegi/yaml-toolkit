@@ -67,13 +67,13 @@ func TestDecoderFn(t *testing.T) {
 }
 
 func TestParseListPathComponent(t *testing.T) {
-	name, indexes, ok := ParseListPathComponent("list[0][3][1]")
+	name, indexes, ok := parseListPathComponent("list[0][3][1]")
 	assert.True(t, ok)
 	assert.Equal(t, 3, len(indexes))
 	assert.Equal(t, 0, indexes[0])
 	assert.Equal(t, 3, indexes[1])
 	assert.Equal(t, 1, indexes[2])
 	assert.Equal(t, "list", name)
-	_, _, ok = ParseListPathComponent("not a list")
+	_, _, ok = parseListPathComponent("not a list")
 	assert.False(t, ok)
 }

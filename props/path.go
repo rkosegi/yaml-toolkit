@@ -77,7 +77,7 @@ func (p *pathSupport) parse(r io.RuneReader) (path.Path, error) {
 	}
 	b := path.NewBuilder()
 	for _, seg := range segments {
-		if n, idxes, isListItem := ParseListPathComponent(seg); isListItem {
+		if n, idxes, isListItem := parseListPathComponent(seg); isListItem {
 			b = b.Append(path.Simple(n))
 			for _, idx := range idxes {
 				b = b.Append(path.Numeric(idx))
