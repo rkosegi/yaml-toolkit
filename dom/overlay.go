@@ -21,7 +21,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/path"
 )
 
@@ -106,39 +105,6 @@ func (m *overlayDocument) Set(overlay string, p path.Path, value Node) {
 	m.ensureOverlay(overlay).Set(p, value)
 }
 
-func (m *overlayDocument) Put(overlay, path string, value Node) {
-	if value.IsContainer() {
-		for k, v := range value.AsContainer().Flatten(SimplePathAsString) {
-			m.Put(overlay, common.ToPath(path, k), v)
-		}
-	} else {
-		current := m.ensureOverlay(overlay)
-		components := m.pathComponents(path)
-		current = ensurePath(current, components[:len(components)-1])
-		current.AddValue(components[len(components)-1], value)
-	}
-}
-
-func ensurePath(node ContainerBuilder, pc []string) ContainerBuilder {
-	for _, component := range pc {
-		if listPathRe.MatchString(component) {
-			list, index, _ := ensureList(component, node)
-			if list.Get(int(index)) == nilLeaf {
-				c := initContainerBuilder()
-				list.Set(index, c)
-				node = c
-				continue
-			}
-		}
-		if n := node.Child(component); n == nil {
-			node = node.AddContainer(component)
-		} else {
-			node = n.(ContainerBuilder)
-		}
-	}
-	return node
-}
-
 func (m *overlayDocument) Merged(opts ...MergeOption) Container {
 	mg := &merger{}
 	mg.init(opts...)
@@ -151,18 +117,6 @@ func (m *overlayDocument) ensureOverlay(name string) ContainerBuilder {
 		m.names = append(m.names, name)
 	}
 	return m.overlays[name]
-}
-
-func (m *overlayDocument) pathComponents(path string) []string {
-	return strings.Split(path, ".")
-}
-
-func (m *overlayDocument) Populate(overlay, path string, data *map[string]interface{}) {
-	current := m.ensureOverlay(overlay)
-	if path != "" {
-		current = ensurePath(current, m.pathComponents(path))
-	}
-	decodeContainerFn(data, current)
 }
 
 func (m *overlayDocument) Get(overlay string, p path.Path) Node {

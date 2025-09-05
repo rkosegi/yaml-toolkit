@@ -61,45 +61,6 @@ func encodeToWriter(n Node, encFn EncoderFunc, w io.Writer) error {
 	return encFn(w, n.AsAny())
 }
 
-func decodeLeafFn(v interface{}) Leaf {
-	return LeafNode(v)
-}
-
-func decodeListFn(v []interface{}, l ListBuilder) {
-	for _, item := range v {
-		t := reflect.ValueOf(item)
-		switch t.Kind() {
-		case reflect.Map:
-			l.Append(DefaultNodeDecoderFn(item.(map[string]interface{})))
-		case reflect.Slice, reflect.Array:
-			list := initListBuilder()
-			decodeListFn(item.([]interface{}), list)
-			l.Append(list)
-		case reflect.Float32, reflect.Float64, reflect.String, reflect.Bool,
-			reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			l.Append(decodeLeafFn(item))
-		}
-	}
-}
-
-func decodeContainerFn(current *map[string]interface{}, parent ContainerBuilder) {
-	for k, v := range *current {
-		t := reflect.ValueOf(v)
-		switch t.Kind() {
-		case reflect.Map:
-			ref := v.(map[string]interface{})
-			decodeContainerFn(&ref, parent.AddContainer(k))
-		case reflect.Slice, reflect.Array:
-			decodeListFn(v.([]interface{}), parent.AddList(k))
-		case reflect.Float32, reflect.Float64, reflect.String, reflect.Bool,
-			reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			parent.AddValue(k, decodeLeafFn(v))
-		}
-	}
-}
-
 // DecodeYamlScalarNode attempts to convert scalar value (string) to more specific type.
 // This method mimics (in very simplified way) what yaml decoder does
 // see e.g. gopkg.in/yaml.v3@v3.0.1/decode.go:565

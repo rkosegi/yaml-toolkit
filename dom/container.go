@@ -18,7 +18,6 @@ package dom
 
 import (
 	"regexp"
-	"strconv"
 
 	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/rkosegi/yaml-toolkit/query"
@@ -171,22 +170,6 @@ func (c *containerBuilderImpl) Set(p path.Path, node Node) ContainerBuilder {
 func (c *containerBuilderImpl) Delete(p path.Path) ContainerBuilder {
 	removeFromNode(c, p)
 	return c
-}
-
-func ensureList(name string, parent ContainerBuilder) (ListBuilder, uint, string) {
-	idx := listPathRe.FindStringIndex(name)
-	index, _ := strconv.Atoi(name[idx[0]+1 : idx[1]-1])
-	name2 := name[0:idx[0]]
-	var list ListBuilder
-	if l := parent.Child(name2); l == nil {
-		list = parent.AddList(name2)
-	}
-	for i := 0; i <= index; i++ {
-		if list.Size() <= i {
-			list.Append(nilLeaf)
-		}
-	}
-	return list, uint(index), name2
 }
 
 func (c *containerBuilderImpl) add(name string, child Node) {

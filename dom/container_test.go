@@ -163,6 +163,14 @@ func TestAddListAt(t *testing.T) {
 		AsList().Get(5).AsLeaf().Value())
 }
 
+func TestAddList(t *testing.T) {
+	c := ContainerNode()
+	l1 := c.AddList("list1")
+	l1.Set(3, LeafNode("Hi"))
+	assert.Len(t, c.Child("list1").AsList().Items(), 4)
+	assert.Equal(t, "Hi", c.Child("list1").AsList().Get(3).AsLeaf().Value())
+}
+
 func TestCompact(t *testing.T) {
 	c, err := DecodeReader(strings.NewReader(`
 root:

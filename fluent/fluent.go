@@ -53,8 +53,8 @@ func panicIfError(err error) {
 }
 
 func any2dom(in any) dom.Container {
-	if m, ok := in.(map[string]interface{}); ok {
-		return dom.DefaultNodeDecoderFn(m)
+	if _, ok := in.(map[string]interface{}); ok {
+		return dom.DecodeAnyToNode(in).AsContainer()
 	}
 	var (
 		buf bytes.Buffer
