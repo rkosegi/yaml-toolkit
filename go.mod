@@ -21,7 +21,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/magiconair/properties v1.8.10
 	github.com/stretchr/testify v1.11.1
-	github.com/theory/jsonpath v0.10.0
+	github.com/theory/jsonpath v0.10.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
