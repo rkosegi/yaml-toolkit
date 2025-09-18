@@ -82,6 +82,14 @@ func TestBuildAndSerialize(t *testing.T) {
 `, buf.String())
 }
 
+func TestContainerAddNil(t *testing.T) {
+	c := ContainerNode()
+	c.AddValue("leaf", nil)
+	assert.NotNil(t, c.Child("leaf"))
+	m := c.AsAny().(map[string]interface{})
+	assert.Nil(t, m["leaf"])
+}
+
 func TestRemove(t *testing.T) {
 	builder := ContainerNode()
 	builder.AddContainer("root").

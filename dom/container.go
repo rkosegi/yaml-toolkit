@@ -173,6 +173,9 @@ func (c *containerBuilderImpl) Delete(p path.Path) ContainerBuilder {
 }
 
 func (c *containerBuilderImpl) add(name string, child Node) {
+	if child == nil {
+		child = nilLeaf
+	}
 	c.ensureChildren()
 	c.children[name] = child
 }
