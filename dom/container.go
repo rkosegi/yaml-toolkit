@@ -17,15 +17,12 @@ limitations under the License.
 package dom
 
 import (
-	"regexp"
-
 	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/rkosegi/yaml-toolkit/query"
 )
 
 var (
-	listPathRe = regexp.MustCompile("\\[\\d+]$")
-	nilLeaf    = LeafNode(nil)
+	nilLeaf = LeafNode(nil)
 )
 
 type containerImpl struct {
