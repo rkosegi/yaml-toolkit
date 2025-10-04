@@ -123,9 +123,28 @@ func newPathSupport(delim rune) *pathSupport {
 }
 
 func NewPathParser() path.Parser {
-	return newPathSupport('.')
+	return PathCodec().Parser()
 }
 
 func NewPathSerializer() path.Serializer {
+	return PathCodec().Serializer()
+}
+
+type codecImpl struct {
+	pp path.Parser
+	ps path.Serializer
+}
+
+var defPathCodec = &codecImpl{}
+
+func PathCodec() path.Codec {
+	return defPathCodec
+}
+
+func (c *codecImpl) Parser() path.Parser {
+	return newPathSupport('.')
+}
+
+func (c *codecImpl) Serializer() path.Serializer {
 	return newPathSupport('.')
 }

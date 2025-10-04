@@ -21,15 +21,15 @@ import (
 	"github.com/rkosegi/yaml-toolkit/props"
 )
 
-var pp = props.NewPathParser()
+var pc = props.PathCodec()
 
 func applySingle(node dom.ContainerBuilder, mod Modification) {
+	p := pc.Parser().MustParse(mod.Path)
 	switch mod.Type {
 	case ModAdd, ModChange:
-		node.Set(pp.MustParse(mod.Path), dom.LeafNode(mod.Value))
-
+		node.Set(p, dom.LeafNode(mod.Value))
 	case ModDelete:
-		node.Delete(pp.MustParse(mod.Path))
+		node.Delete(p)
 	}
 }
 

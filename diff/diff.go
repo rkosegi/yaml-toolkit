@@ -21,8 +21,8 @@ import (
 	"sort"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/path"
 )
 
 type ModificationType string
@@ -43,116 +43,137 @@ type Modification struct {
 	OldValue interface{}      `yaml:"oldValue,omitempty"`
 }
 
+type (
+	DifferContext interface {
+		// Append appends modification to the result slice
+		Append(mt ModificationType, p path.Path, oldVal, newVal interface{})
+		// Flatten flattens out Node into sequence of Modifications.
+		Flatten(node dom.Node, pb path.Builder)
+		// DefaultListDiff uses default list diffing function
+		DefaultListDiff(left, right dom.List, pb path.Builder)
+	}
+	ListDiffFn func(ctx DifferContext, left, right dom.List, pb path.Builder)
+)
+
+func WithListDiffFn(fn ListDiffFn) Opt {
+	return func(d *differ) {
+		d.ldFn = fn
+	}
+}
+
+type Opt func(*differ)
+
 func (m *Modification) String() string {
-	return fmt.Sprintf("Mod[Type=%s,Path=%s,Value=%v]", m.Type, m.Path, m.Value)
+	return fmt.Sprintf("%s[Path=%s,Value=%v]", m.Type, m.Path, m.Value)
 }
 
-func flattenContainer(c dom.Container, path string, res *[]Modification) {
-	for k, n := range c.Children() {
-		sub := common.ToPath(path, k)
-		if n.IsContainer() {
-			flattenContainer(n.(dom.Container), sub, res)
-		} else if n.IsList() {
-			flattenList(n.(dom.List), sub, res)
-		} else {
-			flattenLeaf(n.(dom.Leaf), sub, res)
-		}
-	}
+type differ struct {
+	// function to compute difference between 2 lists
+	ldFn ListDiffFn
+	out  []Modification
 }
 
-func flattenList(l dom.List, path string, res *[]Modification) {
-	for i, n := range l.Items() {
-		sub := fmt.Sprintf("%s[%d]", path, i)
-		if n.IsContainer() {
-			flattenContainer(n.(dom.Container), sub, res)
-		} else if n.IsList() {
-			flattenList(n.(dom.List), ToListPath(path, i), res)
-		} else {
-			flattenLeaf(n.(dom.Leaf), sub, res)
-		}
-	}
+func (d *differ) DefaultListDiff(left, right dom.List, pb path.Builder) {
+	defaultListDiffFn(d, left, right, pb)
 }
 
-func flattenLeaf(l dom.Leaf, path string, res *[]Modification) {
-	appendMod(ModAdd, path, l.Value(), nil, res)
-}
-
-func flattenNode(node dom.Node, path string, res *[]Modification) {
-	if node.IsContainer() {
-		flattenContainer(node.(dom.Container), path, res)
-	} else if node.IsList() {
-		flattenList(node.(dom.List), path, res)
-	} else {
-		flattenLeaf(node.(dom.Leaf), path, res)
-	}
-}
-
-func handleExisting(left, right dom.Node, path string, res *[]Modification) {
-	if left.IsContainer() && right.IsContainer() {
-		diff(left.(dom.Container), right.(dom.Container), path, res)
-	} else if left.IsList() && right.IsList() {
-		// lists don't merge
-		diffList(left.(dom.List), right.(dom.List), path, res)
-	} else if left.IsLeaf() && right.IsLeaf() {
-		if !cmp.Equal(left.(dom.Leaf).Value(), right.(dom.Leaf).Value()) {
-			// update
-			appendMod(ModChange, path, right.(dom.Leaf).Value(), left.(dom.Leaf).Value(), res)
-		}
-	} else {
-		// replace (del+add)
-		appendMod(ModDelete, path, nil, nil, res)
-		flattenNode(right, path, res)
-	}
-}
-
-func diffList(left, right dom.List, path string, res *[]Modification) {
-	if !left.Equals(right) {
-		appendMod(ModDelete, path, nil, nil, res)
-		flattenList(left, path, res)
-	}
-}
-
-func appendMod(t ModificationType, path string, val interface{}, oldVal interface{}, res *[]Modification) {
-	*res = append(*res, Modification{
-		Type:     t,
-		Path:     path,
-		Value:    val,
+func (d *differ) Append(mt ModificationType, p path.Path, oldVal, newVal interface{}) {
+	d.out = append(d.out, Modification{
+		Type:     mt,
+		Path:     pc.Serializer().Serialize(p),
 		OldValue: oldVal,
+		Value:    newVal,
 	})
 }
 
-func diff(left, right dom.Container, path string, res *[]Modification) {
+func diffLeaves(ctx DifferContext, left, right dom.Leaf, pb path.Builder) {
+	// if values of 2 leaves are not equal, then emit ModChange
+	if !cmp.Equal(left.AsLeaf().Value(), right.AsLeaf().Value()) {
+		ctx.Append(ModChange, pb.Build(), left.AsLeaf().Value(), right.AsLeaf().Value())
+	}
+}
+
+func (d *differ) diffLists(left dom.List, right dom.List, pb path.Builder) {
+	d.ldFn(d, left, right, pb)
+}
+
+func (d *differ) diffContainers(left, right dom.Container, pb path.Builder) {
 	for k, n := range left.Children() {
+		childPath := pb.Append(path.Simple(k))
 		if n2 := right.Child(k); n2 != nil {
 			// already exists in right
-			handleExisting(n, n2, common.ToPath(path, k), res)
+			d.diffNodes(n, n2, childPath)
 		} else {
-			// not found in right Container,so flatten out Node into 1 or more ModAdds Modifications
-			flattenNode(n, common.ToPath(path, k), res)
+			// not found in right Container,so flatten out n
+			d.Flatten(n, childPath)
 		}
 	}
 	for k := range right.Children() {
-		if n2 := left.Child(k); n2 == nil {
+		if n := left.Child(k); n == nil {
 			// k is present in right, but missing in left
-			appendMod(ModDelete, common.ToPath(path, k), nil, nil, res)
+			d.Append(ModDelete, pb.Append(path.Simple(k)).Build(), nil, nil)
 		}
 	}
 }
 
-func sortMods(mods []Modification) {
-	sort.SliceStable(mods, func(i, j int) bool {
-		return mods[i].Path < mods[j].Path
-	})
+func (d *differ) diffNodes(left, right dom.Node, pb path.Builder) {
+	if left.SameAs(right) {
+		if left.IsContainer() {
+			d.diffContainers(left.AsContainer(), right.AsContainer(), pb)
+		} else if left.IsList() {
+			d.diffLists(left.AsList(), right.AsList(), pb)
+		} else {
+			diffLeaves(d, left.AsLeaf(), right.AsLeaf(), pb)
+		}
+	} else {
+		// nodes are of different types. This scenario must be handled by
+		//   1, removing old node (left)
+		//   2, flattening out new one (right)
+		d.Append(ModDelete, pb.Build(), nil, nil)
+		d.Flatten(right, pb)
+	}
 }
 
-// Diff computes semantic difference between 2 Containers
-func Diff(left, right dom.Container) *[]Modification {
-	var mods []Modification
-	path := ""
-	diff(left, right, path, &mods)
+func (d *differ) Flatten(node dom.Node, pb path.Builder) {
+	if node.IsContainer() {
+		for k, n := range node.AsContainer().Children() {
+			d.Flatten(n, pb.Append(path.Simple(k)))
+		}
+	} else if node.IsList() {
+		for i, n := range node.AsList().Items() {
+			d.Flatten(n, pb.Append(path.Numeric(i)))
+		}
+	} else {
+		d.Append(ModAdd, pb.Build(), nil, node.AsLeaf().Value())
+	}
+}
+
+func defaultListDiffFn(ctx DifferContext, left, right dom.List, pb path.Builder) {
+	if !left.Equals(right) {
+		ctx.Append(ModDelete, pb.Build(), nil, nil)
+		ctx.Flatten(left, pb)
+	}
+}
+
+func (d *differ) do(left, right dom.Container) []Modification {
+	d.diffContainers(left, right, path.NewBuilder())
 	// make order of modifications deterministic
-	sortMods(mods)
-	return &mods
+	sort.SliceStable(d.out, func(i, j int) bool {
+		return d.out[i].Path < d.out[j].Path
+	})
+	return d.out
+}
+
+// Diff computes difference between 2 Containers
+func Diff(left, right dom.Container, opts ...Opt) *[]Modification {
+	d := &differ{}
+	for _, opt := range append([]Opt{
+		WithListDiffFn(defaultListDiffFn),
+	}, opts...) {
+		opt(d)
+	}
+	out := d.do(left, right)
+	return &out
 }
 
 // OverlayDocs computes semantic difference between 2 Overlay documents
@@ -175,14 +196,4 @@ func OverlayDocs(left, right dom.OverlayDocument) map[string]*[]Modification {
 		}
 	}
 	return res
-}
-
-// ToListPath like ToPath, but for lists
-func ToListPath(path string, index int) string {
-	sub := fmt.Sprintf("[%d]", index)
-	if len(path) == 0 {
-		return sub
-	} else {
-		return path + sub
-	}
 }
