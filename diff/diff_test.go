@@ -18,11 +18,14 @@ package diff
 
 import (
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	korek "github.com/rkosegi/go-korek"
 	"github.com/rkosegi/yaml-toolkit/dom"
+	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
@@ -278,16 +281,71 @@ root:
 	assert.Equal(t, 0, len(*res))
 }
 
+func TestDiffCustomListFn(t *testing.T) {
+	var (
+		data []byte
+		err  error
+	)
+	sr := korek.ForSlice(func(left, right dom.Node) bool {
+		if left.IsContainer() && right.IsContainer() &&
+			left.AsContainer().Child("name") != nil && right.AsContainer().Child("name") != nil {
+			return left.AsContainer().Child("name").Equals(right.AsContainer().Child("name"))
+		}
+		return left.Equals(right)
+	}).WithEqualityFunc(func(left, right dom.Node) bool {
+		return left.Equals(right)
+	})
+
+	data, err = os.ReadFile("../testdata/k8s_values1.yaml")
+	assert.NoError(t, err)
+	doc1, err := dom.DecodeReader(bytes.NewReader(data), dom.DefaultYamlDecoder)
+	assert.NoError(t, err)
+	data, err = os.ReadFile("../testdata/k8s_values2.yaml")
+	assert.NoError(t, err)
+	doc2, err := dom.DecodeReader(bytes.NewReader(data), dom.DefaultYamlDecoder)
+	assert.NoError(t, err)
+
+	out := Diff(doc1.AsContainer(), doc2.AsContainer(), WithListDiffFn(
+		func(ctx DifferContext, left, right dom.List, pb path.Builder) {
+			t.Logf("path: %v", pb.Build())
+			if !left.Equals(right) {
+				if pb.Build().Last().Value() == "env" {
+					_, _, added, removed := sr.Diff(left.Items(), right.Items())
+
+					for _, removedItem := range removed {
+						ctx.Append(ModDelete, pb.Build(), removedItem, nil)
+					}
+					for _, addedItem := range added {
+						ctx.Append(ModAdd, pb.Build(), addedItem, nil)
+					}
+				} else {
+					ctx.DefaultListDiff(left, right, pb)
+				}
+			}
+		}))
+
+	t.Log(out)
+	assert.Len(t, *out, 6)
+
+	out = Diff(doc1.AsContainer(), doc2.AsContainer(), WithListDiffFn(
+		func(ctx DifferContext, left, right dom.List, pb path.Builder) {
+			ctx.DefaultListDiff(left, right, pb)
+		}))
+
+	t.Log(out)
+	assert.Len(t, *out, 11)
+}
+
 func TestDiffOverlayDocuments(t *testing.T) {
 	var (
 		cb dom.ContainerBuilder
 	)
 	left := dom.NewOverlayDocument()
 	cb = dom.ContainerNode()
-	cb.Set(pp.MustParse("a.b.c"), dom.LeafNode(1))
+	cb.Set(pc.Parser().MustParse("a.b.c"), dom.LeafNode(1))
 	left.Add("layer1", cb)
 	cb = dom.ContainerNode()
-	cb.Set(pp.MustParse("a.b.d"), dom.LeafNode("xyz"))
+	cb.Set(pc.Parser().MustParse("a.b.d"), dom.LeafNode("xyz"))
 	left.Add("layer2", cb)
 	cb = dom.ContainerNode()
 	cb.AddValue("something", dom.LeafNode("A"))
@@ -295,7 +353,7 @@ func TestDiffOverlayDocuments(t *testing.T) {
 
 	right := dom.NewOverlayDocument()
 	cb = dom.ContainerNode()
-	cb.Set(pp.MustParse("a.b.c"), dom.LeafNode(2))
+	cb.Set(pc.Parser().MustParse("a.b.c"), dom.LeafNode(2))
 	right.Add("layer1", cb)
 	cb = dom.ContainerNode()
 	cb.AddValue("hello", dom.LeafNode("Hi!"))
@@ -333,9 +391,4 @@ func TestDiffOverlayDocuments(t *testing.T) {
 		Path:  "something",
 		Value: "A",
 	}, res["layer3"])
-}
-
-func TestToListPath(t *testing.T) {
-	assert.Equal(t, "[2]", ToListPath("", 2))
-	assert.Equal(t, "item[3]", ToListPath("item", 3))
 }

@@ -73,3 +73,9 @@ type Serializer interface {
 	// Serialize serializes path into lexical representation
 	Serialize(Path) string
 }
+
+// Codec is interface that combines Parser and Serializer
+type Codec interface {
+	Parser() Parser
+	Serializer() Serializer
+}

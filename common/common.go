@@ -18,7 +18,6 @@ package common
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"regexp"
@@ -57,15 +56,6 @@ var (
 var (
 	FileOpener = os.Open
 )
-
-// ToPath creates path from path and key name
-func ToPath(path, key string) string {
-	if len(path) == 0 {
-		return key
-	} else {
-		return fmt.Sprintf("%s.%s", path, key)
-	}
-}
 
 // NewYamlEncoder creates and uniformly configures yaml.Encoder across project
 func NewYamlEncoder(w io.Writer) *yaml.Encoder {

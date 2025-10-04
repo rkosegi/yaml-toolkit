@@ -33,6 +33,15 @@ my-app:
                   - my-app
   container:
     - name: nginx
+  env:
+    - name: ENV1
+      value: abc
+    - name: ENV2
+      value: xyw
+    - name: MY_POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
   resources:
     limits:
       memory: 256Mi

@@ -47,11 +47,6 @@ func TestStringMatchFunc(t *testing.T) {
 	assert.Equal(t, 2, len(res))
 }
 
-func TestToPath(t *testing.T) {
-	assert.Equal(t, "abc", ToPath("", "abc"))
-	assert.Equal(t, "abc.def", ToPath("abc", "def"))
-}
-
 func TestNewYamlEncoder(t *testing.T) {
 	assert.NotNil(t, NewYamlEncoder(bytes.NewBuffer(make([]byte, 0))))
 }
