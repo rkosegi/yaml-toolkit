@@ -177,22 +177,22 @@ func Diff(left, right dom.Container, opts ...Opt) *[]Modification {
 }
 
 // OverlayDocs computes semantic difference between 2 Overlay documents
-func OverlayDocs(left, right dom.OverlayDocument) map[string]*[]Modification {
+func OverlayDocs(left, right dom.OverlayDocument, opts ...Opt) map[string]*[]Modification {
 	res := make(map[string]*[]Modification)
 	lmap := left.Layers()
 	rmap := right.Layers()
 	for ln, ll := range lmap {
 		if rl, ok := rmap[ln]; ok {
-			res[ln] = Diff(ll, rl)
+			res[ln] = Diff(ll, rl, opts...)
 		} else {
-			res[ln] = Diff(ll, dom.ContainerNode())
+			res[ln] = Diff(ll, dom.ContainerNode(), opts...)
 		}
 	}
 	for rn, rl := range rmap {
 		if ll, ok := lmap[rn]; ok {
-			res[rn] = Diff(ll, rl)
+			res[rn] = Diff(ll, rl, opts...)
 		} else {
-			res[rn] = Diff(dom.ContainerNode(), rl)
+			res[rn] = Diff(dom.ContainerNode(), rl, opts...)
 		}
 	}
 	return res
