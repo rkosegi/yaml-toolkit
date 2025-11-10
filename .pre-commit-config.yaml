@@ -28,7 +28,7 @@ repos:
 #    hooks:
 #      - id: golangci-lint
   - repo: https://github.com/tekwizely/pre-commit-golang
-    rev: v1.0.0-rc.2
+    rev: v1.0.0-rc.4
     hooks:
       - id: go-mod-tidy
       - id: go-fmt
@@ -41,6 +41,6 @@ repos:
         args:
           - -c=.yamllint-config.yaml
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.28.0
+    rev: v8.29.0
     hooks:
       - id: gitleaks
