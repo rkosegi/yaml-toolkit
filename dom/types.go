@@ -71,6 +71,14 @@ func DefaultJsonEncoder(w io.Writer, v interface{}) error {
 	return e.Encode(v)
 }
 
+func DefaultYamlCodec() FormatBiCodec {
+	return defYamlCodec
+}
+
+func DefaultJsonCodec() FormatBiCodec {
+	return defJsonCodec
+}
+
 // DecodeAnyToNode decodes any value to Node.
 func DecodeAnyToNode(in any) Node {
 	return decodeValueToNode(reflect.ValueOf(in))
@@ -100,6 +108,14 @@ func MustDecodeReader(r io.Reader, decFn DecoderFunc) Node {
 // current implementation
 func YamlNodeDecoder() func(n *yaml.Node) Node {
 	return decodeYamlNode
+}
+
+// FormatBiCodec is bi-directional codec for specific format
+type FormatBiCodec interface {
+	// Encoder returns EncoderFunc for actual format
+	Encoder() EncoderFunc
+	// Decoder returns DecoderFunc for actual format
+	Decoder() DecoderFunc
 }
 
 // Node is elemental unit of document. At runtime, it could be either Leaf, List or Container.

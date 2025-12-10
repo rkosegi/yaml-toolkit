@@ -27,6 +27,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type failingBiCodec struct{}
+
+func (f failingBiCodec) Encoder() dom.EncoderFunc {
+	return func(w io.Writer, v interface{}) error {
+		return errors.New("failing bi encoder")
+	}
+}
+
+func (f failingBiCodec) Decoder() dom.DecoderFunc {
+	return func(r io.Reader, v interface{}) error {
+		return errors.New("failing bi decoder")
+	}
+}
+
 func TestTranscode(t *testing.T) {
 	var (
 		err error
@@ -102,5 +116,32 @@ func TestTranscode(t *testing.T) {
 			return errors.New("this is an error")
 		}, dom.DefaultJsonEncoder, common.FailingWriter()))
 	})
+}
 
+func TestTransform(t *testing.T) {
+	type MyType struct {
+		A string `json:"a"`
+		B int
+	}
+	t.Run("list of map[string]interface{} to list of specific types", func(t *testing.T) {
+		in := []interface{}{
+			map[string]interface{}{
+				"a": "hello",
+				"b": 42,
+			},
+			map[string]interface{}{
+				"a": "world",
+				"b": 50,
+			},
+		}
+		out, err := Transform[[]MyType](in, dom.DefaultJsonCodec())
+		assert.NoError(t, err)
+		assert.NotNil(t, out)
+		assert.Equal(t, "hello world", (*out)[0].A+" "+(*out)[1].A)
+		assert.Equal(t, 92, (*out)[0].B+(*out)[1].B)
+	})
+	t.Run("invalid read", func(t *testing.T) {
+		_, err := Transform[any](struct{}{}, &failingBiCodec{})
+		assert.Error(t, err)
+	})
 }

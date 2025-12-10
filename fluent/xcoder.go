@@ -50,3 +50,18 @@ func Transcode[T any](in *T, enc dom.EncoderFunc, dec dom.DecoderFunc, outEnc do
 func TranscodeJson2Yaml[T any](in *T, w io.Writer) error {
 	return Transcode[T](in, dom.DefaultJsonEncoder, dom.DefaultJsonDecoder, dom.DefaultYamlEncoder, w)
 }
+
+// Transform can transform arbitrary object to specific type, using provided codec.
+// Common use case is to transform i.e. []interface{} to []MyType
+func Transform[T any](in any, codec dom.FormatBiCodec) (*T, error) {
+	var (
+		data bytes.Buffer
+		err  error
+		out  T
+	)
+	if err = codec.Encoder()(&data, in); err != nil {
+		return nil, err
+	}
+	err = codec.Decoder()(&data, &out)
+	return &out, err
+}

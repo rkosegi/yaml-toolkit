@@ -59,7 +59,7 @@ func TestLoad(t *testing.T) {
 	assert.Equal(t, 1, len(od.Layers()))
 
 	var buf bytes.Buffer
-	assert.NoError(t, EncodeToWriter(od.Merged(), DefaultYamlEncoder, &buf))
+	assert.NoError(t, EncodeToWriter(od.Merged(), defYamlCodec.Encoder(), &buf))
 	x, err := decodeFromReader(&buf, DefaultYamlDecoder)
 	assert.NoError(t, err)
 	assert.True(t, x.IsContainer())

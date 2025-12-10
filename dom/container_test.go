@@ -41,7 +41,7 @@ def: xyz
 }
 
 func TestBuilderFromInvalidJsonString(t *testing.T) {
-	doc, err := DecodeReader(strings.NewReader(`This is not a json`), DefaultJsonDecoder)
+	doc, err := DecodeReader(strings.NewReader(`This is not a json`), DefaultJsonCodec().Decoder())
 	assert.NotNil(t, err)
 	assert.Nil(t, doc)
 }
@@ -52,7 +52,7 @@ func TestBuilderFromJsonString(t *testing.T) {
 	"def": "xyz",
 	"abc": 123
 }
-`), DefaultJsonDecoder)
+`), defJsonCodec.Decoder())
 	assert.Nil(t, err)
 	assert.True(t, doc.IsContainer())
 	assert.Equal(t, "xyz", doc.AsContainer().Child("def").AsLeaf().Value())
@@ -67,7 +67,7 @@ func TestBuildAndSerialize(t *testing.T) {
 		AddContainer("level3").
 		AddValue("leaf1", LeafNode("Hello"))
 	var buf bytes.Buffer
-	assert.NoError(t, EncodeToWriter(builder, DefaultJsonEncoder, &buf))
+	assert.NoError(t, EncodeToWriter(builder, DefaultJsonCodec().Encoder(), &buf))
 	assert.Equal(t, `{
   "root": {
     "level1": {
@@ -97,14 +97,14 @@ func TestRemove(t *testing.T) {
 		AddValue("leaf1", LeafNode("Hello"))
 	builder.Remove("root")
 	var buf bytes.Buffer
-	assert.NoError(t, EncodeToWriter(builder, DefaultJsonEncoder, &buf))
+	assert.NoError(t, EncodeToWriter(builder, DefaultJsonCodec().Encoder(), &buf))
 	assert.Equal(t, "{}\n", buf.String())
 }
 
 func getTestDoc(t *testing.T, name string) ContainerBuilder {
 	data, err := os.ReadFile("../testdata/" + name + ".yaml")
 	assert.NoError(t, err)
-	doc, err := DecodeReader(bytes.NewReader(data), DefaultYamlDecoder)
+	doc, err := DecodeReader(bytes.NewReader(data), DefaultYamlCodec().Decoder())
 	assert.NoError(t, err)
 	return doc.(ContainerBuilder)
 }

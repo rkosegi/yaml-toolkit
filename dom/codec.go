@@ -25,6 +25,19 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var (
+	defYamlCodec = &yamlCodec{}
+	defJsonCodec = &jsonCodec{}
+)
+
+type yamlCodec struct{}
+type jsonCodec struct{}
+
+func (y *yamlCodec) Encoder() EncoderFunc { return DefaultYamlEncoder }
+func (y *yamlCodec) Decoder() DecoderFunc { return DefaultYamlDecoder }
+func (y *jsonCodec) Encoder() EncoderFunc { return DefaultJsonEncoder }
+func (y *jsonCodec) Decoder() DecoderFunc { return DefaultJsonDecoder }
+
 func encodeLeafFn(n Leaf) interface{} {
 	return n.Value()
 }
