@@ -41,7 +41,7 @@ root:
 		n   yaml.Node
 		err error
 	)
-	err = yaml.NewDecoder(strings.NewReader(doc1)).Decode(&n)
+	err = defYamlCodec.Decoder()(strings.NewReader(doc1), &n)
 	assert.NoError(t, err)
 	dn = YamlNodeDecoder()(&n)
 	assert.NotNil(t, dn)
@@ -163,28 +163,28 @@ root:
 		AsLeaf().Value())
 
 	t.Run("Decode leaf value as YAML", func(t *testing.T) {
-		out, err = DecodeReader(strings.NewReader(`just a leaf`), DefaultYamlDecoder)
+		out, err = DecodeReader(strings.NewReader(`just a leaf`), defYamlCodec.Decoder())
 		assert.NoError(t, err)
 		assert.Equal(t, "just a leaf", out.AsLeaf().Value())
 	})
 	t.Run("Decode invalid JSON", func(t *testing.T) {
-		out, err = DecodeReader(strings.NewReader(`something`), DefaultJsonDecoder)
+		out, err = DecodeReader(strings.NewReader(`something`), defJsonCodec.Decoder())
 		assert.Error(t, err)
 		assert.Nil(t, out)
 	})
 	t.Run("failure from io.Reader should fail decoding", func(t *testing.T) {
-		_, err = DecodeReader(common.FailingReader(), DefaultYamlDecoder)
+		_, err = DecodeReader(common.FailingReader(), defYamlCodec.Decoder())
 		assert.Error(t, err)
 	})
 	t.Run("expect panic from MustDecodeReader", func(t *testing.T) {
 		defer func() {
 			recover()
 		}()
-		MustDecodeReader(common.FailingReader(), DefaultYamlDecoder)
+		MustDecodeReader(common.FailingReader(), defYamlCodec.Decoder())
 		t.Fail()
 	})
 	t.Run("calling MustDecodeReader with valid json should pass", func(t *testing.T) {
-		out = MustDecodeReader(strings.NewReader(`{"A":"xyz"}`), DefaultJsonDecoder)
+		out = MustDecodeReader(strings.NewReader(`{"A":"xyz"}`), defJsonCodec.Decoder())
 		assert.True(t, out.IsContainer())
 		assert.Equal(t, "xyz", out.AsContainer().Child("A").AsLeaf().Value())
 	})
