@@ -48,7 +48,11 @@ func Transcode[T any](in *T, enc dom.EncoderFunc, dec dom.DecoderFunc, outEnc do
 // TranscodeJson2Yaml takes T and encodes it into JSON form,
 // then decodes it into intermediate object which is then serialized into YAML form.
 func TranscodeJson2Yaml[T any](in *T, w io.Writer) error {
-	return Transcode[T](in, dom.DefaultJsonEncoder, dom.DefaultJsonDecoder, dom.DefaultYamlEncoder, w)
+	return TranscodeWithCodec[T](in, dom.DefaultJsonCodec(), dom.DefaultYamlEncoder, w)
+}
+
+func TranscodeWithCodec[T any](in *T, codec dom.FormatBiCodec, enc dom.EncoderFunc, w io.Writer) error {
+	return Transcode[T](in, codec.Encoder(), codec.Decoder(), enc, w)
 }
 
 // Transform can transform arbitrary object to specific type, using provided codec.
