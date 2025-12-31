@@ -25,13 +25,14 @@ import (
 	"github.com/rkosegi/yaml-toolkit/common"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/props"
-	"gopkg.in/yaml.v3"
 )
 
 // ConfigHelper allows to load, mutate and save configuration object
 type ConfigHelper[T any] interface {
 	// Add adds any object.
 	Add(doc any /*merge strategy*/) ConfigHelper[T]
+	// Read reads given io.Reader and process it into T using configured codec
+	Read(reader io.Reader) ConfigHelper[T]
 	// Load loads given file and merge it into current object
 	Load(file string) ConfigHelper[T]
 	// Save saves current object into file
@@ -42,8 +43,23 @@ type ConfigHelper[T any] interface {
 	Result() *T
 }
 
+type Opt[T any] func(helper *configHelper[T])
+
+func WithCodec[T any](codec dom.FormatBiCodec) Opt[T] {
+	return func(ch *configHelper[T]) {
+		ch.codec = codec
+	}
+}
+
+func WithInitialData[T any](data dom.ContainerBuilder) Opt[T] {
+	return func(ch *configHelper[T]) {
+		ch.c = data
+	}
+}
+
 type configHelper[T any] struct {
-	c dom.ContainerBuilder
+	codec dom.FormatBiCodec
+	c     dom.ContainerBuilder
 }
 
 func panicIfError(err error) {
@@ -52,7 +68,7 @@ func panicIfError(err error) {
 	}
 }
 
-func any2dom(in any) dom.Container {
+func any2dom(in any, codec dom.FormatBiCodec) dom.Container {
 	if _, ok := in.(map[string]interface{}); ok {
 		return dom.DecodeAnyToNode(in).AsContainer()
 	}
@@ -60,18 +76,18 @@ func any2dom(in any) dom.Container {
 		buf bytes.Buffer
 		m   map[string]interface{}
 	)
-	panicIfError(yaml.NewEncoder(&buf).Encode(in))
-	panicIfError(yaml.NewDecoder(&buf).Decode(&m))
-	return any2dom(m)
+	panicIfError(codec.Encoder()(&buf, in))
+	panicIfError(codec.Decoder()(&buf, &m))
+	return any2dom(m, codec)
 }
 
-func dom2gen[T any](c dom.Container) *T {
+func dom2gen[T any](c dom.Container, codec dom.FormatBiCodec) *T {
 	var (
 		buf bytes.Buffer
 		t   T
 	)
-	panicIfError(yaml.NewEncoder(&buf).Encode(c.AsAny()))
-	panicIfError(yaml.NewDecoder(&buf).Decode(&t))
+	panicIfError(codec.Encoder()(&buf, c.AsAny()))
+	panicIfError(codec.Decoder()(&buf, &t))
 	return &t
 }
 
@@ -82,16 +98,25 @@ func (c *configHelper[T]) Add(doc any) ConfigHelper[T] {
 	if dc, ok := doc.(dom.Container); ok {
 		c.c = c.c.Merge(dc)
 	} else {
-		c.c = c.c.Merge(any2dom(doc))
+		c.c = c.c.Merge(any2dom(doc, c.codec))
 	}
 	return c
+}
+
+func (c *configHelper[T]) readWithDecoder(r io.Reader, dec dom.DecoderFunc) ConfigHelper[T] {
+	var t T
+	panicIfError(dec(r, &t))
+	return c.Add(t)
+}
+
+func (c *configHelper[T]) Read(r io.Reader) ConfigHelper[T] {
+	return c.readWithDecoder(r, c.codec.Decoder())
 }
 
 func (c *configHelper[T]) Load(file string) ConfigHelper[T] {
 	var (
 		f   io.ReadCloser
 		err error
-		cb  dom.Node
 	)
 	fdp := DefaultFileDecoderProvider(file)
 	f, err = common.FileOpener(file)
@@ -99,12 +124,7 @@ func (c *configHelper[T]) Load(file string) ConfigHelper[T] {
 	defer func() {
 		_ = f.Close()
 	}()
-	cb, err = dom.DecodeReader(f, fdp)
-	panicIfError(err)
-	if !cb.IsContainer() {
-		return c
-	}
-	return c.Add(cb)
+	return c.readWithDecoder(f, fdp)
 }
 
 func (c *configHelper[T]) Save(file string) ConfigHelper[T] {
@@ -124,13 +144,18 @@ func (c *configHelper[T]) Mutate(fn func(builder dom.ContainerBuilder)) ConfigHe
 }
 
 func (c *configHelper[T]) Result() *T {
-	return dom2gen[T](c.c)
+	return dom2gen[T](c.c, c.codec)
 }
 
-func NewConfigHelper[T any]( /* options */ ) ConfigHelper[T] {
-	return &configHelper[T]{
-		c: dom.ContainerNode(),
+func NewConfigHelper[T any](opts ...Opt[T]) ConfigHelper[T] {
+	ch := &configHelper[T]{}
+	for _, opt := range append([]Opt[T]{
+		WithCodec[T](dom.DefaultYamlCodec()),
+		WithInitialData[T](dom.ContainerNode()),
+	}, opts...) {
+		opt(ch)
 	}
+	return ch
 }
 
 // DefaultFileEncoderProvider is FileEncoderProvider that uses file suffix to choose dom.EncoderFunc

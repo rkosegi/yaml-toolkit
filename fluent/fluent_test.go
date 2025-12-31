@@ -19,6 +19,7 @@ package fluent
 import (
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
@@ -26,15 +27,20 @@ import (
 )
 
 type config struct {
-	Path string
-	Host string
-	Port int
+	Path    *string
+	Host    string
+	Port    int
+	Timeout *int
+}
+
+func ptr[T any](v T) *T {
+	return &v
 }
 
 func TestConfigHelper(t *testing.T) {
 
 	defCfg := &config{
-		Path: "/tmp/x",
+		Path: ptr("/tmp/x"),
 	}
 	tmpDir, err := os.MkdirTemp("", "yt*")
 	assert.NoError(t, err)
@@ -46,13 +52,17 @@ func TestConfigHelper(t *testing.T) {
 		cfg := NewConfigHelper[config]().
 			Add(nil).
 			Add(defCfg).
+			Add(dom.ContainerNode()).
 			Load("../testdata/cfg1.yaml").
+			Read(strings.NewReader(`port: 9988`)).
 			Mutate(func(cb dom.ContainerBuilder) {
 				cb.AddValue("host", dom.LeafNode("localhost"))
 			}).
 			Save(path.Join(tmpDir, "config.yaml")).
 			Result()
 		assert.Equal(t, "localhost", cfg.Host)
+		assert.Equal(t, 9988, cfg.Port)
+		assert.Equal(t, 673, *cfg.Timeout)
 	})
 
 	t.Run("load empty YAML file", func(t *testing.T) {
@@ -61,7 +71,7 @@ func TestConfigHelper(t *testing.T) {
 			Load("../testdata/empty_doc.yaml").
 			Save(path.Join(tmpDir, "config.yaml")).
 			Result()
-		assert.Equal(t, "/tmp/x", cfg.Path)
+		assert.Equal(t, "/tmp/x", *cfg.Path)
 	})
 
 }
