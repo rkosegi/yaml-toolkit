@@ -18,6 +18,7 @@ package fluent
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 
 	"github.com/rkosegi/yaml-toolkit/dom"
@@ -68,4 +69,33 @@ func Transform[T any](in any, codec dom.FormatBiCodec) (*T, error) {
 	}
 	err = codec.Decoder()(&data, &out)
 	return &out, err
+}
+
+func MustTransform[T any](in any, codec dom.FormatBiCodec) *T {
+	out, err := Transform[T](in, codec)
+	if err != nil {
+		panic(err)
+	} else {
+		return out
+	}
+}
+
+func TransformSlice[F any, T any](in []F, codec dom.FormatBiCodec) ([]*T, error) {
+	out := make([]*T, len(in))
+	for idx, item := range in {
+		x, err := Transform[T](item, codec)
+		if err != nil {
+			return nil, fmt.Errorf("transform failed for item at index %d: %w", idx, err)
+		}
+		out[idx] = x
+	}
+	return out, nil
+}
+
+func MustTransformSlice[F any, T any](in []F, codec dom.FormatBiCodec) []*T {
+	out, err := TransformSlice[F, T](in, codec)
+	if err != nil {
+		panic(err)
+	}
+	return out
 }
