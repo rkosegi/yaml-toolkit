@@ -144,4 +144,43 @@ func TestTransform(t *testing.T) {
 		_, err := Transform[any](struct{}{}, &failingBiCodec{})
 		assert.Error(t, err)
 	})
+
+	t.Run("must transform", func(t *testing.T) {
+		t.Run("valid", func(t *testing.T) {
+			mt := MustTransform[MyType](map[string]interface{}{
+				"a": "hello",
+				"b": 42,
+				"c": 3.14,
+			}, dom.DefaultYamlCodec())
+			assert.NotNil(t, mt)
+			assert.Equal(t, 42, mt.B)
+			assert.Equal(t, "hello", mt.A)
+		})
+		t.Run("invalid", func(t *testing.T) {
+			defer func() {
+				recover()
+			}()
+			MustTransform[MyType]([]int{0}, dom.DefaultYamlCodec())
+			assert.Fail(t, "transform must fail")
+		})
+	})
+	t.Run("transform slice", func(t *testing.T) {
+		t.Run("valid", func(t *testing.T) {
+			mt := MustTransformSlice[map[string]interface{}, MyType]([]map[string]interface{}{
+				{"a": "hello"},
+				{"a": "world"},
+			}, dom.DefaultYamlCodec())
+			assert.NotNil(t, mt)
+			assert.Len(t, mt, 2)
+			assert.Equal(t, "hello", mt[0].A)
+			assert.Equal(t, "world", mt[1].A)
+		})
+		t.Run("invalid", func(t *testing.T) {
+			defer func() {
+				recover()
+			}()
+			MustTransformSlice[string, MyType]([]string{"A"}, failingBiCodec{})
+			assert.Fail(t, "transform slice must fail")
+		})
+	})
 }
