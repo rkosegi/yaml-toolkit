@@ -193,6 +193,10 @@ type Container interface {
 	// Query queries this container and return matching child nodes.
 	Query(qry query.Query) NodeList
 
+	// Each invokes provided function for each child node in this container.
+	// When provided function returns true, iteration stops immediately.
+	Each(cb func(cn string, cv Node) bool)
+
 	// Flatten flattens this Container recursively into map,
 	// where key is computed using provided function from path and value is actual Leaf Node.
 	// Caller can use a SimplePathAsString function which just delegates to Path.String(),

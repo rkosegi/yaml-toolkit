@@ -54,13 +54,23 @@ func (c *containerImpl) Equals(node Node) bool {
 	if node == nil || !node.IsContainer() {
 		return false
 	}
+	ret := true
+	c.Each(func(cn string, cv Node) bool {
+		if other := node.AsContainer().Child(cn); other == nil || !cv.Equals(other) {
+			ret = false
+			return true
+		}
+		return false
+	})
+	return ret
+}
+
+func (c *containerImpl) Each(cb func(cn string, cv Node) bool) {
 	for k, v := range c.children {
-		other := node.AsContainer().Child(k)
-		if other == nil || !v.Equals(other) {
-			return false
+		if cb(k, v) {
+			return
 		}
 	}
-	return true
 }
 
 func (c *containerImpl) ensureChildren() {
@@ -98,9 +108,10 @@ func (c *containerImpl) Get(p path.Path) Node {
 func (c *containerImpl) Clone() Node {
 	c2 := initContainer()
 	c2.ensureChildren()
-	for k, v := range c.children {
-		c2.children[k] = v.Clone()
-	}
+	c.Each(func(cn string, cv Node) bool {
+		c2.children[cn] = cv.Clone()
+		return false
+	})
 	return c2
 }
 

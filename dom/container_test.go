@@ -320,3 +320,16 @@ func TestContainerQuery(t *testing.T) {
 	r = a.Query(&noneQueryImpl{})
 	assert.Nil(t, r)
 }
+
+func TestContainerEach(t *testing.T) {
+	a := getTestDoc(t, "doc1")
+	found := false
+	a.Each(func(cn string, cv Node) bool {
+		if cn == "level1" {
+			found = true
+			return true
+		}
+		return false
+	})
+	assert.True(t, found)
+}
