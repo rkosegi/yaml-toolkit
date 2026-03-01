@@ -19,6 +19,7 @@ package diff
 import (
 	"fmt"
 	"sort"
+	"strconv"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/dom"
@@ -34,6 +35,8 @@ const (
 	ModDelete = ModificationType("Delete")
 	// ModAdd leaf value is being added
 	ModAdd = ModificationType("Add")
+
+	fieldName = "name"
 )
 
 type Modification struct {
@@ -49,8 +52,10 @@ type (
 		Append(mt ModificationType, p path.Path, oldVal, newVal interface{})
 		// Flatten flattens out Node into sequence of Modifications.
 		Flatten(node dom.Node, pb path.Builder)
-		// DefaultListDiff uses default list diffing function
-		DefaultListDiff(left, right dom.List, pb path.Builder)
+		// ListDiff compares 2 lists and generates list of modification from their difference using provided function
+		ListDiff(left, right dom.List, pb path.Builder, fn ListDiffFn)
+
+		ContainerDiff(left, right dom.Container, pb path.Builder)
 	}
 	ListDiffFn func(ctx DifferContext, left, right dom.List, pb path.Builder)
 )
@@ -73,8 +78,12 @@ type differ struct {
 	out  []Modification
 }
 
-func (d *differ) DefaultListDiff(left, right dom.List, pb path.Builder) {
-	defaultListDiffFn(d, left, right, pb)
+func (d *differ) ContainerDiff(left, right dom.Container, pb path.Builder) {
+	d.diffContainers(left, right, pb)
+}
+
+func (d *differ) ListDiff(left, right dom.List, pb path.Builder, fn ListDiffFn) {
+	fn(d, left, right, pb)
 }
 
 func (d *differ) Append(mt ModificationType, p path.Path, oldVal, newVal interface{}) {
@@ -148,11 +157,80 @@ func (d *differ) Flatten(node dom.Node, pb path.Builder) {
 	}
 }
 
-func defaultListDiffFn(ctx DifferContext, left, right dom.List, pb path.Builder) {
+// DefaultListDiffFn drops right list and flatten left one into series of additions.
+func DefaultListDiffFn(ctx DifferContext, left, right dom.List, pb path.Builder) {
 	if !left.Equals(right) {
 		ctx.Append(ModDelete, pb.Build(), nil, nil)
 		ctx.Flatten(left, pb)
 	}
+}
+
+func K8sListDiffFn(ctx DifferContext, left, right dom.List, pb path.Builder) {
+	ctx.ContainerDiff(k8sList2cont(left), k8sList2cont(right), pb)
+}
+
+// checks if container has child "name" that is of string value
+func hasValidNameNodeForK8sManifest(c dom.Container) bool {
+	nameNode := c.Child(fieldName)
+	if nameNode == nil {
+		return false
+	}
+	if !nameNode.IsLeaf() {
+		return false
+	}
+	if nameNode.AsLeaf().Value() == nil {
+		return false
+	}
+	if _, ok := nameNode.AsLeaf().Value().(string); !ok {
+		return false
+	}
+	return true
+}
+
+// k8sList2cont try to convert List into Container by using "name" child as a subcontainer.
+// This is useful in k8s manifests, since env/volume/volumeMount etc. uses this convention.
+// example:
+//
+//	env:
+//	  - name: MY_ENV
+//	    value: abcd
+//	  - name: MY_OTHER_ENV
+//	    value: Hola Mundo
+//
+// will become
+//
+//	 env:
+//		  MY_ENV: abcd
+//		  MY_OTHER_ENV: Hola Mundo
+//
+// Keep in mind that this convention is not guaranteed when dealing with arbitrary YAML document (since value of "name"
+// might not be unique)
+func k8sList2cont(l dom.List) dom.Container {
+	o := dom.ContainerNode()
+	for index, child := range l.Items() {
+		if child.IsContainer() {
+			cc := child.AsContainer()
+			cb := dom.ContainerNode()
+			if hasValidNameNodeForK8sManifest(cc) {
+				o.AddValue(cc.Child(fieldName).AsLeaf().Value().(string), cb)
+				// copy each child node into new subcontainer, except for "name" itself
+				cc.Each(func(cn string, cv dom.Node) bool {
+					if cn != fieldName {
+						cb.AddValue(cn, cv)
+					}
+					return false
+				})
+			} else {
+				// fallback, use node index as a child name and copy everything under it
+				o.AddValue(strconv.Itoa(index), cb)
+				cc.Each(func(cn string, cv dom.Node) bool {
+					cb.AddValue(cn, cv)
+					return false
+				})
+			}
+		}
+	}
+	return o
 }
 
 func (d *differ) do(left, right dom.Container) []Modification {
@@ -168,7 +246,7 @@ func (d *differ) do(left, right dom.Container) []Modification {
 func Diff(left, right dom.Container, opts ...Opt) *[]Modification {
 	d := &differ{}
 	for _, opt := range append([]Opt{
-		WithListDiffFn(defaultListDiffFn),
+		WithListDiffFn(DefaultListDiffFn),
 	}, opts...) {
 		opt(d)
 	}

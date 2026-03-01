@@ -53,6 +53,23 @@ func assertHasChange(t *testing.T, mod Modification, mods *[]Modification) {
 	t.Fatalf("expected change not present %s, all changes:\n%v", mod.String(), string(data))
 }
 
+func loadDocs(t *testing.T, d1, d2 string) (dom.Node, dom.Node, error) {
+	var (
+		data []byte
+		err  error
+	)
+
+	data, err = os.ReadFile(d1)
+	assert.NoError(t, err)
+	doc1, err := dom.DecodeReader(bytes.NewReader(data), dom.DefaultYamlDecoder)
+	assert.NoError(t, err)
+	data, err = os.ReadFile(d2)
+	assert.NoError(t, err)
+	doc2, err := dom.DecodeReader(bytes.NewReader(data), dom.DefaultYamlDecoder)
+	assert.NoError(t, err)
+	return doc1, doc2, nil
+}
+
 func diffStrDocs(t *testing.T, doc1, doc2 string) *[]Modification {
 	cleft, err := dom.DecodeReader(strings.NewReader(doc1), dom.DefaultYamlDecoder)
 	if err != nil {
@@ -281,59 +298,72 @@ root:
 	assert.Equal(t, 0, len(*res))
 }
 
+func logResultMods(t *testing.T, mods *[]Modification) {
+	var buff bytes.Buffer
+	assert.NoError(t, dom.DefaultJsonEncoder(&buff, mods))
+	t.Log(buff.String())
+}
+
 func TestDiffCustomListFn(t *testing.T) {
 	var (
-		data []byte
-		err  error
+		err error
+		out *[]Modification
 	)
-	sr := korek.ForSlice(func(left, right dom.Node) bool {
-		if left.IsContainer() && right.IsContainer() &&
-			left.AsContainer().Child("name") != nil && right.AsContainer().Child("name") != nil {
-			return left.AsContainer().Child("name").Equals(right.AsContainer().Child("name"))
-		}
-		return left.Equals(right)
-	}).WithEqualityFunc(func(left, right dom.Node) bool {
-		return left.Equals(right)
+
+	var doc1, doc2 dom.Node
+	if doc1, doc2, err = loadDocs(t,
+		"../testdata/k8s_values1.yaml",
+		"../testdata/k8s_values2.yaml"); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("custom logic using korek", func(t *testing.T) {
+		sr := korek.ForSlice(func(left, right dom.Node) bool {
+			if left.IsContainer() && right.IsContainer() &&
+				left.AsContainer().Child(fieldName) != nil && right.AsContainer().Child(fieldName) != nil {
+				return left.AsContainer().Child(fieldName).Equals(right.AsContainer().Child(fieldName))
+			}
+			return left.Equals(right)
+		}).WithEqualityFunc(func(left, right dom.Node) bool {
+			return left.Equals(right)
+		})
+
+		out = Diff(doc1.AsContainer(), doc2.AsContainer(), WithListDiffFn(
+			func(ctx DifferContext, left, right dom.List, pb path.Builder) {
+				t.Logf("path: %v", pb.Build())
+				if !left.Equals(right) {
+					if pb.Build().Last().Value() == "env" {
+						_, _, added, removed := sr.Diff(left.Items(), right.Items())
+
+						for _, removedItem := range removed {
+							ctx.Append(ModDelete, pb.Build(), removedItem, nil)
+						}
+						for _, addedItem := range added {
+							ctx.Append(ModAdd, pb.Build(), addedItem, nil)
+						}
+					} else {
+						ctx.ListDiff(left, right, pb, DefaultListDiffFn)
+					}
+				}
+			}))
+		assert.Len(t, *out, 6)
+		logResultMods(t, out)
 	})
 
-	data, err = os.ReadFile("../testdata/k8s_values1.yaml")
-	assert.NoError(t, err)
-	doc1, err := dom.DecodeReader(bytes.NewReader(data), dom.DefaultYamlDecoder)
-	assert.NoError(t, err)
-	data, err = os.ReadFile("../testdata/k8s_values2.yaml")
-	assert.NoError(t, err)
-	doc2, err := dom.DecodeReader(bytes.NewReader(data), dom.DefaultYamlDecoder)
-	assert.NoError(t, err)
+	t.Run("with default as opt", func(t *testing.T) {
+		out = Diff(doc1.AsContainer(), doc2.AsContainer(), WithListDiffFn(
+			func(ctx DifferContext, left, right dom.List, pb path.Builder) {
+				ctx.ListDiff(left, right, pb, DefaultListDiffFn)
+			}))
+		logResultMods(t, out)
+		assert.Len(t, *out, 11)
+	})
 
-	out := Diff(doc1.AsContainer(), doc2.AsContainer(), WithListDiffFn(
-		func(ctx DifferContext, left, right dom.List, pb path.Builder) {
-			t.Logf("path: %v", pb.Build())
-			if !left.Equals(right) {
-				if pb.Build().Last().Value() == "env" {
-					_, _, added, removed := sr.Diff(left.Items(), right.Items())
-
-					for _, removedItem := range removed {
-						ctx.Append(ModDelete, pb.Build(), removedItem, nil)
-					}
-					for _, addedItem := range added {
-						ctx.Append(ModAdd, pb.Build(), addedItem, nil)
-					}
-				} else {
-					ctx.DefaultListDiff(left, right, pb)
-				}
-			}
-		}))
-
-	t.Log(out)
-	assert.Len(t, *out, 6)
-
-	out = Diff(doc1.AsContainer(), doc2.AsContainer(), WithListDiffFn(
-		func(ctx DifferContext, left, right dom.List, pb path.Builder) {
-			ctx.DefaultListDiff(left, right, pb)
-		}))
-
-	t.Log(out)
-	assert.Len(t, *out, 11)
+	t.Run("with default", func(t *testing.T) {
+		out = Diff(doc1.AsContainer(), doc2.AsContainer())
+		logResultMods(t, out)
+		assert.Len(t, *out, 11)
+	})
 }
 
 func TestDiffOverlayDocuments(t *testing.T) {
@@ -391,4 +421,90 @@ func TestDiffOverlayDocuments(t *testing.T) {
 		Path:  "something",
 		Value: "A",
 	}, res["layer3"])
+}
+
+func TestHasValidNameNodeForK8sManifest(t *testing.T) {
+	assert.False(t, hasValidNameNodeForK8sManifest(dom.ContainerNode()))
+	c := dom.ContainerNode()
+	c.AddValue(fieldName, nil)
+	assert.False(t, hasValidNameNodeForK8sManifest(c))
+
+	c = dom.ContainerNode()
+	c.AddValue(fieldName, dom.ContainerNode())
+	assert.False(t, hasValidNameNodeForK8sManifest(c))
+
+	c = dom.ContainerNode()
+	c.AddValue(fieldName, dom.LeafNode(1))
+	assert.False(t, hasValidNameNodeForK8sManifest(c))
+
+	c = dom.ContainerNode()
+	c.AddValue(fieldName, dom.LeafNode("test"))
+	assert.True(t, hasValidNameNodeForK8sManifest(c))
+}
+
+func TestDiffCustomListFnK8s(t *testing.T) {
+	var (
+		doc1, doc2 dom.Node
+		err        error
+	)
+
+	t.Run("diff 2 unrelated things", func(t *testing.T) {
+		if doc1, doc2, err = loadDocs(t,
+			"../testdata/env1.yaml",
+			"../testdata/unrelated_list.yaml"); err != nil {
+			t.Fatal(err)
+		}
+		out := Diff(doc1.AsContainer(), doc2.AsContainer(), WithListDiffFn(K8sListDiffFn))
+		logResultMods(t, out)
+		assert.Len(t, *out, 5)
+		assertHasChange(t, Modification{
+			Type: ModDelete,
+			Path: "app.env.0",
+		}, out)
+		assertHasChange(t, Modification{
+			Type: ModDelete,
+			Path: "app.env.1",
+		}, out)
+		assertHasChange(t, Modification{
+			Type:  ModAdd,
+			Path:  "app.env.ENV1.value",
+			Value: "abc",
+		}, out)
+		assertHasChange(t, Modification{
+			Type:  ModAdd,
+			Path:  "app.env.ENV2.value",
+			Value: "xyz",
+		}, out)
+		assertHasChange(t, Modification{
+			Type:  ModAdd,
+			Path:  "app.env.MY_POD_IP.valueFrom.fieldRef.fieldPath",
+			Value: "status.podIP",
+		}, out)
+	})
+
+	t.Run("2 env lists", func(t *testing.T) {
+		if doc1, doc2, err = loadDocs(t,
+			"../testdata/env1.yaml",
+			"../testdata/env2.yaml"); err != nil {
+			t.Fatal(err)
+		}
+		out := Diff(doc1.AsContainer(), doc2.AsContainer(), WithListDiffFn(
+			func(ctx DifferContext, left, right dom.List, pb path.Builder) {
+				t.Logf("path: %v", pb.Build())
+				ctx.ContainerDiff(k8sList2cont(left), k8sList2cont(right), pb)
+			}))
+		logResultMods(t, out)
+		assert.Len(t, *out, 3)
+		assert.Equal(t, "app.env.ENV2.value", (*out)[0].Path)
+		assert.Equal(t, "xyz", (*out)[0].OldValue)
+		assert.Equal(t, "xyw", (*out)[0].Value)
+		assert.Equal(t, ModChange, (*out)[0].Type)
+
+		assert.Equal(t, "app.env.MY_POD_IP.valueFrom.fieldRef.fieldPath", (*out)[1].Path)
+		assert.Equal(t, "status.podIP", (*out)[1].Value)
+		assert.Equal(t, ModAdd, (*out)[1].Type)
+
+		assert.Equal(t, "app.env.MY_POD_NAMESPACE", (*out)[2].Path)
+		assert.Equal(t, ModDelete, (*out)[2].Type)
+	})
 }
