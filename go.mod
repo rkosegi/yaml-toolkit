@@ -22,7 +22,7 @@ require (
 	github.com/magiconair/properties v1.8.10
 	github.com/rkosegi/go-korek v1.0.0-rc1.0.20260216141519-f9a87b794689
 	github.com/stretchr/testify v1.11.1
-	github.com/theory/jsonpath v0.10.2
+	github.com/theory/jsonpath v0.11.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
