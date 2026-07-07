@@ -33,14 +33,10 @@ type config struct {
 	Timeout *int
 }
 
-func ptr[T any](v T) *T {
-	return &v
-}
-
 func TestConfigHelper(t *testing.T) {
 
 	defCfg := &config{
-		Path: ptr("/tmp/x"),
+		Path: new("/tmp/x"),
 	}
 	tmpDir, err := os.MkdirTemp("", "yt*")
 	assert.NoError(t, err)
