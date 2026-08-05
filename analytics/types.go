@@ -77,7 +77,7 @@ type PlaceholderResolutionReport struct {
 	FailedKeys []string
 	// ActualValues is mapping between keys (those that failed resolution) and their actual values
 	// as observed during resolution process.
-	ActualValues map[string]interface{}
+	ActualValues map[string]any
 	// Coordinates is mapping between failed keys and dom.Coordinates where placeholders are found
 	Coordinates map[string]dom.Coordinates
 }

@@ -28,7 +28,7 @@ func TestApplyTo(t *testing.T) {
 
 	type tCase struct {
 		p   path.Path
-		exp interface{}
+		exp any
 		n   Node
 	}
 

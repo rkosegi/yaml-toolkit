@@ -86,7 +86,7 @@ func TestContainerAddNil(t *testing.T) {
 	c := ContainerNode()
 	c.AddValue("leaf", nil)
 	assert.NotNil(t, c.Child("leaf"))
-	m := c.AsAny().(map[string]interface{})
+	m := c.AsAny().(map[string]any)
 	assert.Nil(t, m["leaf"])
 }
 
@@ -117,7 +117,7 @@ func TestBuilderFromFile(t *testing.T) {
 }
 
 func TestContainerAsAny(t *testing.T) {
-	fm := getTestDoc(t, "doc1").AsAny().(map[string]interface{})
+	fm := getTestDoc(t, "doc1").AsAny().(map[string]any)
 	assert.Equal(t, 1, len(fm))
 	assert.NotNil(t, fm["level1"])
 }
@@ -136,7 +136,7 @@ func TestFlatten(t *testing.T) {
 }
 
 func TestFromMap(t *testing.T) {
-	c := DecodeAnyToNode(map[string]interface{}{
+	c := DecodeAnyToNode(map[string]any{
 		"test1.test2":  "abc",
 		"test1.test22": 123,
 	}).AsContainer()

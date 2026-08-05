@@ -49,9 +49,9 @@ type UniversalQuery struct {
 func (u *UniversalQuery) UnmarshalYAML(node *yaml.Node) error {
 	var (
 		val string
-		syn interface{}
+		syn any
 		ok  bool
-		x   interface{}
+		x   any
 		pf  query.Parser
 	)
 	u.Syntax = QuerySyntaxJsonpath
@@ -61,7 +61,7 @@ func (u *UniversalQuery) UnmarshalYAML(node *yaml.Node) error {
 		val = node.Value
 
 	case yaml.MappingNode:
-		m := make(map[string]interface{})
+		m := make(map[string]any)
 		// TODO: how to provoke error from this call?
 		_ = node.Decode(&m)
 		if x, ok = m["value"]; !ok {

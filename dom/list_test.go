@@ -119,7 +119,7 @@ func TestListBuilderSeal(t *testing.T) {
 
 func TestListAsAny(t *testing.T) {
 	l := ListNode(LeafNode(10), LeafNode(20), LeafNode(30))
-	x := l.AsAny().([]interface{})
+	x := l.AsAny().([]any)
 	assert.Len(t, x, 3)
 	assert.Equal(t, 10, x[0])
 	assert.Equal(t, 20, x[1])

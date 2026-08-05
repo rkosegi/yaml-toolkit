@@ -38,7 +38,7 @@ func Transcode[T any](in *T, enc dom.EncoderFunc, dec dom.DecoderFunc, outEnc do
 		return err
 	}
 	// 2, decode serialized form into dummy object
-	var x interface{}
+	var x any
 	if err = dec(&data, &x); err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func TranscodeWithCodec[T any](in *T, codec dom.FormatBiCodec, enc dom.EncoderFu
 }
 
 // Transform can transform arbitrary object to specific type, using provided codec.
-// Common use case is to transform i.e. []interface{} to []MyType
+// Common use case is to transform i.e. []any to []MyType
 func Transform[T any](in any, codec dom.FormatBiCodec) (*T, error) {
 	var (
 		data bytes.Buffer

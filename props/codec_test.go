@@ -27,7 +27,7 @@ import (
 )
 
 func TestEncoderFn(t *testing.T) {
-	m := map[string]interface{}{
+	m := map[string]any{
 		"a.b.c": 1,
 		"x.y.z": "Hi!",
 	}
@@ -41,7 +41,7 @@ func TestEncoderFn(t *testing.T) {
 }
 
 func TestDomEncoderFn(t *testing.T) {
-	m := map[string]interface{}{
+	m := map[string]any{
 		"a.b.c": 1,
 		"x.y.z": "Hi!",
 	}
@@ -55,12 +55,12 @@ func TestDomEncoderFn(t *testing.T) {
 }
 
 func TestDecoderFn(t *testing.T) {
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 	err := DecoderFn(strings.NewReader("a.b=1\nx.y=Hi!\n"), &m)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(m))
-	assert.Equal(t, "1", m["a"].(map[string]interface{})["b"])
-	assert.Equal(t, "Hi!", m["x"].(map[string]interface{})["y"])
+	assert.Equal(t, "1", m["a"].(map[string]any)["b"])
+	assert.Equal(t, "Hi!", m["x"].(map[string]any)["y"])
 
 	err = DecoderFn(common.FailingReader(), m)
 	assert.Error(t, err)

@@ -31,7 +31,7 @@ func TestIsPossiblePlaceholder(t *testing.T) {
 	assert.False(t, possiblyContainsPlaceholder("abcd"))
 }
 
-func FromProperties(in map[string]interface{}) dom.ContainerBuilder {
+func FromProperties(in map[string]any) dom.ContainerBuilder {
 	x := dom.ContainerNode()
 	for k, v := range in {
 		x.Set(pp.MustParse(k), dom.LeafNode(v))
@@ -41,7 +41,7 @@ func FromProperties(in map[string]interface{}) dom.ContainerBuilder {
 
 func TestResolvePlaceholders(t *testing.T) {
 	ds := NewDocumentSet()
-	assert.NoError(t, ds.AddUnnamedDocument(FromProperties(map[string]interface{}{
+	assert.NoError(t, ds.AddUnnamedDocument(FromProperties(map[string]any{
 		"key1.key2.key31": "${key1.key2.key32}",
 		"key1.key2.key32": 3,
 		"key1.key2.key33": "${key1.key2.key34}",

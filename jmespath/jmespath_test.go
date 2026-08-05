@@ -27,15 +27,15 @@ func TestQuery(t *testing.T) {
 	q, err := p.Parse("a")
 	assert.NoError(t, err)
 	assert.NotNil(t, q)
-	r := q.Select(map[string]interface{}{
-		"a": []interface{}{
+	r := q.Select(map[string]any{
+		"a": []any{
 			"b", "d",
 		},
 	})
 	assert.Len(t, r, 2)
 	assert.Equal(t, "b", r[0])
 
-	r = q.Select(map[string]interface{}{
+	r = q.Select(map[string]any{
 		"a": "b",
 	})
 	assert.Len(t, r, 1)

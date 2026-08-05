@@ -95,17 +95,17 @@ func Unique(in []string) []string {
 }
 
 // Unflatten map entries into new map.
-func Unflatten(in map[string]interface{}) map[string]interface{} {
-	res := make(map[string]interface{})
+func Unflatten(in map[string]any) map[string]any {
+	res := make(map[string]any)
 	for k, v := range in {
 		current := res
 		pc := strings.Split(k, ".")
 		for _, c := range pc[0 : len(pc)-1] {
-			if x, exists := current[c].(map[string]interface{}); exists {
+			if x, exists := current[c].(map[string]any); exists {
 				current = x
 			} else {
-				current[c] = make(map[string]interface{})
-				current = current[c].(map[string]interface{})
+				current[c] = make(map[string]any)
+				current = current[c].(map[string]any)
 			}
 		}
 		current[pc[len(pc)-1]] = v

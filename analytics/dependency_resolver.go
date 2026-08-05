@@ -30,7 +30,7 @@ func matchAll(string) bool {
 }
 
 func hasPlaceholderFunc(ph string) dom.SearchValueFunc {
-	return func(val interface{}) bool {
+	return func(val any) bool {
 		if x, ok := val.(string); ok {
 			return strings.Contains(x, fmt.Sprintf("${%s}", ph)) ||
 				(strings.HasPrefix(x, fmt.Sprintf("${%s:", ph)) && strings.HasSuffix(x, "}"))

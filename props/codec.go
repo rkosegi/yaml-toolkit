@@ -29,13 +29,13 @@ import (
 	"github.com/rkosegi/yaml-toolkit/dom"
 )
 
-func encodeKv(k string, v interface{}, w io.Writer) error {
+func encodeKv(k string, v any, w io.Writer) error {
 	_, err := w.Write([]byte(fmt.Sprintf("%s=%v\n", k, v)))
 	return err
 }
 
-func EncoderFn(w io.Writer, x interface{}) error {
-	for k, v := range x.(map[string]interface{}) {
+func EncoderFn(w io.Writer, x any) error {
+	for k, v := range x.(map[string]any) {
 		err := encodeKv(k, v, w)
 		if err != nil {
 			return err
@@ -44,7 +44,7 @@ func EncoderFn(w io.Writer, x interface{}) error {
 	return nil
 }
 
-func DomEncoderFn(w io.Writer, x interface{}) error {
+func DomEncoderFn(w io.Writer, x any) error {
 	for k, v := range x.(dom.Container).Children() {
 		err := encodeKv(k, v.(dom.Leaf).Value(), w)
 		if err != nil {
@@ -54,17 +54,17 @@ func DomEncoderFn(w io.Writer, x interface{}) error {
 	return nil
 }
 
-func DecoderFn(r io.Reader, x interface{}) error {
+func DecoderFn(r io.Reader, x any) error {
 	data, err := io.ReadAll(r)
 	if err != nil {
 		return err
 	}
 	p, _ := properties.Load(data, properties.UTF8)
-	m2 := make(map[string]interface{})
+	m2 := make(map[string]any)
 	for k, v := range p.Map() {
 		m2[k] = v
 	}
-	out := make(map[string]interface{})
+	out := make(map[string]any)
 	for k, v := range common.Unflatten(m2) {
 		out[k] = v
 	}

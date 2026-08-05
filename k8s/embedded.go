@@ -180,7 +180,7 @@ func (b *builderImpl) Create(kind string, name string, opts ...CreateOption) (Do
 	for _, opt := range opts {
 		opt(b)
 	}
-	init := map[string]interface{}{
+	init := map[string]any{
 		"kind":       kind,
 		"apiVersion": b.apiVersion,
 		"metadata": map[string]string{

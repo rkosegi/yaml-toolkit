@@ -44,7 +44,7 @@ func TestPutAndGet(t *testing.T) {
 
 func TestLoad(t *testing.T) {
 	od := NewOverlayDocument()
-	var doc map[string]interface{}
+	var doc map[string]any
 	data, err := os.ReadFile("../testdata/doc1.yaml")
 	assert.Nil(t, err)
 	err = yaml.NewDecoder(bytes.NewReader(data)).Decode(&doc)
@@ -70,7 +70,7 @@ func TestLoad(t *testing.T) {
 
 func TestLoad2(t *testing.T) {
 	od := NewOverlayDocument()
-	var doc map[string]interface{}
+	var doc map[string]any
 	data, err := os.ReadFile("../testdata/doc2.yaml")
 	assert.Nil(t, err)
 	err = yaml.NewDecoder(bytes.NewReader(data)).Decode(&doc)

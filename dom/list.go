@@ -43,7 +43,7 @@ func (l *listImpl) Items() []Node {
 	return c
 }
 
-func (l *listImpl) AsSlice() []interface{} {
+func (l *listImpl) AsSlice() []any {
 	return encodeListFn(l)
 }
 

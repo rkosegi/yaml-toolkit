@@ -49,7 +49,7 @@ func (pr *placeholderResolver) Resolve(doc dom.OverlayDocument) *PlaceholderReso
 	}).MustBuild()
 
 	failedKeys := make([]string, 0)
-	actualValues := make(map[string]interface{})
+	actualValues := make(map[string]any)
 	coordsMap := make(map[string]dom.Coordinates)
 	for k, v := range c.Flatten(ps.Serialize) {
 		if pr.keyFilterFn(k) {

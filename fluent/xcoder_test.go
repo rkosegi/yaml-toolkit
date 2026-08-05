@@ -30,13 +30,13 @@ import (
 type failingBiCodec struct{}
 
 func (f failingBiCodec) Encoder() dom.EncoderFunc {
-	return func(w io.Writer, v interface{}) error {
+	return func(w io.Writer, v any) error {
 		return errors.New("failing bi encoder")
 	}
 }
 
 func (f failingBiCodec) Decoder() dom.DecoderFunc {
-	return func(r io.Reader, v interface{}) error {
+	return func(r io.Reader, v any) error {
 		return errors.New("failing bi decoder")
 	}
 }
@@ -108,11 +108,11 @@ func TestTranscode(t *testing.T) {
 	})
 
 	t.Run("negative cases", func(t *testing.T) {
-		assert.Error(t, Transcode[data1](&data1{}, func(w io.Writer, v interface{}) error {
+		assert.Error(t, Transcode[data1](&data1{}, func(w io.Writer, v any) error {
 			return errors.New("")
 		}, dom.DefaultYamlDecoder, dom.DefaultJsonEncoder, common.FailingWriter()))
 
-		assert.Error(t, Transcode[data1](&data1{}, dom.DefaultJsonEncoder, func(r io.Reader, v interface{}) error {
+		assert.Error(t, Transcode[data1](&data1{}, dom.DefaultJsonEncoder, func(r io.Reader, v any) error {
 			return errors.New("this is an error")
 		}, dom.DefaultJsonEncoder, common.FailingWriter()))
 	})
@@ -123,13 +123,13 @@ func TestTransform(t *testing.T) {
 		A string `json:"a"`
 		B int
 	}
-	t.Run("list of map[string]interface{} to list of specific types", func(t *testing.T) {
-		in := []interface{}{
-			map[string]interface{}{
+	t.Run("list of map[string]any to list of specific types", func(t *testing.T) {
+		in := []any{
+			map[string]any{
 				"a": "hello",
 				"b": 42,
 			},
-			map[string]interface{}{
+			map[string]any{
 				"a": "world",
 				"b": 50,
 			},
@@ -147,7 +147,7 @@ func TestTransform(t *testing.T) {
 
 	t.Run("must transform", func(t *testing.T) {
 		t.Run("valid", func(t *testing.T) {
-			mt := MustTransform[MyType](map[string]interface{}{
+			mt := MustTransform[MyType](map[string]any{
 				"a": "hello",
 				"b": 42,
 				"c": 3.14,
@@ -166,7 +166,7 @@ func TestTransform(t *testing.T) {
 	})
 	t.Run("transform slice", func(t *testing.T) {
 		t.Run("valid", func(t *testing.T) {
-			mt := MustTransformSlice[map[string]interface{}, MyType]([]map[string]interface{}{
+			mt := MustTransformSlice[map[string]any, MyType]([]map[string]any{
 				{"a": "hello"},
 				{"a": "world"},
 			}, dom.DefaultYamlCodec())

@@ -20,7 +20,7 @@ import "github.com/google/go-cmp/cmp"
 
 type leaf struct {
 	base
-	value interface{}
+	value any
 }
 
 func (l *leaf) Clone() Node {
@@ -39,7 +39,7 @@ func (l *leaf) IsLeaf() bool {
 	return true
 }
 
-func (l *leaf) Value() interface{} {
+func (l *leaf) Value() any {
 	return l.value
 }
 
@@ -51,7 +51,7 @@ func (l *leaf) AsAny() any {
 	return l.value
 }
 
-func LeafNode(val interface{}) Leaf {
+func LeafNode(val any) Leaf {
 	ln := &leaf{value: val}
 	ln.desc = "leaf"
 	return ln
