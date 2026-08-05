@@ -162,7 +162,7 @@ func TestFailBeforeSave(t *testing.T) {
 	}()
 	assert.NoError(t, err)
 	doc, err := NewBuilder().Manifest(f.Name()).
-		Encoder(EncodeEmbeddedDoc("embedded.txt", func(w io.Writer, v interface{}) error {
+		Encoder(EncodeEmbeddedDoc("embedded.txt", func(w io.Writer, v any) error {
 			return anyErr
 		})).
 		Decoder(DecodeEmbeddedProps()).

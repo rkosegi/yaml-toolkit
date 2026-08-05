@@ -42,14 +42,14 @@ const (
 type Modification struct {
 	Type     ModificationType `yaml:"type"`
 	Path     string           `yaml:"path"`
-	Value    interface{}      `yaml:"value,omitempty"`
-	OldValue interface{}      `yaml:"oldValue,omitempty"`
+	Value    any              `yaml:"value,omitempty"`
+	OldValue any              `yaml:"oldValue,omitempty"`
 }
 
 type (
 	DifferContext interface {
 		// Append appends modification to the result slice
-		Append(mt ModificationType, p path.Path, oldVal, newVal interface{})
+		Append(mt ModificationType, p path.Path, oldVal, newVal any)
 		// Flatten flattens out Node into sequence of Modifications.
 		Flatten(node dom.Node, pb path.Builder)
 		// ListDiff compares 2 lists and generates list of modification from their difference using provided function
@@ -86,7 +86,7 @@ func (d *differ) ListDiff(left, right dom.List, pb path.Builder, fn ListDiffFn) 
 	fn(d, left, right, pb)
 }
 
-func (d *differ) Append(mt ModificationType, p path.Path, oldVal, newVal interface{}) {
+func (d *differ) Append(mt ModificationType, p path.Path, oldVal, newVal any) {
 	d.out = append(d.out, Modification{
 		Type:     mt,
 		Path:     pc.Serializer().Serialize(p),

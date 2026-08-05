@@ -38,12 +38,12 @@ func (y *yamlCodec) Decoder() DecoderFunc { return DefaultYamlDecoder }
 func (y *jsonCodec) Encoder() EncoderFunc { return DefaultJsonEncoder }
 func (y *jsonCodec) Decoder() DecoderFunc { return DefaultJsonDecoder }
 
-func encodeLeafFn(n Leaf) interface{} {
+func encodeLeafFn(n Leaf) any {
 	return n.Value()
 }
 
-func encodeListFn(n List) []interface{} {
-	res := make([]interface{}, n.Size())
+func encodeListFn(n List) []any {
+	res := make([]any, n.Size())
 	for i, item := range n.Items() {
 		if item.IsContainer() {
 			res[i] = encodeContainerFn(item.AsContainer())
@@ -56,8 +56,8 @@ func encodeListFn(n List) []interface{} {
 	return res
 }
 
-func encodeContainerFn(n Container) map[string]interface{} {
-	res := map[string]interface{}{}
+func encodeContainerFn(n Container) map[string]any {
+	res := map[string]any{}
 	for k, v := range n.Children() {
 		if v.IsContainer() {
 			res[k] = encodeContainerFn(v.AsContainer())
@@ -78,7 +78,7 @@ func encodeToWriter(n Node, encFn EncoderFunc, w io.Writer) error {
 // This method mimics (in very simplified way) what yaml decoder does
 // see e.g. gopkg.in/yaml.v3@v3.0.1/decode.go:565
 // notable difference is that any error is silently dropped and fallback to plain string value is used
-func DecodeYamlScalarNode(in *yaml.Node) interface{} {
+func DecodeYamlScalarNode(in *yaml.Node) any {
 	switch in.ShortTag() {
 	case "!!int":
 		if out, err := strconv.Atoi(in.Value); err == nil {
@@ -170,7 +170,7 @@ func decodeValueToNode(in reflect.Value) Node {
 
 func decodeFromReader(r io.Reader, decFn DecoderFunc) (Node, error) {
 	var (
-		x   interface{}
+		x   any
 		err error
 	)
 	if err = decFn(r, &x); err != nil {

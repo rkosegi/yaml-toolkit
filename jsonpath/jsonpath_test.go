@@ -27,8 +27,8 @@ func TestQuery(t *testing.T) {
 	q, err := p.Parse("$.a.b")
 	assert.NoError(t, err)
 	assert.NotNil(t, q)
-	r := q.Select(map[string]interface{}{
-		"a": map[string]interface{}{
+	r := q.Select(map[string]any{
+		"a": map[string]any{
 			"b": "c",
 			"d": 1,
 		},

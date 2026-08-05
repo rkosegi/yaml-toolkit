@@ -69,12 +69,12 @@ func panicIfError(err error) {
 }
 
 func any2dom(in any, codec dom.FormatBiCodec) dom.Container {
-	if _, ok := in.(map[string]interface{}); ok {
+	if _, ok := in.(map[string]any); ok {
 		return dom.DecodeAnyToNode(in).AsContainer()
 	}
 	var (
 		buf bytes.Buffer
-		m   map[string]interface{}
+		m   map[string]any
 	)
 	panicIfError(codec.Encoder()(&buf, in))
 	panicIfError(codec.Decoder()(&buf, &m))

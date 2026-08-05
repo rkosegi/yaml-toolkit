@@ -43,7 +43,7 @@ type handler interface {
 }
 
 func afterLoadBinary(k *manifest, srcKey string) error {
-	if data, ok := k.doc[srcKey].(map[string]interface{}); ok {
+	if data, ok := k.doc[srcKey].(map[string]any); ok {
 		for dk, dv := range data {
 			if ed, err := base64.StdEncoding.DecodeString(dv.(string)); err != nil {
 				return err
@@ -56,7 +56,7 @@ func afterLoadBinary(k *manifest, srcKey string) error {
 }
 
 func afterLoadString(k *manifest, srcKey string) {
-	if data, ok := k.doc[srcKey].(map[string]interface{}); ok {
+	if data, ok := k.doc[srcKey].(map[string]any); ok {
 		for dk, dv := range data {
 			k.strData[dk] = fmt.Sprintf("%v", dv)
 		}
@@ -67,9 +67,9 @@ func beforeSaveBinary(k *manifest, key string) {
 	if len(k.binData) == 0 {
 		delete(k.doc, key)
 	} else {
-		k.doc[key] = map[string]interface{}{}
+		k.doc[key] = map[string]any{}
 		for dk, dv := range k.binData {
-			k.doc[key].(map[string]interface{})[dk] = base64.StdEncoding.EncodeToString(dv)
+			k.doc[key].(map[string]any)[dk] = base64.StdEncoding.EncodeToString(dv)
 		}
 	}
 }
@@ -78,9 +78,9 @@ func beforeSaveString(k *manifest, key string) {
 	if len(k.strData) == 0 {
 		delete(k.doc, key)
 	} else {
-		k.doc[key] = map[string]interface{}{}
+		k.doc[key] = map[string]any{}
 		for dk, dv := range k.strData {
-			k.doc[key].(map[string]interface{})[dk] = dv
+			k.doc[key].(map[string]any)[dk] = dv
 		}
 	}
 }
@@ -108,7 +108,7 @@ type binaryDataFacade struct {
 }
 
 type manifest struct {
-	doc       map[string]interface{}
+	doc       map[string]any
 	strData   map[string]string
 	binData   map[string][]byte
 	strDataIf *stringDataFacade
@@ -216,7 +216,7 @@ func ManifestFromFile(file string) (Manifest, error) {
 }
 
 func ManifestFromBytes(data []byte) (Manifest, error) {
-	var doc map[string]interface{}
+	var doc map[string]any
 	err := yaml.Unmarshal(data, &doc)
 	if err != nil {
 		return nil, err

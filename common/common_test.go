@@ -66,16 +66,16 @@ func TestUnique(t *testing.T) {
 }
 
 func TestUnflattenMap(t *testing.T) {
-	out := Unflatten(map[string]interface{}{
+	out := Unflatten(map[string]any{
 		"a.b": 123,
 		"a.c": "0876",
 		"x.y": "hello",
 		"x.z": nil,
 		"s":   3.14,
 	})
-	assert.Equal(t, 123, out["a"].(map[string]interface{})["b"])
-	assert.Equal(t, "0876", out["a"].(map[string]interface{})["c"])
-	assert.Equal(t, "hello", out["x"].(map[string]interface{})["y"])
-	assert.Equal(t, nil, out["x"].(map[string]interface{})["z"])
+	assert.Equal(t, 123, out["a"].(map[string]any)["b"])
+	assert.Equal(t, "0876", out["a"].(map[string]any)["c"])
+	assert.Equal(t, "hello", out["x"].(map[string]any)["y"])
+	assert.Equal(t, nil, out["x"].(map[string]any)["z"])
 	assert.Equal(t, 3.14, out["s"])
 }

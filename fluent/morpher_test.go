@@ -81,7 +81,7 @@ func TestMorpherCopyReplace(t *testing.T) {
 }
 
 func TestMorpherMutate(t *testing.T) {
-	res := NewMorpher().Copy(dom.DecodeAnyToNode(map[string]interface{}{
+	res := NewMorpher().Copy(dom.DecodeAnyToNode(map[string]any{
 		"A": 123,
 		"B": "Hi",
 	}).AsContainer(), CopyModeReplace()).Mutate(func(d dom.ContainerBuilder) {

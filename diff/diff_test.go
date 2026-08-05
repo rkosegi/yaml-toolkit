@@ -30,7 +30,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func leavesEqual(l1, l2 interface{}) bool {
+func leavesEqual(l1, l2 any) bool {
 	if l1 == nil && l2 == nil {
 		return true
 	}

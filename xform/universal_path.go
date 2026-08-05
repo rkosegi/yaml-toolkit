@@ -49,9 +49,9 @@ type UniversalPath struct {
 func (u *UniversalPath) UnmarshalYAML(node *yaml.Node) error {
 	var (
 		val string
-		syn interface{}
+		syn any
 		ok  bool
-		x   interface{}
+		x   any
 	)
 	u.Syntax = PathSyntaxProps
 
@@ -59,7 +59,7 @@ func (u *UniversalPath) UnmarshalYAML(node *yaml.Node) error {
 	case yaml.ScalarNode:
 		val = node.Value
 	case yaml.MappingNode:
-		m := make(map[string]interface{})
+		m := make(map[string]any)
 		// TODO: how to provoke error from this call?
 		_ = node.Decode(&m)
 		if x, ok = m["value"]; !ok {

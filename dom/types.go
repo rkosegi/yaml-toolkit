@@ -32,40 +32,40 @@ import (
 type PathToStringFunc func(path path.Path) string
 
 // SearchValueFunc is used to search for value within document
-type SearchValueFunc func(val interface{}) bool
+type SearchValueFunc func(val any) bool
 
 // SearchEqual is SearchValueFunc that search for equivalent value
-func SearchEqual(in interface{}) SearchValueFunc {
-	return func(val interface{}) bool {
+func SearchEqual(in any) SearchValueFunc {
+	return func(val any) bool {
 		return cmp.Equal(val, in)
 	}
 }
 
 // NodeEncoderFunc maps internal Container value into external data representation
-type NodeEncoderFunc func(Container) interface{}
+type NodeEncoderFunc func(Container) any
 
 // NodeDecoderFunc takes external data representation and decode it to Container
-type NodeDecoderFunc func(map[string]interface{}) Container
+type NodeDecoderFunc func(map[string]any) Container
 
 // EncoderFunc encodes raw value into stream using provided io.Writer
-type EncoderFunc func(w io.Writer, v interface{}) error
+type EncoderFunc func(w io.Writer, v any) error
 
 // DecoderFunc decodes byte stream into raw value using provided io.Reader
-type DecoderFunc func(r io.Reader, v interface{}) error
+type DecoderFunc func(r io.Reader, v any) error
 
-func DefaultYamlDecoder(r io.Reader, v interface{}) error {
+func DefaultYamlDecoder(r io.Reader, v any) error {
 	return yaml.NewDecoder(r).Decode(v)
 }
 
-func DefaultJsonDecoder(r io.Reader, v interface{}) error {
+func DefaultJsonDecoder(r io.Reader, v any) error {
 	return json.NewDecoder(r).Decode(v)
 }
 
-func DefaultYamlEncoder(w io.Writer, v interface{}) error {
+func DefaultYamlEncoder(w io.Writer, v any) error {
 	return common.NewYamlEncoder(w).Encode(v)
 }
 
-func DefaultJsonEncoder(w io.Writer, v interface{}) error {
+func DefaultJsonEncoder(w io.Writer, v any) error {
 	e := json.NewEncoder(w)
 	e.SetIndent("", "  ")
 	return e.Encode(v)
@@ -153,7 +153,7 @@ type Node interface {
 // Leaf represent Node of scalar value
 type Leaf interface {
 	Node
-	Value() interface{}
+	Value() any
 }
 
 // List is collection of Nodes
@@ -166,9 +166,9 @@ type List interface {
 	// Items returns copy of slice of all nodes in this list
 	Items() []Node
 
-	// AsSlice converts recursively content of this List into []interface{}.
+	// AsSlice converts recursively content of this List into []any.
 	// Result consists from Go vanilla constructs only.
-	AsSlice() []interface{}
+	AsSlice() []any
 }
 
 // NodeList is sequence of zero or more Nodes

@@ -50,7 +50,7 @@ func (p path) buildString() string {
 	if pcs == 0 {
 		return "[]"
 	}
-	var r []interface{}
+	var r []any
 	for i := 0; i < pcs; i++ {
 		if p.components[i].IsNumeric() {
 			r = append(r, p.components[i].NumericValue())

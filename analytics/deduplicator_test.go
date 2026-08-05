@@ -64,11 +64,11 @@ func TestFindCommonOnlyOne(t *testing.T) {
 func TestDeduplicate(t *testing.T) {
 	dd := NewDeduplicator()
 	ds := NewDocumentSet()
-	d := dom.DecodeAnyToNode(map[string]interface{}{
+	d := dom.DecodeAnyToNode(map[string]any{
 		"url":     "http://prod.myapp.tld",
 		"timeout": 15000,
-		"mounts": []interface{}{
-			map[string]interface{}{
+		"mounts": []any{
+			map[string]any{
 				"name": "temp",
 				"path": "/tmp",
 			},
