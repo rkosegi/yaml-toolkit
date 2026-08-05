@@ -16,8 +16,8 @@ github.com/magiconair/properties v1.18.11 h1:j5ozYZl0zCjG7ahMDH0GWIobOvvUzT0BdAg
 github.com/magiconair/properties v1.18.11/go.mod h1:Dhd985XPs7jluiymwWYZ0G4Z61jb3vdS329zhj2hYo0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/rkosegi/go-korek v1.0.0-rc1.0.20260703141920-7cef6f25883b h1:msbgB+hffHkl0hgjkiJ1qU/0ReXfo7W+BeuaJAD9nM4=
-github.com/rkosegi/go-korek v1.0.0-rc1.0.20260703141920-7cef6f25883b/go.mod h1:UgdsNXqxC66LtaR2qEOpXMRYxIT/cu+DrTowSwITPPM=
+github.com/rkosegi/go-korek v1.0.0-rc1.0.20260803141549-c384a7a0efae h1:t69XsrHEPcGclb9KcoJPqeJAPQEeRoOjoP1a2gHy2oo=
+github.com/rkosegi/go-korek v1.0.0-rc1.0.20260803141549-c384a7a0efae/go.mod h1:UgdsNXqxC66LtaR2qEOpXMRYxIT/cu+DrTowSwITPPM=
 github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU5NdKM8=
 github.com/rogpeppe/go-internal v1.12.0/go.mod h1:E+RYuTGaKKdloAfM02xzb0FW3Paa99yedzYV+kq4uf4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
