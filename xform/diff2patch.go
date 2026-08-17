@@ -28,18 +28,18 @@ func DiffMod2PatchOp(mod diff.Modification) *patch.OpObj {
 	case diff.ModAdd:
 		return &patch.OpObj{
 			Op:    patch.OpAdd,
-			Path:  PointerFromPropPathString(mod.Path),
+			Path:  PropPath2Pointer(mod.Path),
 			Value: dom.LeafNode(mod.Value),
 		}
 	case diff.ModDelete:
 		return &patch.OpObj{
-			Path: PointerFromPropPathString(mod.Path),
+			Path: PropPath2Pointer(mod.Path),
 			Op:   patch.OpRemove,
 		}
 	case diff.ModChange:
 		return &patch.OpObj{
 			Op:    patch.OpReplace,
-			Path:  PointerFromPropPathString(mod.Path),
+			Path:  PropPath2Pointer(mod.Path),
 			Value: dom.LeafNode(mod.Value),
 		}
 	default:

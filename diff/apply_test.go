@@ -38,7 +38,7 @@ level1:
 	Apply(doc.(dom.ContainerBuilder), []Modification{
 		{
 			Type:  ModAdd,
-			Path:  "level1.level22.leaf22",
+			Path:  pc.Parser().MustParse("level1.level22.leaf22"),
 			Value: "abc",
 		},
 	})
@@ -65,7 +65,7 @@ list1:
 	Apply(doc.(dom.ContainerBuilder), []Modification{
 		{
 			Type:  ModAdd,
-			Path:  "list1[1][2][3].item_obj1.sub.sublist[1].efgh[0]",
+			Path:  pc.Parser().MustParse("list1[1][2][3].item_obj1.sub.sublist[1].efgh[0]"),
 			Value: "abc",
 		},
 	})
@@ -84,7 +84,7 @@ level1:
 	Apply(doc.(dom.ContainerBuilder), []Modification{
 		{
 			Type:  ModDelete,
-			Path:  "level1.level23.leaf22",
+			Path:  pc.Parser().MustParse("level1.level23.leaf22"),
 			Value: nil,
 		},
 	})

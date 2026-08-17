@@ -42,7 +42,7 @@ const (
 
 type Modification struct {
 	Type     ModificationType `yaml:"type"`
-	Path     string           `yaml:"path"`
+	Path     path.Path        `yaml:"path"`
 	Value    any              `yaml:"value,omitempty"`
 	OldValue any              `yaml:"oldValue,omitempty"`
 }
@@ -98,7 +98,7 @@ func (d *differ) ListDiff(left, right dom.List, pb path.Builder, fn ListDiffFn) 
 func (d *differ) Append(mt ModificationType, p path.Path, oldVal, newVal any) {
 	d.out = append(d.out, Modification{
 		Type:     mt,
-		Path:     pc.Serializer().Serialize(p),
+		Path:     p,
 		OldValue: oldVal,
 		Value:    newVal,
 	})
@@ -270,7 +270,7 @@ func (d *differ) do(left, right dom.Container) []Modification {
 	d.diffContainers(left, right, path.NewBuilder())
 	// make order of modifications deterministic
 	sort.SliceStable(d.out, func(i, j int) bool {
-		return d.out[i].Path < d.out[j].Path
+		return pc.Serializer().Serialize(d.out[i].Path) < pc.Serializer().Serialize(d.out[j].Path)
 	})
 	return d.out
 }

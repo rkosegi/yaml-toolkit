@@ -56,6 +56,10 @@ type Path interface {
 
 	// Last gets very last path Component, panics if path is empty.
 	Last() Component
+
+	// Equals return true if the other path is effectively same as this one
+	// The "same" means it contains exactly same sequence of path components
+	Equals(other Path) bool
 }
 
 // Parser interface is implemented by different Path syntax parsers.

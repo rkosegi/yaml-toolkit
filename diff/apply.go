@@ -24,12 +24,11 @@ import (
 var pc = props.PathCodec()
 
 func applySingle(node dom.ContainerBuilder, mod Modification) {
-	p := pc.Parser().MustParse(mod.Path)
 	switch mod.Type {
 	case ModAdd, ModChange:
-		node.Set(p, dom.LeafNode(mod.Value))
+		node.Set(mod.Path, dom.LeafNode(mod.Value))
 	case ModDelete:
-		node.Delete(p)
+		node.Delete(mod.Path)
 	}
 }
 
