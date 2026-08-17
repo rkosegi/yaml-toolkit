@@ -19,6 +19,7 @@ package path
 import (
 	"bytes"
 	"encoding/json"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -67,6 +68,12 @@ func (p path) buildString() string {
 // String returns string representation of this path, that can be used as a key into map.
 func (p path) String() string {
 	return p.s
+}
+
+func (p path) Equals(other Path) bool {
+	return slices.EqualFunc(p.components, other.Components(), func(pc1 Component, pc2 Component) bool {
+		return pc1.Value() == pc2.Value()
+	})
 }
 
 func AfterLast() Component {

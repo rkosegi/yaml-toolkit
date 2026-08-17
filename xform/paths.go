@@ -22,7 +22,6 @@ import (
 
 	"github.com/rkosegi/yaml-toolkit/patch"
 	"github.com/rkosegi/yaml-toolkit/path"
-	"github.com/rkosegi/yaml-toolkit/props"
 )
 
 func PropPath2Pointer(in path.Path) patch.Path {
@@ -35,8 +34,4 @@ func PropPath2Pointer(in path.Path) patch.Path {
 		}
 	}
 	return patch.MustParsePath(r.String())
-}
-
-func PointerFromPropPathString(raw string) patch.Path {
-	return PropPath2Pointer(props.NewPathParser().MustParse(raw))
 }

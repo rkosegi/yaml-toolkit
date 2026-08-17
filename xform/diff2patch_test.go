@@ -22,14 +22,17 @@ import (
 	"github.com/rkosegi/yaml-toolkit/diff"
 	"github.com/rkosegi/yaml-toolkit/dom"
 	"github.com/rkosegi/yaml-toolkit/patch"
+	"github.com/rkosegi/yaml-toolkit/props"
 	"github.com/stretchr/testify/assert"
 )
+
+var pp = props.PathCodec().Parser()
 
 func TestDiffMod2PatchOpAdd(t *testing.T) {
 	var op *patch.OpObj
 	op = DiffMod2PatchOp(diff.Modification{
 		Type:  diff.ModAdd,
-		Path:  "list1[1][2][3].item_obj20.sub.sublist[3].efgh[0]",
+		Path:  pp.MustParse("list1[1][2][3].item_obj20.sub.sublist[3].efgh[0]"),
 		Value: "abc",
 	})
 	assert.NotNil(t, op)
@@ -41,7 +44,7 @@ func TestDiffMod2PatchOpAdd(t *testing.T) {
 
 	op = DiffMod2PatchOp(diff.Modification{
 		Type: diff.ModDelete,
-		Path: "root.sub1.sub2",
+		Path: pp.MustParse("root.sub1.sub2"),
 	})
 	assert.NotNil(t, op)
 	assert.Equal(t, patch.OpRemove, op.Op)
@@ -49,7 +52,7 @@ func TestDiffMod2PatchOpAdd(t *testing.T) {
 
 	op = DiffMod2PatchOp(diff.Modification{
 		Type:  diff.ModChange,
-		Path:  "root.sub1.sub2",
+		Path:  pp.MustParse("root.sub1.sub2"),
 		Value: 123,
 	})
 	assert.NotNil(t, op)

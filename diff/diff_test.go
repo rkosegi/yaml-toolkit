@@ -43,8 +43,8 @@ func leavesEqual(l1, l2 any) bool {
 func assertHasChange(t *testing.T, mod Modification, mods *[]Modification) {
 	for _, m := range *mods {
 		if cmp.Equal(m, mod, cmp.Comparer(func(m1, m2 Modification) bool {
-			return cmp.Equal(m.Type, mod.Type) && cmp.Equal(m.Path, mod.Path) &&
-				leavesEqual(m.Value, mod.Value) && leavesEqual(m.OldValue, mod.OldValue)
+			return cmp.Equal(m1.Type, m2.Type) && m1.Path.Equals(m2.Path) &&
+				leavesEqual(m1.Value, m2.Value) && leavesEqual(m1.OldValue, m2.OldValue)
 		})) {
 			return
 		}
@@ -91,7 +91,7 @@ func TestDiffSimple1(t *testing.T) {
 	assert.Equal(t, 1, len(*res))
 	assertHasChange(t, Modification{
 		Type:     ModChange,
-		Path:     "leaf1",
+		Path:     pc.Parser().MustParse("leaf1"),
 		Value:    456,
 		OldValue: "abc",
 	}, res)
@@ -110,13 +110,13 @@ level1:
 	assert.Equal(t, 2, len(*res))
 	assertHasChange(t, Modification{
 		Type:     ModChange,
-		Path:     "leaf0",
+		Path:     pc.Parser().MustParse("leaf0"),
 		Value:    1234,
 		OldValue: 123,
 	}, res)
 	assertHasChange(t, Modification{
 		Type:     ModChange,
-		Path:     "level1.level2.leaf12",
+		Path:     pc.Parser().MustParse("level1.level2.leaf12"),
 		Value:    456,
 		OldValue: "abcd",
 	}, res)
@@ -137,21 +137,21 @@ level1:
 	assert.Equal(t, 4, len(*res))
 	assertHasChange(t, Modification{
 		Type: ModDelete,
-		Path: "level1.level2",
+		Path: pc.Parser().MustParse("level1.level2"),
 	}, res)
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
-		Path:  "leaf2",
+		Path:  pc.Parser().MustParse("leaf2"),
 		Value: "Hi",
 	}, res)
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
-		Path:  "level1.level2",
+		Path:  pc.Parser().MustParse("level1.level2"),
 		Value: 123,
 	}, res)
 	assertHasChange(t, Modification{
 		Type:     ModChange,
-		Path:     "leaf0",
+		Path:     pc.Parser().MustParse("leaf0"),
 		Value:    1234,
 		OldValue: 123,
 	}, res)
@@ -183,27 +183,27 @@ level1:
 
 	assertHasChange(t, Modification{
 		Type:     ModChange,
-		Path:     "leaf0",
+		Path:     pc.Parser().MustParse("leaf0"),
 		Value:    123,
 		OldValue: 1234,
 	}, res)
 	assertHasChange(t, Modification{
 		Type: ModDelete,
-		Path: "level1.level2",
+		Path: pc.Parser().MustParse("level1.level2"),
 	}, res)
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
-		Path:  "level1.level2.leaf12",
+		Path:  pc.Parser().MustParse("level1.level2.leaf12"),
 		Value: "abcd",
 	}, res)
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
-		Path:  "another.container.leaf13",
+		Path:  pc.Parser().MustParse("another.container.leaf13"),
 		Value: "Hi",
 	}, res)
 	assertHasChange(t, Modification{
 		Type: ModDelete,
-		Path: "leaf1",
+		Path: pc.Parser().MustParse("leaf1"),
 	}, res)
 	Apply(cright.(dom.ContainerBuilder), *res)
 	var buf bytes.Buffer
@@ -235,12 +235,12 @@ level1:
 	assert.Equal(t, 4, len(*res))
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
-		Path:  "list1[0]",
+		Path:  pc.Parser().MustParse("list1[0]"),
 		Value: "item1",
 	}, res)
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
-		Path:  "list1[1]",
+		Path:  pc.Parser().MustParse("list1[1]"),
 		Value: "item2",
 	}, res)
 }
@@ -267,22 +267,22 @@ list1:
 	assert.Equal(t, 9, len(*res))
 	assertHasChange(t, Modification{
 		Type:  ModDelete,
-		Path:  "list1",
+		Path:  pc.Parser().MustParse("list1"),
 		Value: nil,
 	}, res)
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
-		Path:  "list1[0]",
+		Path:  pc.Parser().MustParse("list1[0]"),
 		Value: "item1",
 	}, res)
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
-		Path:  "list1[1].item_obj1.sub.leaf1",
+		Path:  pc.Parser().MustParse("list1[1].item_obj1.sub.leaf1"),
 		Value: 789,
 	}, res)
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
-		Path:  "list1[2]",
+		Path:  pc.Parser().MustParse("list1[2]"),
 		Value: "item2",
 	}, res)
 }
@@ -400,25 +400,25 @@ func TestDiffOverlayDocuments(t *testing.T) {
 	assert.Len(t, res, 4)
 	assertHasChange(t, Modification{
 		Type:     ModChange,
-		Path:     "a.b.c",
+		Path:     pc.Parser().MustParse("a.b.c"),
 		OldValue: 1,
 		Value:    2,
 	}, res["layer1"])
 
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
-		Path:  "a.b.d",
+		Path:  pc.Parser().MustParse("a.b.d"),
 		Value: "xyz",
 	}, res["layer2"])
 
 	assertHasChange(t, Modification{
 		Type: ModDelete,
-		Path: "hello",
+		Path: pc.Parser().MustParse("hello"),
 	}, res["layer2"])
 
 	assertHasChange(t, Modification{
 		Type:  ModAdd,
-		Path:  "something",
+		Path:  pc.Parser().MustParse("something"),
 		Value: "A",
 	}, res["layer3"])
 }
@@ -489,25 +489,25 @@ func TestDiffCustomListFnK8s(t *testing.T) {
 		assert.Len(t, *out, 5)
 		assertHasChange(t, Modification{
 			Type: ModDelete,
-			Path: "app.env.0",
+			Path: pc.Parser().MustParse("app.env.0"),
 		}, out)
 		assertHasChange(t, Modification{
 			Type: ModDelete,
-			Path: "app.env.1",
+			Path: pc.Parser().MustParse("app.env.1"),
 		}, out)
 		assertHasChange(t, Modification{
 			Type:  ModAdd,
-			Path:  "app.env.ENV1.value",
+			Path:  pc.Parser().MustParse("app.env.ENV1.value"),
 			Value: "abc",
 		}, out)
 		assertHasChange(t, Modification{
 			Type:  ModAdd,
-			Path:  "app.env.ENV2.value",
+			Path:  pc.Parser().MustParse("app.env.ENV2.value"),
 			Value: "xyz",
 		}, out)
 		assertHasChange(t, Modification{
 			Type:  ModAdd,
-			Path:  "app.env.MY_POD_IP.valueFrom.fieldRef.fieldPath",
+			Path:  pc.Parser().MustParse("app.env.MY_POD_IP.valueFrom.fieldRef.fieldPath"),
 			Value: "status.podIP",
 		}, out)
 	})
@@ -525,16 +525,16 @@ func TestDiffCustomListFnK8s(t *testing.T) {
 			}))
 		logResultMods(t, out)
 		assert.Len(t, *out, 3)
-		assert.Equal(t, "app.env.ENV2.value", (*out)[0].Path)
+		assert.Equal(t, `["app","env","ENV2","value"]`, (*out)[0].Path.String())
 		assert.Equal(t, "xyz", (*out)[0].OldValue)
 		assert.Equal(t, "xyw", (*out)[0].Value)
 		assert.Equal(t, ModChange, (*out)[0].Type)
 
-		assert.Equal(t, "app.env.MY_POD_IP.valueFrom.fieldRef.fieldPath", (*out)[1].Path)
+		assert.Equal(t, `["app","env","MY_POD_IP","valueFrom","fieldRef","fieldPath"]`, (*out)[1].Path.String())
 		assert.Equal(t, "status.podIP", (*out)[1].Value)
 		assert.Equal(t, ModAdd, (*out)[1].Type)
 
-		assert.Equal(t, "app.env.MY_POD_NAMESPACE", (*out)[2].Path)
+		assert.Equal(t, `["app","env","MY_POD_NAMESPACE"]`, (*out)[2].Path.String())
 		assert.Equal(t, ModDelete, (*out)[2].Type)
 	})
 }

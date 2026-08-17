@@ -59,6 +59,20 @@ func TestChildOf(t *testing.T) {
 	assert.Equal(t, "c", np.Last().Value())
 }
 
+func TestPathEquals(t *testing.T) {
+	p1 := NewBuilder(Simple("a"), Simple("b")).Build()
+	t.Run("same", func(t *testing.T) {
+		p2 := NewBuilder(Simple("a")).Append(Simple("b")).Build()
+		assert.True(t, p1.Equals(p2))
+		assert.True(t, p2.Equals(p1))
+	})
+	t.Run("different", func(t *testing.T) {
+		p2 := NewBuilder(Simple("c")).Build()
+		assert.False(t, p1.Equals(p2))
+		assert.False(t, p2.Equals(p1))
+	})
+}
+
 func TestPathString(t *testing.T) {
 	type testCase struct {
 		exp string
