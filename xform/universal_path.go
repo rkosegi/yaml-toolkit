@@ -24,7 +24,7 @@ import (
 	"github.com/rkosegi/yaml-toolkit/patch"
 	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/rkosegi/yaml-toolkit/props"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 type PathSyntax string
