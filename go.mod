@@ -21,9 +21,12 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/magiconair/properties v1.18.11
 	github.com/rkosegi/go-korek v1.0.0-rc1.0.20260803141549-c384a7a0efae
-	github.com/stretchr/testify v1.12.0
+	github.com/stretchr/testify v1.12.1
 	github.com/theory/jsonpath v0.12.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/kr/text v0.2.0 // indirect
+require (
+	github.com/kr/text v0.2.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
+)
