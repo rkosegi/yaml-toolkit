@@ -24,7 +24,7 @@ import (
 	"github.com/rkosegi/yaml-toolkit/jmespath"
 	"github.com/rkosegi/yaml-toolkit/jsonpath"
 	"github.com/rkosegi/yaml-toolkit/query"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 type QuerySyntax string
