@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/rkosegi/yaml-toolkit/dom"
@@ -58,11 +59,18 @@ type (
 		ContainerDiff(left, right dom.Container, pb path.Builder)
 	}
 	ListDiffFn func(ctx DifferContext, left, right dom.List, pb path.Builder)
+	LeafDiffFn func(ctx DifferContext, left, right dom.Leaf, pb path.Builder)
 )
 
 func WithListDiffFn(fn ListDiffFn) Opt {
 	return func(d *differ) {
 		d.ldFn = fn
+	}
+}
+
+func WithLeafDiffFn(fn LeafDiffFn) Opt {
+	return func(d *differ) {
+		d.lfdFn = fn
 	}
 }
 
@@ -74,8 +82,9 @@ func (m *Modification) String() string {
 
 type differ struct {
 	// function to compute difference between 2 lists
-	ldFn ListDiffFn
-	out  []Modification
+	ldFn  ListDiffFn
+	out   []Modification
+	lfdFn LeafDiffFn
 }
 
 func (d *differ) ContainerDiff(left, right dom.Container, pb path.Builder) {
@@ -95,11 +104,8 @@ func (d *differ) Append(mt ModificationType, p path.Path, oldVal, newVal any) {
 	})
 }
 
-func diffLeaves(ctx DifferContext, left, right dom.Leaf, pb path.Builder) {
-	// if values of 2 leaves are not equal, then emit ModChange
-	if !cmp.Equal(left.AsLeaf().Value(), right.AsLeaf().Value()) {
-		ctx.Append(ModChange, pb.Build(), left.AsLeaf().Value(), right.AsLeaf().Value())
-	}
+func (d *differ) diffLeaves(left, right dom.Leaf, pb path.Builder) {
+	d.lfdFn(d, left, right, pb)
 }
 
 func (d *differ) diffLists(left dom.List, right dom.List, pb path.Builder) {
@@ -132,7 +138,7 @@ func (d *differ) diffNodes(left, right dom.Node, pb path.Builder) {
 		} else if left.IsList() {
 			d.diffLists(left.AsList(), right.AsList(), pb)
 		} else {
-			diffLeaves(d, left.AsLeaf(), right.AsLeaf(), pb)
+			d.diffLeaves(left.AsLeaf(), right.AsLeaf(), pb)
 		}
 	} else {
 		// nodes are of different types. This scenario must be handled by
@@ -154,6 +160,33 @@ func (d *differ) Flatten(node dom.Node, pb path.Builder) {
 		}
 	} else {
 		d.Append(ModAdd, pb.Build(), nil, node.AsLeaf().Value())
+	}
+}
+
+// DefaultLeafDiffFn compares leaf values using go-cmp's Equals()
+func DefaultLeafDiffFn(ctx DifferContext, left, right dom.Leaf, pb path.Builder) {
+	// if values of 2 leaves are not equal, then emit ModChange
+	if !cmp.Equal(left.AsLeaf().Value(), right.AsLeaf().Value()) {
+		ctx.Append(ModChange, pb.Build(), left.AsLeaf().Value(), right.AsLeaf().Value())
+	}
+}
+
+func isStr(leaf dom.Leaf) bool {
+	_, ok := leaf.Value().(string)
+	return ok
+}
+
+// TrimStringLeafDiffFn trims leading and trailing whitespace from string value before comparing.
+// Both leaves must be string, otherwise comparison is delegated to default comparing function
+func TrimStringLeafDiffFn(ctx DifferContext, left, right dom.Leaf, pb path.Builder) {
+	if isStr(left) && isStr(right) {
+		ls := strings.TrimSpace(left.AsLeaf().Value().(string))
+		rs := strings.TrimSpace(right.AsLeaf().Value().(string))
+		if ls != rs {
+			ctx.Append(ModChange, pb.Build(), ls, rs)
+		}
+	} else {
+		DefaultLeafDiffFn(ctx, left, right, pb)
 	}
 }
 
@@ -247,6 +280,7 @@ func Diff(left, right dom.Container, opts ...Opt) *[]Modification {
 	d := &differ{}
 	for _, opt := range append([]Opt{
 		WithListDiffFn(DefaultListDiffFn),
+		WithLeafDiffFn(DefaultLeafDiffFn),
 	}, opts...) {
 		opt(d)
 	}

@@ -442,6 +442,36 @@ func TestHasValidNameNodeForK8sManifest(t *testing.T) {
 	assert.True(t, hasValidNameNodeForK8sManifest(c))
 }
 
+func TestDiffLeaves(t *testing.T) {
+	var (
+		out *[]Modification
+	)
+	t.Run("int and string", func(t *testing.T) {
+		out = Diff(
+			dom.ContainerNode().AddValue("x", dom.LeafNode(1)),
+			dom.ContainerNode().AddValue("x", dom.LeafNode("abc")),
+			WithLeafDiffFn(TrimStringLeafDiffFn))
+		logResultMods(t, out)
+		assert.Len(t, *out, 1)
+	})
+	t.Run("string and string - not equal", func(t *testing.T) {
+		out = Diff(
+			dom.ContainerNode().AddValue("x", dom.LeafNode("xyz")),
+			dom.ContainerNode().AddValue("x", dom.LeafNode("abc")),
+			WithLeafDiffFn(TrimStringLeafDiffFn))
+		logResultMods(t, out)
+		assert.Len(t, *out, 1)
+	})
+	t.Run("string and string - equal after trim", func(t *testing.T) {
+		out = Diff(
+			dom.ContainerNode().AddValue("x", dom.LeafNode("   xyz")),
+			dom.ContainerNode().AddValue("x", dom.LeafNode("xyz   ")),
+			WithLeafDiffFn(TrimStringLeafDiffFn))
+		logResultMods(t, out)
+		assert.Len(t, *out, 0)
+	})
+}
+
 func TestDiffCustomListFnK8s(t *testing.T) {
 	var (
 		doc1, doc2 dom.Node
