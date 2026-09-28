@@ -24,7 +24,7 @@ import (
 	"slices"
 	"strings"
 
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 // EmptyChecker interface can be used to check is implementing struct is "empty".

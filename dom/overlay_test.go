@@ -24,7 +24,7 @@ import (
 
 	"github.com/rkosegi/yaml-toolkit/path"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 func TestPutAndGet(t *testing.T) {
