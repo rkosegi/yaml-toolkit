@@ -20,7 +20,7 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/magiconair/properties v1.18.12
-	github.com/rkosegi/go-korek v1.0.0-rc1.0.20260901141759-2184eff18545
+	github.com/rkosegi/go-korek v1.0.0-rc1.0.20261027141938-a95cad34ce07
 	github.com/stretchr/testify v1.12.1
 	github.com/theory/jsonpath v0.12.2
 	gopkg.in/yaml.v3 v3.0.1
