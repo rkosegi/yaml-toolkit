@@ -119,8 +119,7 @@ func removeChild(n Node, c path.Component) {
 // First non-existent node along the path will terminate iteration.
 // This function returns (eventually modified) targetNode.
 func removeFromNode(targetNode Node, at path.Path) Node {
-	var p path.Path
-	p = path.ParentOf(at)
+	var p = path.ParentOf(at)
 	if p != nil {
 		if x := getFromNode(targetNode, p); x == nil {
 			return targetNode

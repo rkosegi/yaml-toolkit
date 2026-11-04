@@ -128,5 +128,5 @@ func possiblyContainsPlaceholder(in string) bool {
 	if idx == -1 {
 		return false
 	}
-	return strings.Index(in[idx:], "}") != -1
+	return strings.Contains(in[idx:], "}")
 }

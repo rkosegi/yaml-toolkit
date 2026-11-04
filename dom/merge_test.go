@@ -40,8 +40,8 @@ func TestMergeLists(t *testing.T) {
 	m := &merger{}
 	m.init()
 	l := m.mergeListsMeld(
-		ListNode(ListNode(LeafNode(123), LeafNode(456))).(ListBuilder),
-		ListNode(ListNode()).(ListBuilder),
+		ListNode(ListNode(LeafNode(123), LeafNode(456))),
+		ListNode(ListNode()),
 	)
 	assert.Equal(t, 1, l.Size())
 	assert.Equal(t, 2, l.Get(0).(List).Size())

@@ -27,9 +27,9 @@ type qryImpl struct {
 
 func (q *qryImpl) Select(data any) query.Result {
 	ret, _ := q.p.Search(data)
-	switch ret.(type) {
+	switch ret := ret.(type) {
 	case []any:
-		return ret.([]any)
+		return ret
 
 	default:
 		return query.Result{ret}
