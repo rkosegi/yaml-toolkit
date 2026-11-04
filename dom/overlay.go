@@ -42,7 +42,7 @@ func (cs Coordinates) String() string {
 	sb.WriteString("[")
 	for _, c := range cs {
 		sb.WriteString("[")
-		sb.WriteString(fmt.Sprintf("layer=%s,path=%s", c.Layer(), c.Path()))
+		fmt.Fprintf(&sb, "layer=%s,path=%s", c.Layer(), c.Path())
 		sb.WriteString("],")
 	}
 	sb.WriteString("]\n")

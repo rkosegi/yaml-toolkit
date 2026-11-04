@@ -30,7 +30,7 @@ import (
 )
 
 func encodeKv(k string, v any, w io.Writer) error {
-	_, err := w.Write([]byte(fmt.Sprintf("%s=%v\n", k, v)))
+	_, err := fmt.Fprintf(w, "%s=%v\n", k, v)
 	return err
 }
 

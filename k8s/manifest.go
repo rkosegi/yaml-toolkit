@@ -224,13 +224,14 @@ func ManifestFromBytes(data []byte) (Manifest, error) {
 	var tk, bk string
 
 	if kind, ok := doc["kind"]; ok {
-		if kind.(string) == "Secret" {
+		switch kind.(string) {
+		case "Secret":
 			bk = keyData
 			tk = keyStringData
-		} else if kind.(string) == "ConfigMap" {
+		case "ConfigMap":
 			bk = keyBinaryData
 			tk = keyData
-		} else {
+		default:
 			return nil, fmt.Errorf("unsupported manifest kind: %s", kind)
 		}
 	} else {

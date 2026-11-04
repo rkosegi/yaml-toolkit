@@ -59,11 +59,12 @@ func (p Path) String() string {
 		sb.WriteRune('/')
 		rps := []rune(ps)
 		for i := 0; i < len(rps); i++ {
-			if rps[i] == '~' {
+			switch rps[i] {
+			case '~':
 				sb.WriteString("~0")
-			} else if rps[i] == '/' {
+			case '/':
 				sb.WriteString("~1")
-			} else {
+			default:
 				sb.WriteRune(rps[i])
 			}
 		}
@@ -102,15 +103,14 @@ func ParsePath(pathSpec string) (Path, error) {
 			if i < len(rps)-1 {
 				// https://datatracker.ietf.org/doc/html/rfc6901#section-4
 				// first transforming any occurrence of the sequence '~1' to '/'
-				if rps[i+1] == '1' {
+				switch rps[i+1] {
+				case '1':
 					cs.WriteRune('/')
 					i++
-				} else
-				// then transforming any occurrence of the sequence '~0' to '~'
-				if rps[i+1] == '0' {
+				case '0':
 					cs.WriteRune('~')
 					i++
-				} else {
+				default:
 					// not a special case, just regular character
 					cs.WriteRune(c)
 				}
@@ -189,11 +189,12 @@ func (ps pathSupport) Serialize(in path.Path) string {
 		sb.WriteRune('/')
 		rps := []rune(pc.Value())
 		for i := 0; i < len(rps); i++ {
-			if rps[i] == '~' {
+			switch rps[i] {
+			case '~':
 				sb.WriteString("~0")
-			} else if rps[i] == '/' {
+			case '/':
 				sb.WriteString("~1")
-			} else {
+			default:
 				sb.WriteRune(rps[i])
 			}
 		}

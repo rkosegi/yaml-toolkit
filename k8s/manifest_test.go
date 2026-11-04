@@ -103,7 +103,7 @@ func TestInvalidWriteTo(t *testing.T) {
 type failingReader struct{}
 
 func (fr failingReader) Read([]byte) (n int, err error) {
-	return 0, anyErr
+	return 0, errAny
 }
 
 func TestManifestFromReaderFail(t *testing.T) {

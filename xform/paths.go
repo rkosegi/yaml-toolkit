@@ -28,9 +28,9 @@ func PropPath2Pointer(in path.Path) patch.Path {
 	var r strings.Builder
 	for _, pc := range in.Components() {
 		if pc.IsNumeric() {
-			r.WriteString(fmt.Sprintf("/%d", pc.NumericValue()))
+			fmt.Fprintf(&r, "/%d", pc.NumericValue())
 		} else {
-			r.WriteString(fmt.Sprintf("/%s", pc.Value()))
+			fmt.Fprintf(&r, "/%s", pc.Value())
 		}
 	}
 	return patch.MustParsePath(r.String())

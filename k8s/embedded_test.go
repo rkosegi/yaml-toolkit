@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	anyErr = errors.New("any error")
+	errAny = errors.New("any error")
 )
 
 const tempFilePattern = "yt.*.yaml"
@@ -163,7 +163,7 @@ func TestFailBeforeSave(t *testing.T) {
 	assert.NoError(t, err)
 	doc, err := NewBuilder().Manifest(f.Name()).
 		Encoder(EncodeEmbeddedDoc("embedded.txt", func(w io.Writer, v any) error {
-			return anyErr
+			return errAny
 		})).
 		Decoder(DecodeEmbeddedProps()).
 		Create("ConfigMap", "temp")
