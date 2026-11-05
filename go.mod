@@ -23,7 +23,7 @@ require (
 	github.com/rkosegi/go-korek v1.0.0-rc1.0.20261027141938-a95cad34ce07
 	github.com/stretchr/testify v1.12.1
 	github.com/theory/jsonpath v0.12.2
-	go.yaml.in/yaml/v4 v4.0.0-rc.7
+	go.yaml.in/yaml/v4 v4.0.0-rc.9
 )
 
 require go.yaml.in/yaml/v3 v3.0.5 // indirect
