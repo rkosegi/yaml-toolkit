@@ -58,7 +58,7 @@ func (p Path) String() string {
 	for _, ps := range p {
 		sb.WriteRune('/')
 		rps := []rune(ps)
-		for i := 0; i < len(rps); i++ {
+		for i := range rps {
 			switch rps[i] {
 			case '~':
 				sb.WriteString("~0")
@@ -188,7 +188,7 @@ func (ps pathSupport) Serialize(in path.Path) string {
 	for _, pc = range in.Components() {
 		sb.WriteRune('/')
 		rps := []rune(pc.Value())
-		for i := 0; i < len(rps); i++ {
+		for i := range rps {
 			switch rps[i] {
 			case '~':
 				sb.WriteString("~0")

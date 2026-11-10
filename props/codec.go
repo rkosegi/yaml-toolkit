@@ -19,6 +19,7 @@ package props
 import (
 	"fmt"
 	"io"
+	"maps"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -65,9 +66,7 @@ func DecoderFn(r io.Reader, x any) error {
 		m2[k] = v
 	}
 	out := make(map[string]any)
-	for k, v := range common.Unflatten(m2) {
-		out[k] = v
-	}
+	maps.Copy(out, common.Unflatten(m2))
 	// maybe check if xv := reflect.ValueOf(x); xv.Kind() != reflect.Pointer || xv.IsNil() ??
 	reflect.ValueOf(x).Elem().Set(reflect.ValueOf(out))
 	return nil

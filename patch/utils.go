@@ -34,7 +34,7 @@ func removeListItem(list dom.ListBuilder, removeAt int) {
 func insertListItem(list dom.ListBuilder, insertAt int, toInsert dom.Node) {
 	items := list.Items()
 	list.Clear()
-	for i := 0; i < insertAt; i++ {
+	for i := range insertAt {
 		list.Append(items[i])
 	}
 	list.Append(toInsert)

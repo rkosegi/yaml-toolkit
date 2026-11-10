@@ -251,9 +251,9 @@ func ManifestFromBytes(data []byte) (Manifest, error) {
 	m.binDataIf = &binaryDataFacade{m: m}
 	if err = m.h.afterLoad(m); err != nil {
 		return nil, err
-	} else {
-		return m, nil
 	}
+
+	return m, nil
 }
 
 var (

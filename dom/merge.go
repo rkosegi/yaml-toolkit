@@ -17,6 +17,7 @@ limitations under the License.
 package dom
 
 import (
+	"maps"
 	"math"
 	"slices"
 )
@@ -60,10 +61,10 @@ func (mg *merger) mergeListsMeld(l1, l2 List) List {
 	maxLen := int(math.Max(float64(c1), float64(c2)))
 	minLen := int(math.Min(float64(c1), float64(c2)))
 	l := initListBuilder()
-	for i := 0; i < maxLen; i++ {
+	for range maxLen {
 		l.Append(nilLeaf)
 	}
-	for i := 0; i < minLen; i++ {
+	for i := range minLen {
 		n1 := l1.Get(i)
 		n2 := l2.Get(i)
 		if n1.IsContainer() && n2.IsContainer() {
@@ -82,9 +83,7 @@ func (mg *merger) mergeListsMeld(l1, l2 List) List {
 
 func (mg *merger) mergeContainers(c1, c2 Container) ContainerBuilder {
 	merged := map[string]Node{}
-	for k, v := range c1.Children() {
-		merged[k] = v
-	}
+	maps.Copy(merged, c1.Children())
 	for k, v := range c2.Children() {
 		if n, exists := merged[k]; exists {
 			if n.IsContainer() && v.IsContainer() {
