@@ -103,13 +103,13 @@ func doAdd(obj *OpObj, target dom.ContainerBuilder) error {
 	if idx, isNum := obj.Path.LastSegment().IsNumeric(); isNum && parent.IsList() {
 		insertListItem(parent.(dom.ListBuilder), idx, obj.Value)
 		return nil
-	} else {
-		// If the target location specifies an object member that does not
-		//      already exist, a new member is added to the object.
-		// If the target location specifies an object member that does exist,
-		//      that member's value is replaced.
-		parent.(dom.ContainerBuilder).AddValue(string(obj.Path.LastSegment()), obj.Value)
 	}
+
+	// If the target location specifies an object member that does not
+	//      already exist, a new member is added to the object.
+	// If the target location specifies an object member that does exist,
+	//      that member's value is replaced.
+	parent.(dom.ContainerBuilder).AddValue(string(obj.Path.LastSegment()), obj.Value)
 	return nil
 }
 

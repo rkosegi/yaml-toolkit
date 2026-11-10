@@ -52,7 +52,7 @@ func (p path) buildString() string {
 		return "[]"
 	}
 	var r []any
-	for i := 0; i < pcs; i++ {
+	for i := range pcs {
 		if p.components[i].IsNumeric() {
 			r = append(r, p.components[i].NumericValue())
 		} else {

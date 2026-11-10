@@ -164,8 +164,10 @@ func decodeValueToNode(in reflect.Value) Node {
 			}
 		}
 		return out
+
+	default:
+		return nil
 	}
-	return nil
 }
 
 func decodeFromReader(r io.Reader, decFn DecoderFunc) (Node, error) {
