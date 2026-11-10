@@ -37,7 +37,7 @@ func TestEncoderFn(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Contains(t, buff.String(), "a.b.c=1\n")
 	assert.Contains(t, buff.String(), "x.y.z=Hi!\n")
-	assert.Error(t, EncoderFn(common.FailingWriter(), m))
+	assert.Error(t, Codec().Encoder()(common.FailingWriter(), m))
 }
 
 func TestDomEncoderFn(t *testing.T) {
@@ -56,13 +56,13 @@ func TestDomEncoderFn(t *testing.T) {
 
 func TestDecoderFn(t *testing.T) {
 	m := make(map[string]any)
-	err := DecoderFn(strings.NewReader("a.b=1\nx.y=Hi!\n"), &m)
+	err := Codec().Decoder()(strings.NewReader("a.b=1\nx.y=Hi!\n"), &m)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(m))
 	assert.Equal(t, "1", m["a"].(map[string]any)["b"])
 	assert.Equal(t, "Hi!", m["x"].(map[string]any)["y"])
 
-	err = DecoderFn(common.FailingReader(), m)
+	err = Codec().Decoder()(common.FailingReader(), m)
 	assert.Error(t, err)
 }
 

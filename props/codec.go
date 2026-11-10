@@ -30,6 +30,13 @@ import (
 	"github.com/rkosegi/yaml-toolkit/dom"
 )
 
+type biCodec struct{}
+
+func (b biCodec) Encoder() dom.EncoderFunc { return EncoderFn }
+func (b biCodec) Decoder() dom.DecoderFunc { return DecoderFn }
+
+var cdc = &biCodec{}
+
 func encodeKv(k string, v any, w io.Writer) error {
 	_, err := fmt.Fprintf(w, "%s=%v\n", k, v)
 	return err
@@ -91,4 +98,8 @@ func parseListPathComponent(path string) (string, []int, bool) {
 		indexes = append(indexes, index)
 		cpath = cpath[end+1:]
 	}
+}
+
+func Codec() dom.FormatBiCodec {
+	return cdc
 }
