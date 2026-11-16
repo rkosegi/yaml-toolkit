@@ -15,7 +15,7 @@
 bug:
   - head-branch:
       - ^bug/
-docs:
+documentation:
   - changed-files:
       - any-glob-to-any-file:
           - docs/**
